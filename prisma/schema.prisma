@@ -1,0 +1,304 @@
+// Lifipedia 데이터 모델
+// 원칙: 순위는 운영자가 정하지 않는다. 모든 랭킹은 유저 활동의 집계 결과다.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- 인증 / 유저
+
+enum BadgeLevel {
+  NEWCOMER // 신규 (투표 가중치 축소 대상)
+  CONTRIBUTOR
+  EDITOR
+  CURATOR
+  STEWARD
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  bio           String?
+
+  // 신뢰도: 기여 이력으로부터 파생되어 투표 가중치에 반영된다 (lib/trust.ts)
+  trustScore        Float      @default(1.0)
+  contributionCount Int        @default(0)
+  badgeLevel        BadgeLevel @default(NEWCOMER)
+
+  // 모더레이션
+  suspendedUntil   DateTime?
+  suspensionReason String?
+
+  createdAt DateTime @default(now())
+
+  accounts       Account[]
+  sessions       Session[]
+  proposedThemes Theme[]       @relation("ThemeProposer")
+  follows        ThemeFollow[]
+  createdItems   Item[]        @relation("ItemCreator")
+  edits          EditHistory[]
+  votes          Vote[]
+  comments       TalkComment[]
+  reports        Report[]      @relation("Reporter")
+
+  @@index([trustScore])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------- 테마
+
+enum ThemeStatus {
+  PROPOSED // 제안됨. 팔로워가 임계치에 도달하면 ACTIVE 로 승격
+  ACTIVE // 정식. 위키 작성/투표/랭킹 산정이 모두 열린다
+  DORMANT // 휴면. 활동 저조로 읽기 전용
+}
+
+model Theme {
+  id          String      @id @default(cuid())
+  // SEO 친화 URL: /theme/여행-인생템
+  slug        String      @unique
+  name        String
+  description String?
+  status      ThemeStatus @default(PROPOSED)
+
+  proposerId String?
+  proposer   User?   @relation("ThemeProposer", fields: [proposerId], references: [id], onDelete: SetNull)
+
+  followerCount  Int       @default(0)
+  promotedAt     DateTime?
+  lastActivityAt DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+
+  followers ThemeFollow[]
+  items     Item[]
+  snapshots RankingSnapshot[]
+
+  @@index([status, followerCount])
+  @@index([status, lastActivityAt])
+}
+
+model ThemeFollow {
+  themeId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  theme Theme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([themeId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------- 제품 위키
+
+enum Tier {
+  BUDGET // 저가
+  MID // 중가
+  PREMIUM // 고가
+}
+
+model Item {
+  id      String @id @default(cuid())
+  themeId String
+  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  slug            String
+  name            String
+  tier            Tier
+  // 유저가 입력한 대표가(원). 가격대 태깅 검증에 쓰인다. 크롤링은 MVP 범위 밖.
+  priceKrw        Int?
+  description     String  @db.Text
+  specSummary     String? @db.Text
+  recommendReason String? @db.Text
+  imageUrl        String?
+  purchaseLinks   Json    @default("[]") // [{ label, url }]
+
+  createdById String?
+  createdBy   User?   @relation("ItemCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // 낙관적 잠금: 동시 편집 충돌 감지용 (lib/wiki.ts)
+  revision Int @default(1)
+
+  upCount   Int      @default(0)
+  downCount Int      @default(0)
+  // 캐시된 랭킹 점수. 투표 시 갱신되며 산정식은 lib/ranking.ts 에 공개되어 있다.
+  score     Float    @default(0)
+  scoredAt  DateTime @default(now())
+
+  isRemoved Boolean  @default(false) // 규칙 위반 제재 결과만. 큐레이션 삭제 아님
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  edits     EditHistory[]
+  votes     Vote[]
+  comments  TalkComment[]
+  snapshots RankingSnapshot[]
+
+  @@unique([themeId, slug])
+  @@index([themeId, tier, score])
+  @@index([createdAt])
+}
+
+model EditHistory {
+  id       String  @id @default(cuid())
+  itemId   String
+  item     Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  editorId String?
+  editor   User?   @relation(fields: [editorId], references: [id], onDelete: SetNull)
+
+  revision Int // 이 편집으로 만들어진 리비전 번호
+  summary  String? // 편집 요약
+  diff     String  @db.Text // unified diff
+  snapshot Json // 편집 직후의 전체 필드 스냅샷 (되돌리기용)
+
+  createdAt DateTime @default(now())
+
+  @@unique([itemId, revision])
+  @@index([itemId, createdAt])
+}
+
+model TalkComment {
+  id       String        @id @default(cuid())
+  itemId   String
+  item     Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  parentId String?
+  parent   TalkComment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  TalkComment[] @relation("CommentThread")
+
+  body      String   @db.Text
+  isRemoved Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([itemId, createdAt])
+}
+
+// ---------------------------------------------------------------- 투표
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+model Vote {
+  id     String @id @default(cuid())
+  itemId String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type   VoteType
+  // 투표 시점의 유저 신뢰도로 고정된다. 나중에 신뢰도가 변해도 과거 랭킹은 재현 가능.
+  weight Float    @default(1.0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 한 유저는 한 아이템에 한 표만 (변경은 가능, 중복 누적은 불가)
+  @@unique([itemId, userId])
+  @@index([itemId, createdAt])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------- 랭킹 아카이브
+
+enum SnapshotPeriod {
+  MONTHLY
+  YEARLY
+}
+
+// "2024년 여행 인생템 고가 1위는 OO였다" 를 영구 보존하는 테이블.
+// 테마 x 가격대 x 기간 당 상위 N개를 기록한다.
+model RankingSnapshot {
+  id         String         @id @default(cuid())
+  themeId    String
+  theme      Theme          @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  tier       Tier
+  periodType SnapshotPeriod
+  periodKey  String // "2026-09" 또는 "2026"
+
+  rank          Int
+  itemId        String
+  item          Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  score         Float
+  // 산정 근거를 함께 보존한다 (투명성 원칙)
+  breakdown     Json
+  // 최소 참여자 수 미달로 "미정" 처리된 경우
+  isProvisional Boolean @default(false)
+
+  generatedAt DateTime @default(now())
+
+  @@unique([themeId, tier, periodType, periodKey, rank])
+  @@index([periodType, periodKey])
+}
+
+// ---------------------------------------------------------------- 모더레이션
+
+enum ReportTargetType {
+  ITEM
+  COMMENT
+  THEME
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}
+
+model Report {
+  id         String           @id @default(cuid())
+  targetType ReportTargetType
+  targetId   String
+  reporterId String?
+  reporter   User?            @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  reason     String
+  detail     String?          @db.Text
+  status     ReportStatus     @default(OPEN)
+  createdAt  DateTime         @default(now())
+
+  @@index([status, createdAt])
+}

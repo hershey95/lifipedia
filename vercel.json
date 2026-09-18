@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/cron/snapshot?periodType=MONTHLY", "schedule": "10 0 1 * *" },
+    { "path": "/api/cron/snapshot?periodType=YEARLY", "schedule": "30 0 1 1 *" },
+    { "path": "/api/cron/lifecycle", "schedule": "0 3 * * *" }
+  ]
+}

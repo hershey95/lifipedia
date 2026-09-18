@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --max-width: 72rem;
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink antialiased;
+    word-break: keep-all; /* 한글 단어 중간에서 줄바꿈되지 않게 */
+  }
+  a {
+    @apply text-accent;
+  }
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-5xl px-4;
+  }
+  .card {
+    @apply rounded-xl border border-black/10 bg-white p-4 shadow-sm;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent/90;
+  }
+  .btn-ghost {
+    @apply btn border border-black/15 bg-white text-ink hover:bg-black/5;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold;
+  }
+  .field {
+    @apply w-full rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-accent;
+  }
+  .prose-wiki {
+    @apply whitespace-pre-wrap text-[15px] leading-7 text-ink/90;
+  }
+}
