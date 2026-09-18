@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+.git
+.env
+.env.local
+*.tsbuildinfo
+coverage
+tests
+README.md
+DEPLOY_NAS.md

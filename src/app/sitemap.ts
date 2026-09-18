@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db';
 import { TIER_SLUGS } from '@/lib/tier';
 
-export const revalidate = 3600;
+// DB 조회가 필요해 빌드 타임에는 DB 없이도 빌드가 되도록 요청마다 생성한다.
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';

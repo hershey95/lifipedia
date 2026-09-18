@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   description: '생애주기·상황·취향 등 어떤 기준으로도 만들어지는 Lifipedia 테마 목록.',
 };
 
-export const revalidate = 300;
+// DB 조회 페이지라 빌드 타임에 DB 없이도 빌드가 되도록 요청마다 렌더링한다.
+export const dynamic = 'force-dynamic';
 
 const SECTIONS = [
   { status: 'ACTIVE' as const, title: '정식 테마', hint: '위키 작성·투표·순위 산정이 모두 열려 있습니다.' },

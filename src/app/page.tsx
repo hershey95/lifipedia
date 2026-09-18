@@ -6,7 +6,9 @@ import { TierBadge } from '@/components/TierBadge';
 import { AdSlot } from '@/components/AdSlot';
 import { TIER_SLUGS } from '@/lib/tier';
 
-export const revalidate = 300;
+// DB 조회 페이지라 빌드 타임에 DB 없이도 빌드가 되도록 요청마다 렌더링한다.
+// (ISR revalidate 를 쓰면 next build 시점에 DB 연결을 시도해 CI/Docker 빌드가 깨진다.)
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const [activeThemes, risingThemes, recentItems] = await Promise.all([

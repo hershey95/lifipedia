@@ -1,0 +1,71 @@
+name: lifipedia
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lifipedia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lifipedia}
+      POSTGRES_DB: lifipedia
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lifipedia"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # NAS 밖에서 DB에 직접 붙을 필요가 없다면 이 포트 매핑은 제거해도 된다.
+    ports:
+      - '5432:5432'
+
+  # 스키마를 DB에 반영하는 1회성 작업. app 이 뜨기 전에 자동으로 한 번 실행된다.
+  # (prisma CLI 는 builder 스테이지에만 있어 이 서비스만 별도로 그 스테이지를 쓴다.)
+  migrate:
+    build:
+      context: .
+      target: builder
+    environment:
+      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
+    command: npx prisma db push --skip-generate --accept-data-loss
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET 를 .env 에 설정해 주세요}
+      CRON_SECRET: ${CRON_SECRET:-change-me}
+      THEME_PROMOTION_THRESHOLD: ${THEME_PROMOTION_THRESHOLD:-20}
+      GITHUB_ID: ${GITHUB_ID:-}
+      GITHUB_SECRET: ${GITHUB_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - '${APP_PORT:-3000}:3000'
+
+  # 선택: 샘플 데이터를 넣고 싶을 때만 `docker compose --profile seed run --rm seed`
+  seed:
+    build:
+      context: .
+      target: builder
+    profiles: ['seed']
+    environment:
+      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
+    command: npx tsx prisma/seed.ts
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db_data:

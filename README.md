@@ -79,14 +79,28 @@ npm run dev
 - `npm run typecheck` — TypeScript 타입 검사
 - `npm test` — Vitest 유닛 테스트 (랭킹/신뢰도/위키 충돌/생애주기/어뷰징 등 69개)
 - `npm run rank:snapshot -- --type MONTHLY --key 2026-08` — 특정 기간 스냅샷 수동 생성
-- `npm run build` — 프로덕션 빌드 (DB 연결 필요 — 정적 페이지 생성 시 조회)
+- `npm run build` — 프로덕션 빌드 (모든 DB 조회 페이지가 `dynamic = 'force-dynamic'`이라
+  빌드 시점에 DB 연결이 없어도 됩니다)
 
-## 배포 시 참고
+## 배포하기
+
+### 옵션 A — NAS / 셀프호스팅 (Docker)
+
+시놀로지 Container Manager, QNAP Container Station 등 Docker를 지원하는 NAS에서
+`docker compose up -d --build` 한 줄로 앱 + PostgreSQL을 통째로 띄울 수 있습니다.
+자세한 절차는 **[DEPLOY_NAS.md](./DEPLOY_NAS.md)** 참고. `Dockerfile`은 멀티스테이지
+빌드로 `next.config.mjs`의 `output: 'standalone'`을 활용해 최종 이미지를 가볍게 만듭니다.
+
+### 옵션 B — Vercel
 
 - `vercel.json`에 Cron 3개가 정의되어 있습니다 (`/api/cron/snapshot?periodType=MONTHLY`,
   `?periodType=YEARLY`, `/api/cron/lifecycle`). 각 엔드포인트는 `CRON_SECRET` 환경변수로
   보호되며 `Authorization: Bearer <CRON_SECRET>` 헤더 또는 Vercel Cron의 기본 호출(GET)로
   인증됩니다.
+- DB는 Neon, Supabase 등 서버리스 PostgreSQL을 권장합니다.
+
+### 공통 설정
+
 - `THEME_PROMOTION_THRESHOLD` 환경변수로 테마 정식 승격에 필요한 팔로워 수를 조정할 수 있습니다
   (기본 20명).
 - 광고 슬롯은 `src/components/AdSlot.tsx`에 자리만 마련되어 있으며, `NEXT_PUBLIC_ADS_ENABLED=true`
