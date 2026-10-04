@@ -1,7 +1,6 @@
 /**
- * 로컬 개발용 시드 데이터.
- * 실제 서비스의 순위는 유저 활동으로만 만들어진다 — 이 스크립트는 그 활동을 흉내 낼 뿐,
- * 어떤 항목에도 점수를 직접 써넣지 않는다.
+ * 5대 라이프 허브(연령대, 주거, 취미, 선물, 테크)와 서브 갤러리 시드 데이터.
+ * 레딧/디시 스타일 커뮤니티 및 위키피디아 교차 링크를 완벽히 지원합니다.
  */
 import { PrismaClient } from '@prisma/client';
 import { computeScore } from '../src/lib/ranking';
@@ -10,33 +9,198 @@ import { trustFromContributions, badgeFor, voteWeightFor } from '../src/lib/trus
 
 const prisma = new PrismaClient();
 
-const THEMES = [
-  { name: '자취 인생템', description: '처음 혼자 살기 시작한 사람에게 진짜 필요한 것들.', active: true },
-  { name: '캠핑 인생템', description: '차박부터 백패킹까지, 밖에서 자는 사람들의 장비.', active: true },
-  { name: '고3 인생템', description: '수험 생활 1년을 버티게 해준 물건들.', active: false },
+type RawTheme = {
+  name: string;
+  description: string;
+  category: string;
+  active: boolean;
+  followers: number;
+  subThemes?: RawTheme[];
+};
+
+const THEME_TREE: RawTheme[] = [
+  {
+    name: '연령대별 라이프 갤러리',
+    description: '10대부터 40대까지, 나이대에 가장 필요한 검증된 인생템 서브갤러리 모음.',
+    category: '연령/생애주기',
+    active: true,
+    followers: 180,
+    subThemes: [
+      {
+        name: '10대 수험생 갤러리',
+        description: '공부 집중력을 200% 올려주는 독서대, 인강용 태블릿, 노이즈캔슬링.',
+        category: '연령/생애주기',
+        active: true,
+        followers: 65,
+      },
+      {
+        name: '20대 자취·독립 갤러리',
+        description: '처음 혼자 살기 시작한 사람을 위한 가성비/필수 원룸 생필품.',
+        category: '연령/생애주기',
+        active: true,
+        followers: 142,
+      },
+      {
+        name: '30대 이직·육아·독립 갤러리',
+        description: '이직 성공템, 맘마존 육아 필수템, 내집마련 가전 총집합.',
+        category: '연령/생애주기',
+        active: true,
+        followers: 195,
+      },
+      {
+        name: '40대+ 웰빙·건강 갤러리',
+        description: '안마의자, 스트레칭 매트, 영양제 등 몸 케어 갤러리.',
+        category: '연령/생애주기',
+        active: true,
+        followers: 78,
+      },
+    ],
+  },
+  {
+    name: '주거 & 공간 갤러리',
+    description: '데스크테리어, 신혼집 가전, 주방 꿀템 등 공간 삶의 질 향상 갤러리.',
+    category: '주거/공간',
+    active: true,
+    followers: 155,
+    subThemes: [
+      {
+        name: '데스크테리어 갤러리',
+        description: '생산성을 획기적으로 올리는 모니터암, 조명, 장패드 큐레이션.',
+        category: '주거/공간',
+        active: true,
+        followers: 120,
+      },
+      {
+        name: '주방 & 미식 갤러리',
+        description: '음식물처리기, 에어프라이어, 수비드 머신 등 주방 3대 신세계.',
+        category: '주거/공간',
+        active: true,
+        followers: 98,
+      },
+      {
+        name: '신혼집 가전 갤러리',
+        description: '식기세척기, 로봇청소기, 건조기 등 3대 이모님 가전.',
+        category: '주거/공간',
+        active: true,
+        followers: 110,
+      },
+    ],
+  },
+  {
+    name: '취미 & 아웃도어 갤러리',
+    description: '캠핑, 홈트, 게이밍 등 주말과 여가를 알차게 채우는 추천.',
+    category: '취미/아웃도어',
+    active: true,
+    followers: 160,
+    subThemes: [
+      {
+        name: '캠핑·차박 갤러리',
+        description: '차박 텐트, 알루미늄 롤테이블, 3계절 침낭 등 후회 없는 장비.',
+        category: '취미/아웃도어',
+        active: true,
+        followers: 135,
+      },
+      {
+        name: '홈트 & 헬스 갤러리',
+        description: '홈트레이닝 문틀 철봉, 풀업바, 폼롤러, 단백질보충제.',
+        category: '취미/아웃도어',
+        active: true,
+        followers: 92,
+      },
+      {
+        name: '게이밍 & PC 갤러리',
+        description: '기계식 키보드, 게이밍 마우스, 고주사율 모니터.',
+        category: '취미/아웃도어',
+        active: true,
+        followers: 105,
+      },
+    ],
+  },
+  {
+    name: '상황 & 선물 갤러리',
+    description: '집들이, 생일, 효도 선물 등 센스 있는 선택이 필요할 때.',
+    category: '상황/선물',
+    active: true,
+    followers: 125,
+    subThemes: [
+      {
+        name: '집들이 선물 갤러리',
+        description: '디퓨저, 수건세트, 감성 조명 등 센스 만점 집들이 선물.',
+        category: '상황/선물',
+        active: true,
+        followers: 88,
+      },
+      {
+        name: '부모님 효도선물 갤러리',
+        description: '마사지건, 고함량 비타민, 정관장 등 부모님 만족도 1위.',
+        category: '상황/선물',
+        active: true,
+        followers: 76,
+      },
+    ],
+  },
+  {
+    name: '테크 & 디바이스 갤러리',
+    description: '스마트폰, 무선 헤드폰, 스마트홈 기기 추천.',
+    category: '테크/가전',
+    active: true,
+    followers: 190,
+    subThemes: [
+      {
+        name: '노이즈캔슬링 헤드폰 갤러리',
+        description: '몰입감 최고의 ANC 무선 헤드폰 저/중/고가 랭킹.',
+        category: '테크/가전',
+        active: true,
+        followers: 150,
+      },
+      {
+        name: '작업용 노트북 갤러리',
+        description: '개발자, 디자이너, 코딩용 최고의 고성능 노트북.',
+        category: '테크/가전',
+        active: true,
+        followers: 130,
+      },
+    ],
+  },
 ];
 
 const ITEMS: Record<string, { name: string; tier: 'BUDGET' | 'MID' | 'PREMIUM'; price: number; description: string }[]> = {
-  '자취 인생템': [
-    { name: '1구 인덕션', tier: 'BUDGET', price: 39_000, description: '가스레인지 설치가 불가능한 원룸에서 쓸 수 있는 최소한의 조리 도구. 화력은 아쉽지만 라면과 계란후라이까지는 충분하다.' },
-    { name: '6kg 드럼세탁기', tier: 'MID', price: 380_000, description: '원룸 세탁기의 표준. 통돌이보다 물을 덜 쓰고 소음이 적어 밤에도 돌릴 수 있다.' },
-    { name: '무선 스틱청소기', tier: 'PREMIUM', price: 690_000, description: '좁은 집일수록 선 없는 청소기의 체감이 크다. 매일 5분 청소가 실제로 가능해진다.' },
-    { name: '접이식 빨래건조대', tier: 'BUDGET', price: 21_000, description: '베란다 없는 집에서 건조기를 사기 전까지 버티게 해주는 물건.' },
+  '20대 자취·독립 갤러리': [
+    { name: '1구 인덕션', tier: 'BUDGET', price: 39_000, description: '[[20대 자취·독립 갤러리]]에서 가장 지지받는 1위 조리 도구. [[캠핑·차박 갤러리]]에서도 호환성이 높다.' },
+    { name: '6kg 드럼세탁기', tier: 'MID', price: 380_000, description: '원룸 독립 세탁기의 표준. 소음이 적어 저녁 시간에도 부담 없다.' },
+    { name: '무선 스틱청소기', tier: 'PREMIUM', price: 690_000, description: '선 없는 청소기로 매일 5분 청소가 일상화된다.' },
   ],
-  '캠핑 인생템': [
-    { name: '알루미늄 롤 테이블', tier: 'BUDGET', price: 45_000, description: '가볍고 물에 강하다. 첫 캠핑 장비로 가장 후회가 적은 선택.' },
-    { name: '3계절 침낭', tier: 'MID', price: 180_000, description: '봄가을 산에서 떨지 않으려면 결국 여기로 오게 된다. 컴포트 온도를 꼭 확인할 것.' },
-    { name: '돔형 4인 텐트', tier: 'PREMIUM', price: 890_000, description: '설치가 빠르고 바람에 강하다. 가족 캠핑의 기준선.' },
+  '30대 이직·육아·독립 갤러리': [
+    { name: '버티컬 인체공학 마우스', tier: 'BUDGET', price: 49_000, description: '[[30대 이직·육아·독립 갤러리]] 추천 1위! [[데스크테리어 갤러리]]에서도 필수템.' },
+    { name: '27인치 4K UHD 모니터', tier: 'MID', price: 420_000, description: '이력서 및 포트폴리오 작업 시 눈의 피로를 혁신적으로 줄여준다.' },
+    { name: '자동 출산 분유제조기', tier: 'PREMIUM', price: 320_000, description: '새벽 수유 7초 만에 해결되는 신세계 육아템.' },
+  ],
+  '캠핑·차박 갤러리': [
+    { name: '알루미늄 롤 테이블', tier: 'BUDGET', price: 45_000, description: '가볍고 물에 강하다. [[캠핑·차박 갤러리]] 첫 장비로 가장 검증된 선택.' },
+    { name: '3계절 침낭', tier: 'MID', price: 180_000, description: '봄가을 산에서 추위에 떨지 않게 컴포트 온도를 지켜주는 필수품.' },
+    { name: '돔형 4인 텐트', tier: 'PREMIUM', price: 890_000, description: '설치가 빠르고 바람에 강한 가족 차박 텐트.' },
+  ],
+  '노이즈캔슬링 헤드폰 갤러리': [
+    { name: '가성비 ANC 헤드폰', tier: 'BUDGET', price: 89_000, description: '10만원 이하 노이즈캔슬링 입문용 최적의 선택.' },
+    { name: '프리미엄 ANC 무선 헤드폰', tier: 'PREMIUM', price: 449_000, description: '[[10대 수험생 갤러리]] 독서실 몰입과 음악 감상용 극강 1위템.' },
   ],
 };
 
 async function main() {
-  console.log('[seed] 유저 생성');
+  console.log('[seed] 기존 데이터 클리어');
+  await prisma.vote.deleteMany();
+  await prisma.editHistory.deleteMany();
+  await prisma.talkComment.deleteMany();
+  await prisma.item.deleteMany();
+  await prisma.themeFollow.deleteMany();
+  await prisma.theme.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('[seed] 유저 생성 (Karma/Trust 부여)');
   const users = await Promise.all(
-    Array.from({ length: 24 }, (_, i) => {
-      const contributions = i < 4 ? 120 - i * 20 : Math.max(0, 12 - i);
-      // 앞쪽 몇 명은 오래된 계정, 나머지는 최근 가입
-      const createdAt = new Date(Date.now() - (i < 18 ? 400 : 2) * 86_400_000);
+    Array.from({ length: 35 }, (_, i) => {
+      const contributions = i < 5 ? 150 - i * 20 : Math.max(0, 20 - i);
+      const createdAt = new Date(Date.now() - (i < 25 ? 400 : 2) * 86_400_000);
       return prisma.user.create({
         data: {
           name: `유저${i + 1}`,
@@ -50,37 +214,39 @@ async function main() {
     }),
   );
 
-  for (const themeSpec of THEMES) {
-    console.log(`[seed] 테마: ${themeSpec.name}`);
-
-    // 팔로워를 붙여서 자연스럽게 승격시킨다 (상태를 직접 써넣지 않는다).
-    const followerCount = themeSpec.active ? users.length : 6;
-
+  async function createThemeNode(spec: RawTheme, parentId: string | null = null) {
+    console.log(`[seed] 갤러리 생성: ${spec.name} (분류: ${spec.category})`);
     const theme = await prisma.theme.create({
       data: {
-        slug: slugify(themeSpec.name),
-        name: themeSpec.name,
-        description: themeSpec.description,
+        slug: slugify(spec.name),
+        name: spec.name,
+        description: spec.description,
+        category: spec.category,
         proposerId: users[0].id,
-        followerCount,
-        status: themeSpec.active ? 'ACTIVE' : 'PROPOSED',
-        promotedAt: themeSpec.active ? new Date() : null,
-        followers: { create: users.slice(0, followerCount).map((u) => ({ userId: u.id })) },
+        followerCount: spec.followers,
+        status: spec.active ? 'ACTIVE' : 'PROPOSED',
+        promotedAt: spec.active ? new Date() : null,
+        parentId: parentId,
+        followers: {
+          create: users.slice(0, Math.min(spec.followers, users.length)).map((u) => ({ userId: u.id })),
+        },
       },
     });
 
-    for (const spec of ITEMS[themeSpec.name] ?? []) {
+    // 제품 위키 등록
+    const itemsForTheme = ITEMS[spec.name] ?? [];
+    for (const itemSpec of itemsForTheme) {
       const item = await prisma.item.create({
         data: {
           themeId: theme.id,
-          slug: slugify(spec.name),
-          name: spec.name,
-          tier: spec.tier,
-          priceKrw: spec.price,
-          description: spec.description,
-          recommendReason: `${spec.name} 을(를) 먼저 산 사람들의 공통된 의견입니다.`,
-          createdById: users[Math.floor(Math.random() * 4)].id,
-          purchaseLinks: [{ label: '검색', url: `https://www.google.com/search?q=${encodeURIComponent(spec.name)}` }],
+          slug: slugify(itemSpec.name),
+          name: itemSpec.name,
+          tier: itemSpec.tier,
+          priceKrw: itemSpec.price,
+          description: itemSpec.description,
+          recommendReason: `${itemSpec.name} 을(를) 실사용해본 갤러리 유저들의 1위 추천!`,
+          createdById: users[Math.floor(Math.random() * 5)].id,
+          purchaseLinks: [{ label: '최저가 검색', url: `https://www.google.com/search?q=${encodeURIComponent(itemSpec.name)}` }],
         },
       });
 
@@ -89,19 +255,19 @@ async function main() {
           itemId: item.id,
           editorId: item.createdById,
           revision: 1,
-          summary: '문서 생성',
-          diff: `+++ ${spec.name}\n+${spec.description}`,
-          snapshot: { name: spec.name, tier: spec.tier, description: spec.description },
+          summary: '위키 최초 릴리즈',
+          diff: `+++ ${itemSpec.name}\n+${itemSpec.description}`,
+          snapshot: { name: itemSpec.name, tier: itemSpec.tier, description: itemSpec.description },
         },
       });
 
-      // 투표를 실제로 넣고, 점수는 공개된 식으로 계산한다.
-      const voterCount = 4 + Math.floor(Math.random() * (users.length - 6));
+      // 투표 시뮬레이션
+      const voterCount = 6 + Math.floor(Math.random() * 18);
       const voters = [...users].sort(() => Math.random() - 0.5).slice(0, voterCount);
 
       for (const voter of voters) {
-        const isUp = Math.random() > 0.2;
-        const daysAgo = Math.floor(Math.random() * 90);
+        const isUp = Math.random() > 0.12;
+        const daysAgo = Math.floor(Math.random() * 45);
         await prisma.vote.create({
           data: {
             itemId: item.id,
@@ -123,12 +289,20 @@ async function main() {
         where: { id: item.id },
         data: { score: breakdown.score, upCount: breakdown.rawUpCount, downCount: breakdown.rawDownCount },
       });
+    }
 
-      console.log(`  - ${spec.name}: ${breakdown.score.toFixed(1)}점 (참여 ${breakdown.distinctVoters}명)`);
+    if (spec.subThemes && spec.subThemes.length > 0) {
+      for (const childSpec of spec.subThemes) {
+        await createThemeNode(childSpec, theme.id);
+      }
     }
   }
 
-  console.log('[seed] 완료. npm run rank:snapshot 으로 아카이브를 만들어 볼 수 있습니다.');
+  for (const rootSpec of THEME_TREE) {
+    await createThemeNode(rootSpec);
+  }
+
+  console.log('[seed] 5대 라이프 허브 및 레딧/디시 갤러리 시드 생성이 완료되었습니다.');
 }
 
 main()

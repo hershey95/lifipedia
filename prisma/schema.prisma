@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -58,12 +58,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -101,7 +101,12 @@ model Theme {
   slug        String      @unique
   name        String
   description String?
+  category    String?     // e.g. "연령대", "주거/독립", "상황/이벤트", "취미/라이프"
   status      ThemeStatus @default(PROPOSED)
+
+  parentId String?
+  parent   Theme?  @relation("ThemeHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  subThemes Theme[] @relation("ThemeHierarchy")
 
   proposerId String?
   proposer   User?   @relation("ThemeProposer", fields: [proposerId], references: [id], onDelete: SetNull)
@@ -117,6 +122,8 @@ model Theme {
 
   @@index([status, followerCount])
   @@index([status, lastActivityAt])
+  @@index([parentId])
+  @@index([category])
 }
 
 model ThemeFollow {
@@ -149,9 +156,9 @@ model Item {
   tier            Tier
   // 유저가 입력한 대표가(원). 가격대 태깅 검증에 쓰인다. 크롤링은 MVP 범위 밖.
   priceKrw        Int?
-  description     String  @db.Text
-  specSummary     String? @db.Text
-  recommendReason String? @db.Text
+  description     String
+  specSummary     String?
+  recommendReason String?
   imageUrl        String?
   purchaseLinks   Json    @default("[]") // [{ label, url }]
 
@@ -190,7 +197,7 @@ model EditHistory {
 
   revision Int // 이 편집으로 만들어진 리비전 번호
   summary  String? // 편집 요약
-  diff     String  @db.Text // unified diff
+  diff     String // unified diff
   snapshot Json // 편집 직후의 전체 필드 스냅샷 (되돌리기용)
 
   createdAt DateTime @default(now())
@@ -209,7 +216,7 @@ model TalkComment {
   parent   TalkComment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
   replies  TalkComment[] @relation("CommentThread")
 
-  body      String   @db.Text
+  body      String
   isRemoved Boolean  @default(false)
   createdAt DateTime @default(now())
 
@@ -296,7 +303,7 @@ model Report {
   reporterId String?
   reporter   User?            @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
   reason     String
-  detail     String?          @db.Text
+  detail     String?
   status     ReportStatus     @default(OPEN)
   createdAt  DateTime         @default(now())
 

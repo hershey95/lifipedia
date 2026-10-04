@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
+import { z } from 'zod';
 
 export function ok<T>(data: T, init?: ResponseInit) {
   return NextResponse.json(data, init);
@@ -10,8 +10,8 @@ export function fail(status: number, message: string, extra?: Record<string, unk
 }
 
 export function handleError(error: unknown) {
-  if (error instanceof ZodError) {
-    return fail(400, '입력값이 올바르지 않습니다.', { issues: error.issues });
+  if (error instanceof z.ZodError) {
+    return fail(400, '입력값이 올바르지 않습니다.', { issues: (error as z.ZodError).issues });
   }
   console.error(error);
   return fail(500, '서버 오류가 발생했습니다.');
