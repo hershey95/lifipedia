@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { TIERS, TIER_LABELS, type Tier } from '@/lib/tier';
+import { MarkdownEditor } from './MarkdownEditor';
 
 export type ItemFormValues = {
   name: string;
@@ -142,38 +143,32 @@ export function ItemForm(props: Props) {
         </div>
       ) : null}
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">설명</span>
-        <textarea
-          className="field min-h-40"
-          value={values.description}
-          onChange={(e) => set('description', e.target.value)}
-          required
-          minLength={10}
-          maxLength={20000}
-          placeholder="어떤 제품인지, 어떤 점이 좋은지 자유롭게 적어 주세요."
-        />
-      </label>
+      <MarkdownEditor
+        label="제품 위키 설명"
+        value={values.description}
+        onChange={(val) => set('description', val)}
+        required
+        maxLength={20000}
+        placeholder="어떤 제품인지, 어떤 점이 좋은지 자유롭게 적어 주세요. [[연관테마]]로 다른 갤러리와 연결할 수 있습니다."
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">추천 이유 <span className="font-normal text-ink/40">(선택)</span></span>
-        <textarea
-          className="field min-h-24"
-          value={values.recommendReason ?? ''}
-          onChange={(e) => set('recommendReason', e.target.value || null)}
-          maxLength={5000}
-        />
-      </label>
+      <MarkdownEditor
+        label="추천 이유 (선택)"
+        value={values.recommendReason ?? ''}
+        onChange={(val) => set('recommendReason', val || null)}
+        rows={4}
+        maxLength={5000}
+        placeholder="왜 이 제품이 저/중/고가 1위로 추천될 만한지 이유를 설명해 주세요."
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">스펙 요약 <span className="font-normal text-ink/40">(선택)</span></span>
-        <textarea
-          className="field min-h-24"
-          value={values.specSummary ?? ''}
-          onChange={(e) => set('specSummary', e.target.value || null)}
-          maxLength={5000}
-        />
-      </label>
+      <MarkdownEditor
+        label="상세 스펙 요약 (선택)"
+        value={values.specSummary ?? ''}
+        onChange={(val) => set('specSummary', val || null)}
+        rows={4}
+        maxLength={5000}
+        placeholder="| 항목 | 내용 | 형식의 마크다운 표나 스펙을 자유롭게 작성하세요."
+      />
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">이미지 URL <span className="font-normal text-ink/40">(선택)</span></span>
