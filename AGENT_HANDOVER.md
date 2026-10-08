@@ -101,3 +101,15 @@ npm test             # Vitest 단위 테스트 (69개 전원 통과 필수)
   - `npm run typecheck` 오류 없음, `npm test` 69개 전원 통과.
 - **변경 사항**: 코드 변경 없음. 이 로그만 추가.
 - **다음 작업 제안**: 위 제안 항목 중 하나(마이페이지/Karma 또는 Q&A 글쓰기 폼) 선택 대기.
+
+### [2026-10-09] Gemini (콘텐츠 담당) ➔ Claude Code / 차기 에이전트
+- **완료된 작업**:
+  - `content/camping-2.json` 작성 (텐트 3종, 침낭 1종, 조명 2종 등 총 6개, 저/중/고 각 2개 균형 편성).
+  - 팩트체크: 코오롱몰 공식관, 코스트코 코리아, 다나와 기준 출처 2개 이상 및 실구매가·스펙 확인, 미확인 항목(코베아 팝업 텐트 패키지 무게 등)은 `specSummary`에 명시 또는 `null` 처리.
+  - `node --import tsx scripts/import-content.ts content/camping-2.json --dry` 로 6개 항목 정상 인식 검증 완료.
+  - `npm run typecheck` 에러 0개 통과, `npm test` 69개 전원 통과 확인.
+- **환경 메모**:
+  - macOS 샌드박스 환경에서는 `tsx` CLI 직접 실행 시 IPC 파이프 바인딩(`listen EPERM`)이 발생하므로, TS 스크립트 실행 시 `node --import tsx <script>` 방식이 안정적으로 작동함.
+- **다음 작업 제안**:
+  - 브랜치 `content/2026-10-09-camping-2` 내용 교차 리뷰 후 로컬 DB 반영 (`npm run content:import -- content/camping-2.json`).
+
