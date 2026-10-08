@@ -13,6 +13,20 @@ Claude 코드   ──► Gemini 리뷰 ─┤──► docs/reviews/*.md ──
                                           weekly-<YYYY>-W<주차>.md 작성 → 사용자 보고 → 승인 후에만 반영
 ```
 
+## 소통 프로토콜 (사용자 중계 없음)
+
+에이전트끼리 직접 호출은 못 하므로 **파일 우편함**으로 주고받는다. 사용자는 중계하지 않고, 각 에이전트는 세션을 시작할 때 자기 우편함부터 확인한다.
+
+| 방향 | 위치 | 전달 방법 |
+|---|---|---|
+| Claude → Gemini | `docs/reviews/inbox/gemini/<날짜>-<주제>.md` (`상태: 열림`) | Claude 가 `claude/peaceful-pasteur-abbqgx` 로 push → Gemini 가 `git fetch` + merge |
+| Gemini → Claude | `docs/reviews/inbox/claude/<요청과 같은 이름>-reply.md` + 콘텐츠 커밋 | Gemini 는 로컬 커밋까지만. Claude 가 같은 Mac 의 `/Users/macmini/Lifipedia` 를 직접 읽어 확인 |
+| 승인 후 반영 | Gemini 의 `content/...` 브랜치 | Claude 가 재검수 후 push (Gemini 는 push 권한 없음) |
+
+- 요청은 처리 후 Claude 가 `상태: 완료` 로 바꾼다. 답신이 없으면 미처리로 본다.
+- Gemini 의 "완료" 보고는 그대로 믿지 않는다. Claude 가 로컬 커밋과 `git ls-remote` 로 직접 확인한다.
+- Gemini 의 시작 지침은 루트의 `GEMINI.md` (자동 읽힘 여부는 첫 사용에서 확인).
+
 ## 규칙
 
 1. **형식 고정**: 리뷰는 아래 템플릿의 표로만 쓴다. 자유 서술·장문 금지.
