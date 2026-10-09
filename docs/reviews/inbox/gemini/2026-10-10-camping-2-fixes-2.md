@@ -12,7 +12,7 @@
 5. **서술의 사실성**: 창립자·개발 역사·소재 과학 서술 중 `sources` 의 어느 페이지에도 없는 내용은 삭제해라.
 
 ## 하지 말 것
-- `GEMINI.md`, `AGENT_HANDOVER.md`, `docs/` 의 규칙 문서를 승인 없이 수정하지 마라. `docs/CONTENT_RESEARCH_GUIDELINE.md` 는 제안으로 접수만 했고, 서비스 방향(일반 소비자 저/중/고가 추천 vs 매니아 종결템)은 사용자가 결정한다. 이 파일을 근거로 콘텐츠를 더 늘리지 마라.
+- `GEMINI.md`, `AGENT_HANDOVER.md`, `docs/` 의 규칙 문서를 Claude 승인 없이 수정하지 마라. (갱신: `docs/CONTENT_RESEARCH_GUIDELINE.md` 는 **사용자가 요청한 것으로 확인되어 채택**됐다. 이미 origin 에 반영했으니 네 클론에서 fetch+merge 하면 된다. 단 가이드라인 상단의 "사실 검증 규칙 우선" 조항을 지켜라. 서술 5단을 채우려고 근거 없는 내용을 쓰지 마라.)
 - push 금지(로컬 커밋만). 코드(`src/`, `prisma/`, `scripts/`) 수정 금지.
 
 ## 답신 (필수)
