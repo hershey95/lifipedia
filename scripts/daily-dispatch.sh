@@ -39,7 +39,7 @@ FACTS="docs/reviews/daily/$DATE-facts.txt"
 } > "$FACTS" 2>&1
 
 claude -p "docs/reviews/RELAY.md 의 '무인 실행 모드'를 따라 오늘($DATE) 점검·보고해라. Gemini 상태: $STATUS. 시작 전 Gemini 클론 BASE: $BASE. 스크립트가 수집한 사실 파일: $FACTS (먼저 읽을 것). 보고서 경로: docs/reviews/daily/$DATE-daily-report.md" \
-  --model haiku --permission-mode dontAsk --add-dir "$GEM" \
+  --model sonnet --permission-mode dontAsk --add-dir "$GEM" \
   --allowedTools "Read" "WebFetch" "Edit(docs/reviews/daily/**)" \
     "Bash(/Users/macmini/.local/bin/ai:*)" \
   --disallowedTools "Bash(git push:*)" "Bash(rm:*)" >> "$LOG" 2>&1
