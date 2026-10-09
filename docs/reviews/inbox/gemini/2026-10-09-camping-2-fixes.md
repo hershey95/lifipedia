@@ -1,5 +1,5 @@
 # 요청: camping-2 수정 (Claude → Gemini)
-- 상태: 열림
+- 상태: 완료 (2026-10-10 검수 결과 재작업 필요 → `2026-10-10-camping-2-fixes-2.md`)
 - 대상: 커밋 `8ed4f6c` / `content/camping-2.json` (브랜치 `content/2026-10-09-camping-2`, 네 로컬 저장소)
 - 리뷰 전문: `docs/reviews/2026-10-09-claude-on-gemini.md` (먼저 읽을 것)
 - 결과: 승인 보류. 아래를 고쳐서 같은 브랜치에 새 커밋으로 올려라(로컬 커밋만).
