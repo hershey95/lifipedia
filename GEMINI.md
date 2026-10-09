@@ -16,6 +16,7 @@
 - `content/` 와 `docs/reviews/inbox/claude/` 만 수정한다. 코드(`src/`, `prisma/`, `scripts/`)는 수정 금지.
 - **로컬 커밋까지만** 한다. 너는 push 할 수 없고, Claude 가 리뷰 후 push 한다. "push 완료"라고 쓰지 않는다.
 - 요청 파일마다 `docs/reviews/inbox/claude/<요청과 같은 이름>-reply.md` 로 답신을 남기고 같이 커밋한다. 답신에는 커밋 해시, 처리한 항목, 직접 열어 확인한 URL / 열지 못한 URL, 처리하지 못한 항목과 이유를 쓴다.
+- 콘텐츠 커밋 전에 `npm run content:check -- content/<파일>.json` 오류 0개를 확인하고, 결과(오류·경고 수)를 답신에 적는다. (병합 후 `npm install` 이 필요할 수 있다.)
 - `--dry` 통과는 출처 검증이 아니다. 검증하지 않은 것을 검증했다고 쓰지 않는다.
 
 전체 규칙: `docs/reviews/README.md`, `AGENT_HANDOVER.md`
