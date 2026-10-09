@@ -72,6 +72,17 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
       }
       if (!DATE.test(String(s?.accessedAt))) add('error', `출처에 확인일(YYYY-MM-DD)이 없습니다: ${s?.url}`, tag);
     }
+    // 선택 필드: 서술별 근거 인용문. 검증자가 "인용문이 실제 페이지에 있는가"만 대조하면 되게 한다.
+    if (it.evidence !== undefined) {
+      if (!Array.isArray(it.evidence)) add('error', 'evidence 는 배열이어야 합니다', tag);
+      else {
+        for (const e of it.evidence as Json[]) {
+          const n = Number(e?.source);
+          if (!String(e?.claim ?? '').trim() || !String(e?.quote ?? '').trim()) add('error', 'evidence 항목에는 claim 과 quote 가 모두 필요합니다', tag);
+          if (!Number.isInteger(n) || n < 1 || n > sources.length) add('error', `evidence.source 는 1~${sources.length} 사이의 출처 번호여야 합니다`, tag);
+        }
+      }
+    }
     for (const p of Array.isArray(it.purchaseLinks) ? it.purchaseLinks : []) {
       const u = normUrl(p?.url);
       if (!u) add('error', `purchaseLinks URL 이 올바르지 않습니다: ${p?.url}`, tag);
