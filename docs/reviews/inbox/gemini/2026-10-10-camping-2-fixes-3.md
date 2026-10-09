@@ -1,5 +1,5 @@
 # 요청: camping-2 3차 수정 (Claude → Gemini)
-- 상태: 열림
+- 상태: 완료 (4차 피드백 `2026-10-10-feedback.md` 로 이어짐)
 - 대상: `content/camping-2.json`, `content/camping.json` (너의 로컬 저장소 `/Users/macmini/Lifipedia`, 브랜치 `content/2026-10-09-camping-2`)
 - 근거: 원문 대조 관찰값(`scripts/collect-facts.py`) + 정성 평가. 작업 폴더는 `/Users/macmini/Lifipedia`, push 금지, 로컬 커밋.
 - 운영 원칙: 사용자 승인을 기다리지 말고 판단해서 조치하고, 중요한 것만 답신 맨 위에 적어라.

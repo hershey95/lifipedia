@@ -39,14 +39,14 @@ for path in sys.argv[1:]:
             code, title, text = fetch(u)
             marks = [m for m in MARK if m in text]
             shown = (f"{price:,}" in text) if price else None
-            print(f"- URL {u[:110]} | http={code} | title={title[:60]!r} | 마커={marks} | 주장가격표시={shown}")
+            print(f"- URL {u[:110]} | http={code} | title={title[:60]!r} | 텍스트길이={len(text.strip())} | 마커={marks} | 주장가격표시={shown}")
         for e in it.get("evidence", []):
             n = e.get("source")
             if not (isinstance(n, int) and 1 <= n <= len(it.get("sources", []))):
                 print(f"- 인용 출처번호 오류: {e}")
                 continue
             code, _, text = fetch(it["sources"][n - 1]["url"])
-            res = "FETCH_FAIL" if code in ("FAIL", "000") or not text.strip() else ("FOUND" if norm(e["quote"]) in norm(text) else "NOT_FOUND")
+            res = "FETCH_FAIL" if code in ("FAIL", "000") or not text.strip() else ("FOUND" if norm(e["quote"]) in norm(text) else ("NOT_FOUND(JS의심)" if len(text.strip()) < 1500 else "NOT_FOUND"))
             # 문장이 달라도 숫자가 페이지에 있으면 표기만 다른 것일 수 있다 (숫자까지 없으면 사실 근거가 없는 인용)
             nums = [x.replace(",", "") for x in re.findall(r"\d[\d,]*\.?\d*", e["quote"])]
             page = text.replace(",", "")

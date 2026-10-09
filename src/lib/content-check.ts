@@ -79,6 +79,7 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
         for (const e of it.evidence as Json[]) {
           const n = Number(e?.source);
           if (!String(e?.claim ?? '').trim() || !String(e?.quote ?? '').trim()) add('error', 'evidence 항목에는 claim 과 quote 가 모두 필요합니다', tag);
+          else if (String(e.quote).trim().length < 12) add('error', `evidence.quote 는 원문의 문장·표 행 단위로 12자 이상 복사해야 합니다 ("${String(e.quote).trim()}")`, tag);
           if (!Number.isInteger(n) || n < 1 || n > sources.length) add('error', `evidence.source 는 1~${sources.length} 사이의 출처 번호여야 합니다`, tag);
         }
       }

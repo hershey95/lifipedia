@@ -20,7 +20,7 @@ if [ "${DRY:-0}" = 1 ]; then
   STATUS="DRY(Gemini 호출 안 함)"
 else
   log "dispatch start base=$BASE"
-  PROMPT="Claude 자동 지시($DATE): 작업 폴더는 반드시 /Users/macmini/Lifipedia 이고 git 은 git -C /Users/macmini/Lifipedia 로 실행하세요. push 는 금지입니다. 먼저 origin 의 $BRANCH 를 fetch 후 병합하고, 저장소의 GEMINI.md 를 읽고 절차대로 다음 세 가지를 진행하세요. (1) 오늘 계획/요일 작업, (2) docs/reviews/inbox/gemini/ 의 상태 열림 피드백 파일 항목마다 수용·부분 수용·거절+이유를 inbox/claude/ 의 feedback-reply 로 답하고 수용분 반영, (3) Claude 의 최근 24시간 변경(설계서·코드 diff)을 리뷰해 inbox/claude/ 에 gemini-on-claude 로 작성. 사용자 승인은 기다리지 말고 판단해서 조치한 뒤 중요한 것만 답신 맨 위에 적으세요. 끝나면 새 커밋 해시를 알려주세요."
+  PROMPT="Claude 자동 지시($DATE): 작업 폴더는 반드시 /Users/macmini/Lifipedia 이고 git 은 git -C /Users/macmini/Lifipedia 로 실행하세요. push 는 금지입니다. 먼저 origin 의 $BRANCH 를 fetch 후 'git merge --no-edit' 로 병합하고 (편집기 대기 금지), 저장소의 GEMINI.md 를 읽고 절차대로 다음 세 가지를 진행하세요. (1) 오늘 계획/요일 작업, (2) docs/reviews/inbox/gemini/ 의 상태 열림 피드백 파일 항목마다 수용·부분 수용·거절+이유를 inbox/claude/ 의 feedback-reply 로 답하고 수용분 반영, (3) Claude 의 최근 24시간 변경(설계서·코드 diff)을 리뷰해 inbox/claude/ 에 gemini-on-claude 로 작성. 사용자 승인은 기다리지 말고 판단해서 조치한 뒤 중요한 것만 답신 맨 위에 적으세요. 끝나면 새 커밋 해시를 알려주세요."
   if perl -e 'alarm shift; exec @ARGV' "$MAX_WAIT" "$HOME/.local/bin/ai" "$PROMPT" >> "$LOG" 2>&1; then
     STATUS="완료"
   else
