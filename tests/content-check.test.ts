@@ -77,4 +77,12 @@ describe('checkContent', () => {
     expect(run(many).filter((i) => i.level === 'warn').map((i) => i.msg).join()).toContain('브랜드 쏠림');
     expect(run([item()], '없는 갤러리').some((i) => i.level === 'error')).toBe(true);
   });
+
+  it('evidence 는 선택이지만 있으면 형식과 출처 번호를 검사한다', () => {
+    expect(errors([item({ evidence: [{ claim: '무게 0.89kg', source: 1, quote: '결합 무게 0.89kg' }] })])).toEqual([]);
+    const bad = errors([item({ evidence: [{ claim: '', source: 3, quote: '' }] })]).join('|');
+    expect(bad).toContain('claim 과 quote');
+    expect(bad).toContain('출처 번호');
+    expect(errors([item({ evidence: 'x' })]).join()).toContain('배열');
+  });
 });
