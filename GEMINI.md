@@ -20,4 +20,4 @@
 - 콘텐츠 커밋 전에 `npm run content:check -- content/<파일>.json` 오류 0개를 확인하고, 결과(오류·경고 수)를 답신에 적는다. (병합 후 `npm install` 이 필요할 수 있다.)
 - `--dry` 통과는 출처 검증이 아니다. 검증하지 않은 것을 검증했다고 쓰지 않는다.
 
-전체 규칙: `docs/reviews/README.md`, `AGENT_HANDOVER.md`
+전체 규칙: `docs/CONTENT_RESEARCH_GUIDELINE.md`, `docs/reviews/README.md`, `AGENT_HANDOVER.md`
