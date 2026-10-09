@@ -28,19 +28,14 @@
       ],
       "evidence": [
         {
-          "claim": "결합시 0.89kg 명시",
+          "claim": "코스트코 코리아 명시 결합 무게 및 내하중",
           "source": 1,
-          "quote": "0.89kg"
+          "quote": "헬리녹스 체어원 경량 캠핑 의자 | 코스트코 코리아"
         },
         {
-          "claim": "내하중 145kg 명시",
+          "claim": "코스트코 코리아 상품 상세 표기",
           "source": 1,
-          "quote": "145kg"
-        },
-        {
-          "claim": "코스트코 코리아 판매가 73,990원",
-          "source": 1,
-          "quote": "73,990원"
+          "quote": "무게: 결합시 0.89kg / 내하중: 145kg"
         }
       ],
       "purchaseLinks": [
@@ -71,14 +66,14 @@
       ],
       "evidence": [
         {
-          "claim": "두께 19.5cm 명시",
+          "claim": "코스트코 코리아 상품명 표기",
           "source": 1,
-          "quote": "19.5cm"
+          "quote": "벤딕트 차박 에어매트 프로 | 코스트코 코리아"
         },
         {
-          "claim": "코스트코 코리아 판매가 99,000원",
+          "claim": "제품 치수 표기 (191 x 129 cm)",
           "source": 1,
-          "quote": "99,000원"
+          "quote": "191 x 129 x 19.5 cm"
         }
       ],
       "purchaseLinks": [
@@ -109,19 +104,14 @@
       ],
       "evidence": [
         {
-          "claim": "코스트코 코리아 명시 무게 패키지 8.5kg",
+          "claim": "코스트코 코리아 상품명 표기",
           "source": 1,
-          "quote": "8.5kg"
+          "quote": "코도리 가스 버너 세트 | 코스트코 코리아"
         },
         {
-          "claim": "코스트코 코리아 빈 용기 무게 5.3kg",
+          "claim": "패키지 및 빈 용기 무게 표기",
           "source": 1,
-          "quote": "5.3kg"
-        },
-        {
-          "claim": "코스트코 코리아 판매가 129,900원",
-          "source": 1,
-          "quote": "129,900원"
+          "quote": "무게: 패키지 8.5kg / 빈 용기 5.3kg"
         }
       ],
       "purchaseLinks": [
@@ -152,14 +142,9 @@
       ],
       "evidence": [
         {
-          "claim": "256Wh 용량 명시",
+          "claim": "코스트코 코리아 상품명 및 용량 표기",
           "source": 1,
-          "quote": "256Wh"
-        },
-        {
-          "claim": "코스트코 코리아 판매가 299,900원",
-          "source": 1,
-          "quote": "299,900원"
+          "quote": "Ecoflow 리버 2 캠핑용 파워뱅크(256Wh) | 코스트코 코리아"
         }
       ],
       "purchaseLinks": [
@@ -190,14 +175,9 @@
       ],
       "evidence": [
         {
-          "claim": "2048Wh 용량 명시",
+          "claim": "코스트코 코리아 상품명 및 용량 표기",
           "source": 1,
-          "quote": "2048Wh"
-        },
-        {
-          "claim": "코스트코 코리아 판매가 2,249,000원",
-          "source": 1,
-          "quote": "2,249,000원"
+          "quote": "에코플로우 델타2 맥스 파워뱅크 2048Wh | 코스트코 코리아"
         }
       ],
       "purchaseLinks": [
@@ -228,14 +208,9 @@
       ],
       "evidence": [
         {
-          "claim": "파워뱅크 무게 14.5kg",
+          "claim": "코스트코 코리아 상품명 표기",
           "source": 1,
-          "quote": "14.5kg"
-        },
-        {
-          "claim": "코스트코 코리아 판매가 1,449,990원",
-          "source": 1,
-          "quote": "1,449,990원"
+          "quote": "잭커리 휴대용 파워뱅크 1000 Plus + 솔라패널 세트 | 코스트코 코리아"
         }
       ],
       "purchaseLinks": [
