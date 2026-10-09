@@ -25,6 +25,17 @@ function normUrl(raw: unknown): string | null {
   }
 }
 
+/** 무게·치수·원단·용량 같은 물리 수치만 뽑는다 (예: "363g", "10d", "2.4oz"). skipApprox 면 "약 397g" 같은 환산값은 뺀다. */
+function figures(text: string, skipApprox = false): Set<string> {
+  const out = new Set<string>();
+  const re = /(약\s?)?(\d[\d,]*\.?\d*)\s?(kg|g|oz|lb|cm|mm|wh|mah|lm|°c|°f|시간|hours?|d|l|w|v)(?![a-z])/gi;
+  for (const m of text.matchAll(re)) {
+    if (skipApprox && m[1]) continue;
+    out.add(`${m[2].replace(/,/g, '')}${m[3].toLowerCase()}`);
+  }
+  return out;
+}
+
 export function checkContent(data: unknown, galleries: string[]): Issue[] {
   const issues: Issue[] = [];
   const add = (level: Issue['level'], msg: string, item?: string) => issues.push({ level, msg, item });
@@ -84,6 +95,19 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
         }
       }
     }
+    // 수치 근거: claim 의 물리 수치는 quote 에 있어야 하고, 설명의 물리 수치는 어느 quote 에든 있어야 한다("약 N" 환산값은 제외).
+    if (Array.isArray(it.evidence)) {
+      const evs = it.evidence as Json[];
+      for (const e of evs) {
+        const q = figures(String(e?.quote ?? ''));
+        for (const f of figures(String(e?.claim ?? ''), true)) {
+          if (!q.has(f)) add('error', `evidence 의 claim 수치 ${f} 가 quote 에 없습니다 (claim: "${String(e?.claim).slice(0, 40)}")`, tag);
+        }
+      }
+      const quoted = figures(evs.map((e) => String(e?.quote ?? '')).join('\n'));
+      const missing = [...figures(String(it.description ?? ''), true)].filter((f) => !quoted.has(f));
+      if (missing.length) add('warn', `설명의 수치가 evidence 인용문에 없습니다: ${missing.join(', ')}`, tag);
+    }
     for (const p of Array.isArray(it.purchaseLinks) ? it.purchaseLinks : []) {
       const u = normUrl(p?.url);
       if (!u) add('error', `purchaseLinks URL 이 올바르지 않습니다: ${p?.url}`, tag);
@@ -105,6 +129,15 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
   }
 
   const items = d.items as Json[];
+  const rank: Record<string, number> = { BUDGET: 0, MID: 1, PREMIUM: 2 };
+  const priced = items.filter((it) => Number.isInteger(it.priceKrw) && it.priceKrw > 0 && it.tier in rank);
+  for (const a of priced) {
+    const higher = priced.find((b) => rank[b.tier] > rank[a.tier] && b.priceKrw < a.priceKrw);
+    if (higher) {
+      const w = (n: number) => `${n.toLocaleString('ko-KR')}원`;
+      add('error', `티어 역전: ${a.tier} ${w(a.priceKrw)} 이(가) ${higher.tier} ${w(higher.priceKrw)}(${higher.name}) 보다 비쌉니다`, a.name);
+    }
+  }
   const brands = new Map<string, number>();
   for (const it of items) {
     const b = String(it.name ?? '').split(/\s+/)[0];

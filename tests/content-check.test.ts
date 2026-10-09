@@ -86,4 +86,21 @@ describe('checkContent', () => {
     expect(errors([item({ evidence: 'x' })]).join()).toContain('배열');
     expect(errors([item({ evidence: [{ claim: '무게', source: 1, quote: '2.0' }] })]).join()).toContain('12자');
   });
+
+  it('claim 수치가 quote 에 없으면 오류, 설명 수치가 evidence 에 없으면 경고', () => {
+    const base = { sources: item().sources, description: '가'.repeat(250) + ' 총중량 363g 입니다.' };
+    const bad = errors([item({ ...base, evidence: [{ claim: '총중량 363g', source: 1, quote: 'Spark Ultralight Down Sleeping Bag Title' }] })]).join();
+    expect(bad).toContain('363g');
+    const ok = run([item({ ...base, evidence: [{ claim: '총중량 363g', source: 1, quote: 'Total weight: 363g (12.8 oz)' }] })]);
+    expect(ok.filter((i) => i.level !== 'warn' || i.msg.includes('수치'))).toEqual([]);
+    const warn = run([item({ ...base, evidence: [{ claim: '제품명 확인', source: 1, quote: 'Spark Ultralight Down Sleeping Bag Title' }] })]);
+    expect(warn.some((i) => i.level === 'warn' && i.msg.includes('363g'))).toBe(true);
+  });
+
+  it('가격 순서와 어긋난 티어는 오류', () => {
+    const mk = (name: string, tier: string, priceKrw: number, n: number) =>
+      item({ name, tier, priceKrw, purchaseLinks: [{ label: 'x', url: `https://shop.example/product/${n}` }] });
+    expect(errors([mk('싼데 중가', 'MID', 62000, 1), mk('비싼데 저가', 'BUDGET', 193200, 2)]).join()).toContain('티어 역전');
+    expect(errors([mk('저가', 'BUDGET', 62000, 3), mk('중가', 'MID', 193200, 4), mk('고가', 'PREMIUM', 413100, 5)]).join()).not.toContain('티어 역전');
+  });
 });
