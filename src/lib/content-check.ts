@@ -25,15 +25,19 @@ function normUrl(raw: unknown): string | null {
   }
 }
 
-/** 무게·치수·원단·용량 같은 물리 수치만 뽑는다 (예: "363g", "10d", "2.4oz"). skipApprox 면 "약 397g" 같은 환산값은 뺀다. */
-function figures(text: string, skipApprox = false): Set<string> {
-  const out = new Set<string>();
-  const re = /(약\s?)?(\d[\d,]*\.?\d*)\s?(kg|g|oz|lb|cm|mm|wh|mah|lm|°c|°f|시간|hours?|d|l|w|v)(?![a-z])/gi;
-  for (const m of text.matchAll(re)) {
-    if (skipApprox && m[1]) continue;
-    out.add(`${m[2].replace(/,/g, '')}${m[3].toLowerCase()}`);
-  }
-  return out;
+/** 무게·치수·원단·용량 같은 물리 수치를 뽑는다 (예: "363g", "10d", "2.4oz"). "약" 접두는 기록만 한다. */
+const FIG = /(약\s?)?(\d[\d,]*\.?\d*)\s?(kg|g|oz|lb|cm|mm|wh|mah|lm|°c|°f|시간|hours?|d|l|w|v)(?![a-z])/gi;
+const figureList = (text: string) =>
+  [...text.matchAll(FIG)].map((m) => ({ approx: !!m[1], unit: m[3].toLowerCase(), key: `${m[2].replace(/,/g, '')}${m[3].toLowerCase()}` }));
+/** "약 N" 은 실제 단위 환산(oz·lb→g·kg, °F→°C)일 때만 면제한다. 근거 인용에 그 환산 원본 단위가 있어야 한다. */
+const CONVERTS_FROM: Record<string, string[]> = { g: ['oz', 'lb'], kg: ['oz', 'lb'], '°c': ['°f'] };
+/** text 의 물리 수치 중 quoteText 로 뒷받침되지 않는 것 */
+function unsupported(text: string, quoteText: string): string[] {
+  const q = figureList(quoteText);
+  const keys = new Set(q.map((f) => f.key));
+  const units = new Set(q.map((f) => f.unit));
+  const miss = figureList(text).filter((f) => !keys.has(f.key) && !(f.approx && (CONVERTS_FROM[f.unit] ?? []).some((u) => units.has(u))));
+  return [...new Set(miss.map((f) => f.key))];
 }
 
 export function checkContent(data: unknown, galleries: string[]): Issue[] {
@@ -95,18 +99,17 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
         }
       }
     }
-    // 수치 근거: claim 의 물리 수치는 quote 에 있어야 하고, 설명의 물리 수치는 어느 quote 에든 있어야 한다("약 N" 환산값은 제외).
+    // 수치 근거: claim 의 물리 수치는 같은 quote 에 있어야 하고, 설명의 물리 수치는 어느 quote 에든 있어야 한다.
+    // "약 N" 은 oz→g 같은 실제 환산일 때만 면제된다(근거 인용에 원본 단위가 있어야 함).
     if (Array.isArray(it.evidence)) {
       const evs = it.evidence as Json[];
       for (const e of evs) {
-        const q = figures(String(e?.quote ?? ''));
-        for (const f of figures(String(e?.claim ?? ''), true)) {
-          if (!q.has(f)) add('error', `evidence 의 claim 수치 ${f} 가 quote 에 없습니다 (claim: "${String(e?.claim).slice(0, 40)}")`, tag);
+        for (const f of unsupported(String(e?.claim ?? ''), String(e?.quote ?? ''))) {
+          add('error', `evidence 의 claim 수치 ${f} 가 quote 에 없습니다 (claim: "${String(e?.claim).slice(0, 40)}")`, tag);
         }
       }
-      const quoted = figures(evs.map((e) => String(e?.quote ?? '')).join('\n'));
-      const missing = [...figures(String(it.description ?? ''), true)].filter((f) => !quoted.has(f));
-      if (missing.length) add('warn', `설명의 수치가 evidence 인용문에 없습니다: ${missing.join(', ')}`, tag);
+      const missing = unsupported(String(it.description ?? ''), evs.map((e) => String(e?.quote ?? '')).join('\n'));
+      if (missing.length) add('warn', `설명의 수치가 evidence 인용문에 없습니다("약"은 oz→g 같은 실제 환산만 면제): ${missing.join(', ')}`, tag);
     }
     for (const p of Array.isArray(it.purchaseLinks) ? it.purchaseLinks : []) {
       const u = normUrl(p?.url);

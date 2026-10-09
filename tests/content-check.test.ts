@@ -103,4 +103,11 @@ describe('checkContent', () => {
     expect(errors([mk('싼데 중가', 'MID', 62000, 1), mk('비싼데 저가', 'BUDGET', 193200, 2)]).join()).toContain('티어 역전');
     expect(errors([mk('저가', 'BUDGET', 62000, 3), mk('중가', 'MID', 193200, 4), mk('고가', 'PREMIUM', 413100, 5)]).join()).not.toContain('티어 역전');
   });
+
+  it('"약" 접두로 수치 근거 검사를 우회할 수 없다 (실제 환산만 면제)', () => {
+    const d = { description: '가'.repeat(250) + ' 총중량 약 363g 입니다.', sources: item().sources };
+    const w = (quote: string) => run([item({ ...d, evidence: [{ claim: '무게', source: 1, quote }] })]).filter((i) => i.level === 'warn' && i.msg.includes('363g'));
+    expect(w('Spark Ultralight Down Sleeping Bag Title')).toHaveLength(1);
+    expect(w('Packed weight: 12.8 oz total')).toHaveLength(0);
+  });
 });
