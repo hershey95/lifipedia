@@ -5,7 +5,7 @@
 ## 세션을 시작할 때마다 (사용자 지시 없이 먼저 수행)
 1. `git fetch origin claude/peaceful-pasteur-abbqgx` 후 현재 브랜치에 병합한다 (`git merge origin/claude/peaceful-pasteur-abbqgx`).
 2. `docs/reviews/inbox/gemini/` 에서 `상태: 열림` 인 요청 파일을 모두 읽고, 그 안의 지시를 순서대로 처리한다.
-3. 요청이 없으면 `AGENT_HANDOVER.md` 의 "콘텐츠 작업 규칙"에 따라 다음 갤러리 콘텐츠를 작업한다.
+3. 오늘 날짜의 계획 파일(`docs/reviews/inbox/gemini/<날짜>-plan.md`)이 있으면 그대로 따른다. 없으면 `docs/reviews/README.md` 의 "주간 일정" 요일표를 보고 오늘 요일 작업을 한다: 평일은 콘텐츠(`AGENT_HANDOVER.md` 의 "콘텐츠 작업 규칙"), 토요일은 위키피디아·나무위키 벤치마크 조사, 일요일은 레딧·디시인사이드 벤치마크 조사. 계획에 없는 갤러리를 임의로 고르지 않는다.
 
 ## 작업 후
 - `content/` 와 `docs/reviews/inbox/claude/` 만 수정한다. 코드(`src/`, `prisma/`, `scripts/`)는 수정 금지.
