@@ -84,5 +84,6 @@ describe('checkContent', () => {
     expect(bad).toContain('claim 과 quote');
     expect(bad).toContain('출처 번호');
     expect(errors([item({ evidence: 'x' })]).join()).toContain('배열');
+    expect(errors([item({ evidence: [{ claim: '무게', source: 1, quote: '2.0' }] })]).join()).toContain('12자');
   });
 });
