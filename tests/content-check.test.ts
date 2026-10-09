@@ -120,4 +120,11 @@ describe('checkContent', () => {
     const ok = run([item({ ...d, evidence: [{ claim: '밝기', source: 1, quote: '최대 밝기 800루멘 / IP54 방진방수 지원' }] })]);
     expect(ok.filter((i) => i.level === 'warn' && i.msg.includes('수치'))).toEqual([]);
   });
+
+  it('가격 근거는 인용문에 "원" 없이 같은 금액 숫자가 있어도 인정한다', () => {
+    const d = { description: '가'.repeat(250) + ' 가격 기준: 다나와 최저가(193,200원).', sources: item().sources };
+    const w = (quote: string) => run([item({ ...d, evidence: [{ claim: '다나와 최저가 193,200원', source: 1, quote }] })]).filter((i) => i.msg.includes('193200'));
+    expect(w('써머레스트 네오에어 : 다나와 가격비교 (193,200+무료배송)')).toHaveLength(0);
+    expect(w('써머레스트 네오에어 : 다나와 가격비교 (293,200+무료배송)').length).toBeGreaterThan(0);
+  });
 });
