@@ -10,3 +10,6 @@ next-env.d.ts
 coverage/
 *.db
 *.db-journal
+
+# 에이전트 예약 실행 확인용 (추적 안 함)
+.agent-heartbeat
