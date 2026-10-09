@@ -7,6 +7,11 @@
 2. `docs/reviews/inbox/gemini/` 에서 `상태: 열림` 인 요청 파일을 모두 읽고, 그 안의 지시를 순서대로 처리한다.
 3. 오늘 날짜의 계획 파일(`docs/reviews/inbox/gemini/<날짜>-plan.md`)이 있으면 그대로 따른다. 없으면 `docs/reviews/README.md` 의 "주간 일정" 요일표를 보고 오늘 요일 작업을 한다: 일~목은 콘텐츠(`AGENT_HANDOVER.md` 의 "콘텐츠 작업 규칙"), 금요일은 위키피디아·나무위키 벤치마크 조사, 토요일은 레딧·디시인사이드 벤치마크 조사. (한 주는 일요일에 시작한다.) 계획에 없는 갤러리를 임의로 고르지 않는다.
 
+## Claude 결과물 리뷰 (너도 Claude 를 피드백한다)
+- 월요일: Claude 의 설계서(`docs/design/`) 리뷰. 화~목: 전날 Claude 가 올린 코드 diff 리뷰. 금요일: 이번 주 결과 총평.
+- 형식은 `docs/reviews/README.md` 의 리뷰 템플릿(문제/근거/심각도/제안). 지적 3개 이상 또는 확인한 항목 나열. 맞장구 금지, 코드를 직접 고치지 않는다.
+- `docs/reviews/inbox/claude/<날짜>-gemini-on-claude.md` 로 작성해 로컬 커밋한다. Claude 가 수용/거절 판단을 `*-feedback-response.md` 로 돌려준다.
+
 ## 작업 후
 - `content/` 와 `docs/reviews/inbox/claude/` 만 수정한다. 코드(`src/`, `prisma/`, `scripts/`)는 수정 금지.
 - **로컬 커밋까지만** 한다. 너는 push 할 수 없고, Claude 가 리뷰 후 push 한다. "push 완료"라고 쓰지 않는다.
