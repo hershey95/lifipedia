@@ -26,9 +26,12 @@ function normUrl(raw: unknown): string | null {
 }
 
 /** 무게·치수·원단·용량 같은 물리 수치를 뽑는다 (예: "363g", "10d", "2.4oz"). "약" 접두는 기록만 한다. */
-const FIG = /(약\s?)?(\d[\d,]*\.?\d*)\s?(kg|g|oz|lb|cm|mm|wh|mah|lm|°c|°f|시간|hours?|d|l|w|v)(?![a-z])/gi;
-const figureList = (text: string) =>
-  [...text.matchAll(FIG)].map((m) => ({ approx: !!m[1], unit: m[3].toLowerCase(), key: `${m[2].replace(/,/g, '')}${m[3].toLowerCase()}` }));
+const FIG = /(약\s?)?(\d[\d,]*\.?\d*)(?:\s?(kg|g|oz|lb|cm|mm|wh|mah|lm|°c|°f|시간|hours?|루멘|인치|그램|d|l|w|v)(?![a-z])|(원))/gi; // 가격 '원' 은 숫자에 붙은 경우만(예: '1200 원단' 제외)
+const IP_RATING = /\bIP\s?(\d{2})\b/gi; // 방진방수 등급도 근거가 필요한 수치다
+const figureList = (text: string) => [
+  ...[...text.matchAll(FIG)].map((m) => ({ approx: !!m[1], unit: (m[3] ?? m[4]).toLowerCase(), key: `${m[2].replace(/,/g, '')}${(m[3] ?? m[4]).toLowerCase()}` })),
+  ...[...text.matchAll(IP_RATING)].map((m) => ({ approx: false, unit: 'ip', key: `ip${m[1]}` })),
+];
 /** "약 N" 은 실제 단위 환산(oz·lb→g·kg, °F→°C)일 때만 면제한다. 근거 인용에 그 환산 원본 단위가 있어야 한다. */
 const CONVERTS_FROM: Record<string, string[]> = { g: ['oz', 'lb'], kg: ['oz', 'lb'], '°c': ['°f'] };
 /** text 의 물리 수치 중 quoteText 로 뒷받침되지 않는 것 */

@@ -110,4 +110,14 @@ describe('checkContent', () => {
     expect(w('Spark Ultralight Down Sleeping Bag Title')).toHaveLength(1);
     expect(w('Packed weight: 12.8 oz total')).toHaveLength(0);
   });
+
+  it('한글 단위(루멘)와 IP 등급도 근거가 필요하다', () => {
+    const d = { description: '가'.repeat(250) + ' 최대 밝기 800루멘, IP54 방진방수를 지원합니다.', sources: item().sources };
+    const msg = run([item({ ...d, evidence: [{ claim: '제품명', source: 1, quote: 'Claymore 3Face mini lantern page' }] })])
+      .filter((i) => i.level === 'warn').map((i) => i.msg).join();
+    expect(msg).toContain('800루멘');
+    expect(msg).toContain('ip54');
+    const ok = run([item({ ...d, evidence: [{ claim: '밝기', source: 1, quote: '최대 밝기 800루멘 / IP54 방진방수 지원' }] })]);
+    expect(ok.filter((i) => i.level === 'warn' && i.msg.includes('수치'))).toEqual([]);
+  });
 });
