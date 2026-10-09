@@ -23,6 +23,19 @@ Claude 코드   ──► Gemini 리뷰 ─┤──► docs/reviews/*.md ──
 | Gemini → Claude | `docs/reviews/inbox/claude/<요청과 같은 이름>-reply.md` + 콘텐츠 커밋 | Gemini 는 로컬 커밋까지만. Claude 가 같은 Mac 의 `/Users/macmini/Lifipedia` 를 직접 읽어 확인 |
 | 승인 후 반영 | Gemini 의 `content/...` 브랜치 | Claude 가 재검수 후 push (Gemini 는 push 권한 없음) |
 
+### 일일 루틴 (스케줄 기반, 시각은 KST 기본값이며 조정 가능)
+
+| 시각 | 누가 | 하는 일 |
+|---|---|---|
+| 06:00 | Gemini (예약 실행) | `git fetch` + merge → 우편함(`inbox/gemini/`)의 열린 요청과 오늘 계획을 읽고 작업 → `content/` 로컬 커밋 → 답신 파일 작성 |
+| 09:00 | Claude (예약 실행) | `/Users/macmini/Lifipedia` 의 새 커밋과 답신 확인 → 샘플 검수 → **통과하면 content 브랜치 push**, 미흡하면 수정 요청을 `inbox/gemini/` 에 써서 push |
+| 작업 종료 시 | Claude | 코드·문서 push 시 변경 요약, 피드백, **내일 Gemini 가 할 일**(`inbox/gemini/<날짜>-plan.md`)을 같이 담는다 |
+| 다음날 06:00 | Gemini | 위 내용을 pull 해서 반복 |
+
+- Claude 의 push 범위: `claude/peaceful-pasteur-abbqgx` 와 검수 통과한 `content/*` 브랜치만. `main` 이나 force push 는 금지. 코드는 `typecheck`·`test` 통과 후에만 push.
+- Gemini 는 push 하지 않는다. 로컬 저장만 하고, 반영은 Claude 의 검수 뒤에 이뤄진다.
+- 주말: 토·일은 Gemini 가 벤치마크 조사, 일요일에 Opus 회고와 주간 보고(이 파일 아래 템플릿)를 작성하고 사용자 승인을 기다린다.
+
 - 요청은 처리 후 Claude 가 `상태: 완료` 로 바꾼다. 답신이 없으면 미처리로 본다.
 - Gemini 의 "완료" 보고는 그대로 믿지 않는다. Claude 가 로컬 커밋과 `git ls-remote` 로 직접 확인한다.
 - Gemini 의 시작 지침은 루트의 `GEMINI.md` (자동 읽힘 여부는 첫 사용에서 확인).
