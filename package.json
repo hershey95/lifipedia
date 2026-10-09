@@ -12,7 +12,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "rank:snapshot": "tsx scripts/snapshot.ts",
-    "content:import": "tsx scripts/import-content.ts"
+    "content:import": "tsx scripts/import-content.ts",
+    "content:check": "tsx scripts/check-content.ts"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
