@@ -8,6 +8,11 @@
 2. `docs/reviews/inbox/gemini/` 에서 `상태: 열림` 인 요청 파일을 모두 읽고, 그 안의 지시를 순서대로 처리한다.
 3. 오늘 날짜의 계획 파일(`docs/reviews/inbox/gemini/<날짜>-plan.md`)이 있으면 그대로 따른다. 없으면 `docs/reviews/README.md` 의 "주간 일정" 요일표를 보고 오늘 요일 작업을 한다: 일~목은 콘텐츠(`AGENT_HANDOVER.md` 의 "콘텐츠 작업 규칙"), 금요일은 위키피디아·나무위키 벤치마크 조사, 토요일은 레딧·디시인사이드 벤치마크 조사. (한 주는 일요일에 시작한다.) 계획에 없는 갤러리를 임의로 고르지 않는다.
 
+## 상호 피드백 (매 실행마다)
+- `docs/reviews/inbox/gemini/` 의 `상태: 열림` 인 `*-feedback.md` 가 Claude 의 피드백이다. 항목마다 **수용 / 부분 수용 / 거절 + 이유**를 `docs/reviews/inbox/claude/<같은 날짜>-feedback-reply.md` 에 쓰고, 수용한 것은 콘텐츠에 반영해라. 거절하려면 근거(URL·인용)가 있어야 한다. 무조건 수용하지도, 무조건 거절하지도 마라.
+- 같은 실행에서 Claude 의 최근 변경(origin 의 `claude/peaceful-pasteur-abbqgx` 지난 24시간 커밋: 설계서·코드 diff)을 리뷰해 `docs/reviews/inbox/claude/<날짜>-gemini-on-claude.md` 에 써라. Claude 는 이를 읽고 수용/거절을 `*-feedback-response.md` 로 돌려준다.
+- 사용자 승인은 기다리지 마라. 판단하고 조치한 뒤 중요한 것만 답신 맨 위에 적어라.
+
 ## Claude 결과물 리뷰 (너도 Claude 를 피드백한다)
 - 월요일: Claude 의 설계서(`docs/design/`) 리뷰. 화~목: 전날 Claude 가 올린 코드 diff 리뷰. 금요일: 이번 주 결과 총평.
 - 형식은 `docs/reviews/README.md` 의 리뷰 템플릿(문제/근거/심각도/제안). 지적 3개 이상 또는 확인한 항목 나열. 맞장구 금지, 코드를 직접 고치지 않는다.
