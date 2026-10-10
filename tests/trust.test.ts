@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
-import { badgeFor, trustFromContributions, voteWeightFor } from '@/lib/trust';
+import { badgeFor, badgeProgress, trustFromContributions, voteWeightFor } from '@/lib/trust';
 
 const NOW = new Date('2026-09-17T00:00:00Z');
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
@@ -63,5 +63,23 @@ describe('voteWeightFor', () => {
 
   it('음수 신뢰도는 0으로 막는다', () => {
     expect(voteWeightFor({ trustScore: -10, accountCreatedAt: daysAgo(365), now: NOW })).toBe(0);
+  });
+});
+
+describe('badgeProgress', () => {
+  it('경계값에서 현재 등급과 남은 기여 수를 낸다', () => {
+    expect(badgeProgress(0)).toEqual({ current: 'NEWCOMER', next: 'CONTRIBUTOR', remaining: 5, percent: 0 });
+    expect(badgeProgress(4)).toEqual({ current: 'NEWCOMER', next: 'CONTRIBUTOR', remaining: 1, percent: 80 });
+    expect(badgeProgress(5)).toMatchObject({ current: 'CONTRIBUTOR', next: 'EDITOR', remaining: 20 });
+    expect(badgeProgress(249)).toMatchObject({ current: 'CURATOR', next: 'STEWARD', remaining: 1 });
+  });
+
+  it('최상위 등급은 next 가 없다', () => {
+    expect(badgeProgress(250)).toEqual({ current: 'STEWARD', next: null, remaining: 0, percent: 100 });
+    expect(badgeProgress(1000).next).toBeNull();
+  });
+
+  it('음수는 0 으로 취급한다', () => {
+    expect(badgeProgress(-3).current).toBe('NEWCOMER');
   });
 });

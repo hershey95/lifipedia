@@ -21,6 +21,27 @@ export function badgeFor(contributionCount: number): BadgeLevel {
   return BADGE_THRESHOLDS.find((b) => contributionCount >= b.minContributions)!.level;
 }
 
+/** 다음 뱃지까지 진행도. 최상위 등급이면 next 가 null. */
+export function badgeProgress(contributionCount: number): {
+  current: BadgeLevel;
+  next: BadgeLevel | null;
+  remaining: number;
+  percent: number;
+} {
+  const count = Math.max(0, contributionCount);
+  const i = BADGE_THRESHOLDS.findIndex((b) => count >= b.minContributions);
+  const cur = BADGE_THRESHOLDS[i];
+  const nxt = BADGE_THRESHOLDS[i - 1];
+  if (!nxt) return { current: cur.level, next: null, remaining: 0, percent: 100 };
+  const span = nxt.minContributions - cur.minContributions;
+  return {
+    current: cur.level,
+    next: nxt.level,
+    remaining: nxt.minContributions - count,
+    percent: Math.floor(((count - cur.minContributions) / span) * 100),
+  };
+}
+
 /**
  * 기여 수 → 신뢰 점수. 로그 스케일이라 다작만으로 무한히 오르지 않는다.
  * 기여 0건 = 1.0 (최소치), 상한은 MAX_VOTE_WEIGHT.
