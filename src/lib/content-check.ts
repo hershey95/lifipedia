@@ -39,7 +39,10 @@ function unsupported(text: string, quoteText: string): string[] {
   const q = figureList(quoteText);
   const keys = new Set(q.map((f) => f.key));
   const units = new Set(q.map((f) => f.unit));
-  const miss = figureList(text).filter((f) => !keys.has(f.key) && !(f.approx && (CONVERTS_FROM[f.unit] ?? []).some((u) => units.has(u))));
+  const digits = quoteText.replace(/,/g, '');
+  // 가격은 인용문에 "원" 없이 숫자만 있어도(예: "(193,200+무료배송)") 같은 금액이면 근거로 본다
+  const priceShown = (f: { unit: string; key: string }) => f.unit === '원' && new RegExp(`(?<!\\d)${f.key.slice(0, -1)}(?!\\d)`).test(digits);
+  const miss = figureList(text).filter((f) => !keys.has(f.key) && !priceShown(f) && !(f.approx && (CONVERTS_FROM[f.unit] ?? []).some((u) => units.has(u))));
   return [...new Set(miss.map((f) => f.key))];
 }
 
