@@ -27,7 +27,7 @@
 - 기여 이벤트 로그 테이블, 뱃지 아이콘/이미지, 알림, 투표·댓글을 기여에 넣는 정책 변경, 타인 프로필의 상세 활동 공개.
 
 ## 4. 데이터·API
-- **스키마 변경 없음.** 활동 목록은 `Item(createdById)`, `EditHistory(editorId)`, `Vote(userId)`, `ThemeFollow(userId)` 에서 읽는다.
+- **테이블 추가 없음.** 인덱스만 1개 추가: `EditHistory @@index([editorId, createdAt])` (내 활동 쿼리용, 현재 editorId 인덱스 없음 — 리뷰 답신에서 확인). 활동 목록은 `Item(createdById)`, `EditHistory(editorId)`, `Vote(userId)`, `ThemeFollow(userId)` 에서 읽는다.
 - `PATCH /api/me` `{ name?, bio? }`: `currentUser()` 필수, 정지 사용자(`isSuspended`) 거부, 길이 검증, 공백 trim, HTML 은 렌더 시 React 가 이스케이프하므로 저장은 원문. 응답은 갱신된 `{ name, bio }`.
 - 활동 병합: 두 쿼리를 각각 `take: 30` 으로 가져와 서버에서 `createdAt` 내림차순 병합 후 30건 자르기. **편집 쿼리는 `revision > 1` 만** (문서 생성 시 revision 1 이력이 같이 만들어져 중복되므로). 모든 쿼리에 `item.isRemoved = false`. 쿼리는 서버 세션의 `currentUser().id` 만 사용하고 클라이언트 파라미터는 받지 않는다.
 - `PATCH /api/me` 검증은 zod `z.string().trim().min(1).max(30)` / 소개 `trim().max(200)`. 성공 시 `revalidatePath('/me')`, `revalidatePath('/u/' + id)`.
