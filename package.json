@@ -14,7 +14,7 @@
     "rank:snapshot": "tsx scripts/snapshot.ts",
     "content:import": "tsx scripts/import-content.ts",
     "content:check": "tsx scripts/check-content.ts",
-    "price:naver": "tsx --env-file=.env scripts/naver-price.ts"
+    "price:danawa": "tsx scripts/danawa-price.ts"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
