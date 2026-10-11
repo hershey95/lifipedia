@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
 import { SignInButtons } from '@/components/SignInButtons';
+import { safeCallbackUrl } from '@/lib/me';
 
 export const metadata: Metadata = { title: '로그인', robots: { index: false } };
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const callbackUrl = safeCallbackUrl((await searchParams).callbackUrl);
   const providers = [
     process.env.GITHUB_ID ? ('github' as const) : null,
     process.env.GOOGLE_CLIENT_ID ? ('google' as const) : null,
@@ -22,7 +28,7 @@ export default function SignInPage() {
             GOOGLE_CLIENT_ID 를 설정해 주세요.
           </p>
         ) : (
-          <SignInButtons providers={providers} />
+          <SignInButtons providers={providers} callbackUrl={callbackUrl} />
         )}
       </div>
     </div>

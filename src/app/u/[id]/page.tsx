@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { badgeFor, trustFromContributions } from '@/lib/trust';
 import { TierBadge } from '@/components/TierBadge';
+import { OwnProfileLink } from '@/components/AuthButton';
 import type { Tier } from '@/lib/tier';
 
 export const metadata: Metadata = { title: '프로필', robots: { index: false } };
@@ -40,6 +41,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-extrabold">{user.name ?? '이름 없는 사용자'}</h1>
           <span className="chip bg-accent/10 text-accent">{user.badgeLevel}</span>
+          <OwnProfileLink profileId={user.id} />
         </div>
         {user.bio ? <p className="mt-2 text-sm text-ink/70">{user.bio}</p> : null}
         <p className="mt-2 text-xs text-ink/50">

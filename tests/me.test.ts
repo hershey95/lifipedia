@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeActivity, profileBody, type ActivityEntry } from '@/lib/me';
+import { mergeActivity, profileBody, safeCallbackUrl, type ActivityEntry } from '@/lib/me';
 
 describe('profileBody', () => {
   it('이름 30자는 통과, 31자는 실패', () => {
@@ -65,5 +65,17 @@ describe('mergeActivity', () => {
   it('한쪽이 비어 있어도 동작한다', () => {
     expect(mergeActivity([], [])).toEqual([]);
     expect(mergeActivity([e('a', '2026-10-01T00:00:00Z')], [])).toHaveLength(1);
+  });
+});
+
+describe('safeCallbackUrl', () => {
+  it('내부 경로만 허용한다', () => {
+    expect(safeCallbackUrl('/me')).toBe('/me');
+    expect(safeCallbackUrl('/theme/a?x=1')).toBe('/theme/a?x=1');
+  });
+  it('외부 주소·프로토콜 상대·역슬래시·빈 값은 / 로', () => {
+    for (const bad of [undefined, '', 'https://evil.com', '//evil.com', '/\\evil.com', 'javascript:alert(1)', 'me']) {
+      expect(safeCallbackUrl(bad)).toBe('/');
+    }
   });
 });

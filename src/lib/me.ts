@@ -41,3 +41,9 @@ export function mergeActivity(created: ActivityEntry[], edits: ActivityEntry[], 
     .sort((a, b) => b.at.getTime() - a.at.getTime() || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0))
     .slice(0, limit);
 }
+
+/** 로그인 후 복귀 경로. 같은 사이트 내부 경로만 허용한다(오픈 리다이렉트 방지). */
+export function safeCallbackUrl(raw: string | undefined): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return '/';
+  return raw;
+}
