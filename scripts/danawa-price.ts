@@ -7,6 +7,8 @@ export {};
  * 가격은 조회 시점 값이다. 콘텐츠에는 queriedAt 날짜를 accessedAt 으로 남긴다.
  */
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124 Safari/537.36';
+const decode = (t: string) =>
+  t.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 const get = async (url: string) => {
   const r = await fetch(url, { headers: { 'User-Agent': UA } });
   if (!r.ok) throw new Error(`${url} → HTTP ${r.status}`);
@@ -41,7 +43,17 @@ async function main() {
     process.exit(2);
   }
   if (args.every((a) => /^\d+$/.test(a))) {
-    console.log(JSON.stringify(await Promise.all(args.map(priceOf)), null, 2));
+    // 한 pcode 실패가 나머지를 지우지 않도록 순차 처리 + 실패는 FETCH_ERROR 로 기록 (과도한 동시 요청 방지)
+    const out = [];
+    for (const pcode of args) {
+      try {
+        out.push(await priceOf(pcode));
+      } catch (e) {
+        out.push({ pcode, status: 'FETCH_ERROR', error: (e as Error).message });
+      }
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    console.log(JSON.stringify(out, null, 2));
     return;
   }
   const html = await get(`https://search.danawa.com/dsearch.php?query=${encodeURIComponent(args.join(' '))}`);
@@ -49,7 +61,7 @@ async function main() {
   for (const m of html.matchAll(/<p class="prod_name">\s*<a[^>]*href="[^"]*pcode=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/g)) {
     if (seen.has(m[1]) || seen.size >= 8) continue;
     seen.add(m[1]);
-    console.log(`${m[1]}  ${m[2].replace(/<[^>]+>|\s+/g, ' ').trim()}`);
+    console.log(`${m[1]}  ${decode(m[2].replace(/<[^>]+>|\s+/g, ' ').trim())}`);
   }
 }
 if (process.argv[1]?.endsWith('danawa-price.ts')) main();

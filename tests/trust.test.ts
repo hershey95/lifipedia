@@ -82,4 +82,10 @@ describe('badgeProgress', () => {
   it('음수는 0 으로 취급한다', () => {
     expect(badgeProgress(-3).current).toBe('NEWCOMER');
   });
+
+  it('NaN·소수 입력에도 터지지 않는다', () => {
+    expect(badgeProgress(NaN).current).toBe('NEWCOMER');
+    expect(badgeProgress(4.9).remaining).toBe(1);
+    expect(badgeFor(NaN)).toBe('NEWCOMER');
+  });
 });

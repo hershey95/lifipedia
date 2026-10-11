@@ -17,8 +17,11 @@ export const BADGE_THRESHOLDS: { level: BadgeLevel; minContributions: number }[]
   { level: 'NEWCOMER', minContributions: 0 },
 ];
 
+const clampCount = (n: number) => (Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
+
 export function badgeFor(contributionCount: number): BadgeLevel {
-  return BADGE_THRESHOLDS.find((b) => contributionCount >= b.minContributions)!.level;
+  const count = clampCount(contributionCount);
+  return BADGE_THRESHOLDS.find((b) => count >= b.minContributions)!.level;
 }
 
 /** 다음 뱃지까지 진행도. 최상위 등급이면 next 가 null. */
@@ -28,7 +31,7 @@ export function badgeProgress(contributionCount: number): {
   remaining: number;
   percent: number;
 } {
-  const count = Math.max(0, contributionCount);
+  const count = clampCount(contributionCount);
   const i = BADGE_THRESHOLDS.findIndex((b) => count >= b.minContributions);
   const cur = BADGE_THRESHOLDS[i];
   const nxt = BADGE_THRESHOLDS[i - 1];
