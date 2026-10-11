@@ -13,7 +13,7 @@ const query = z.object({
 export async function GET(request: Request) {
   try {
     const { q, take } = query.parse(Object.fromEntries(new URL(request.url).searchParams));
-    const contains = { contains: q, mode: 'insensitive' as const };
+    const contains = { contains: q };
 
     const [themes, items] = await Promise.all([
       prisma.theme.findMany({

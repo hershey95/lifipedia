@@ -15,7 +15,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     return <p className="card text-sm text-ink/60">검색어를 입력해 주세요.</p>;
   }
 
-  const contains = { contains: query, mode: 'insensitive' as const };
+  const contains = { contains: query };
   const [themes, items] = await Promise.all([
     prisma.theme.findMany({
       where: { OR: [{ name: contains }, { description: contains }] },
