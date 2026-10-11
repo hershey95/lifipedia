@@ -32,3 +32,9 @@ export async function countSince(
 ): Promise<number> {
   return model.count({ where: { ...where, createdAt: { gte: new Date(Date.now() - seconds * 1000) } } });
 }
+
+/** 사용자가 입력하는 외부 링크(구매 링크·이미지)는 http(s) 만 허용한다. javascript:/data:/file: 차단. */
+export const httpUrl = z
+  .string()
+  .url()
+  .refine((u) => /^https?:\/\//i.test(u), 'http(s) 주소만 쓸 수 있습니다.');

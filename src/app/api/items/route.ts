@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
-import { ok, fail, handleError } from '@/lib/api';
+import { ok, fail, handleError, httpUrl } from '@/lib/api';
 import { uniqueSlug } from '@/lib/slug';
 import { validateTierAgainstPeers } from '@/lib/tier';
 import { canContribute } from '@/lib/theme-lifecycle';
@@ -10,7 +10,7 @@ import { bumpContribution } from '@/lib/contribution';
 
 export const dynamic = 'force-dynamic';
 
-const purchaseLink = z.object({ label: z.string().trim().min(1).max(40), url: z.string().url() });
+const purchaseLink = z.object({ label: z.string().trim().min(1).max(40), url: httpUrl });
 
 const createBody = z.object({
   themeSlug: z.string().trim().min(1),
@@ -20,7 +20,7 @@ const createBody = z.object({
   description: z.string().trim().min(10).max(20_000),
   specSummary: z.string().trim().max(5_000).optional(),
   recommendReason: z.string().trim().max(5_000).optional(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: httpUrl.optional(),
   purchaseLinks: z.array(purchaseLink).max(8).default([]),
   /** 가격대 검증 경고를 유저가 확인하고 그대로 진행할 때 true */
   confirmTier: z.boolean().default(false),
