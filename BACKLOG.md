@@ -1,4 +1,5 @@
 # BACKLOG (Claude 관리, 토요일 격차 분석으로 갱신)
+> 4주 통합 로드맵: `docs/design/ROADMAP.md` (W43~W46). 아래는 로드맵 밖 항목.
 ## 기능
 - [W42 진행] 마이페이지 `/me` + Karma 진행도 — `docs/design/2026-W42-mypage-karma.md`
 - 기여 이벤트 로그(`ContributionEvent`): 문서 삭제·롤백 후에도 기여 이력 보존 (Gemini D2 제안)
