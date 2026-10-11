@@ -6,7 +6,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 export function AuthButton() {
   const { data: session, status } = useSession();
 
-  if (status === 'loading') return <span className="text-sm text-ink/40">…</span>;
+  if (status === 'loading') return <span className="text-sm text-slate-400">…</span>;
 
   if (!session?.user) {
     return (
@@ -18,8 +18,8 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link href="/me" className="text-sm no-underline">
-        <span className="hidden sm:inline">{session.user.name ?? '내 프로필'}</span>
+      <Link href="/me" className="text-sm no-underline" aria-label="마이페이지">
+        <span className="hidden max-w-[10rem] truncate sm:inline-block sm:align-bottom">{session.user.name ?? '내 프로필'}</span>
         <span className="sm:hidden">마이</span>
       </Link>
       <button type="button" className="btn-ghost" onClick={() => signOut()}>

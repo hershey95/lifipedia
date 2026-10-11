@@ -44,7 +44,7 @@ export default async function MePage() {
       where: { userId: id, item: { isRemoved: false } },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 30,
-      select: { id: true, type: true, weight: true, updatedAt: true, item: itemLink },
+      select: { id: true, type: true, weight: true, createdAt: true, item: itemLink },
     }),
     prisma.themeFollow.findMany({
       where: { userId: id },
@@ -74,14 +74,17 @@ export default async function MePage() {
   return (
     <div className="flex flex-col gap-6">
       {suspended && me.suspendedUntil ? (
-        <section role="status" className="card border border-red-500/40 text-sm">
-          계정이 {fmt(me.suspendedUntil)}까지 제재 중입니다. 사유: {me.suspensionReason ?? '기재되지 않음'}
+        <section
+          role="status"
+          className="card border-red-500/60 bg-red-500/10 text-sm text-red-200 hover:border-red-500/60 hover:bg-red-500/10"
+        >
+          <strong>제재 중</strong> · 계정이 {fmt(me.suspendedUntil)}까지 제재 중입니다. 사유: {me.suspensionReason ?? '기재되지 않음'}
         </section>
       ) : null}
 
       <header className="card">
         <h1 className="text-2xl font-extrabold">{me.name ?? '이름 없는 사용자'}</h1>
-        <p className="mt-1 text-sm text-ink/60">
+        <p className="mt-1 text-sm text-slate-400">
           가입 {fmt(me.createdAt)} · <Link href={`/u/${id}`}>공개 프로필 보기</Link>
         </p>
       </header>
@@ -105,7 +108,7 @@ export default async function MePage() {
               aria-valuemax={100}
               aria-valuenow={progress.percent}
               aria-label={`다음 뱃지까지 ${progress.percent}%`}
-              className="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/10"
+              className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10"
             >
               <div className="h-full bg-accent" style={{ width: `${progress.percent}%` }} />
             </div>
@@ -126,7 +129,7 @@ export default async function MePage() {
           )}{' '}
           <Link href="/how-ranking-works">산정 방식</Link>
         </p>
-        <p className="mt-2 text-xs text-ink/50">기여는 문서 작성·편집으로만 쌓입니다. 투표·댓글은 기여가 아닙니다.</p>
+        <p className="mt-2 text-xs text-slate-400">기여는 문서 작성·편집으로만 쌓입니다. 투표·댓글은 기여가 아닙니다.</p>
       </section>
 
       <section aria-labelledby="profile-h">
@@ -141,7 +144,7 @@ export default async function MePage() {
           내 활동
         </h2>
         {activity.length === 0 ? (
-          <p className="card text-sm text-ink/60">
+          <p className="card text-sm text-slate-400">
             아직 기여가 없습니다. 문서를 쓰거나 고치면 기여 1건이 됩니다. <Link href="/themes">갤러리 둘러보기</Link>
           </p>
         ) : (
@@ -151,8 +154,8 @@ export default async function MePage() {
                 <Link href={a.href} className="font-semibold no-underline">
                   {a.kind === 'create' ? '문서 작성' : `편집 r${a.revision}`} · {a.itemName}
                 </Link>
-                <span className="ml-2 text-xs text-ink/50">{fmt(a.at)}</span>
-                {a.summary ? <p className="mt-1 text-xs text-ink/60">{a.summary}</p> : null}
+                <span className="ml-2 text-xs text-slate-400">{fmt(a.at)}</span>
+                {a.summary ? <p className="mt-1 text-xs text-slate-400">{a.summary}</p> : null}
               </li>
             ))}
           </ul>
@@ -161,10 +164,10 @@ export default async function MePage() {
 
       <section aria-labelledby="votes-h">
         <h2 id="votes-h" className="mb-2 text-lg font-bold">
-          내 투표 <span className="text-xs font-normal text-ink/50">(본인만 볼 수 있습니다)</span>
+          내 투표 <span className="text-xs font-normal text-slate-400">(본인만 볼 수 있습니다)</span>
         </h2>
         {votes.length === 0 ? (
-          <p className="card text-sm text-ink/60">아직 투표하지 않았습니다.</p>
+          <p className="card text-sm text-slate-400">아직 투표하지 않았습니다.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {votes.map((v) => (
@@ -173,7 +176,7 @@ export default async function MePage() {
                   {v.item.name}
                 </Link>{' '}
                 · {v.type === 'UP' ? '추천' : '비추천'} · 가중치 {v.weight.toFixed(2)}
-                <span className="ml-2 text-xs text-ink/50">{fmt(v.updatedAt)}</span>
+                <span className="ml-2 text-xs text-slate-400">{fmt(v.createdAt)}</span>
               </li>
             ))}
           </ul>
@@ -185,7 +188,7 @@ export default async function MePage() {
           팔로우한 테마
         </h2>
         {follows.length === 0 ? (
-          <p className="card text-sm text-ink/60">
+          <p className="card text-sm text-slate-400">
             팔로우한 테마가 없습니다. <Link href="/themes">갤러리 둘러보기</Link>
           </p>
         ) : (
@@ -195,7 +198,7 @@ export default async function MePage() {
                 <Link href={`/theme/${theme.slug}`} className="font-semibold no-underline">
                   {theme.name}
                 </Link>{' '}
-                <span className="chip bg-black/5">{STATUS_LABEL[theme.status]}</span>
+                <span className="chip bg-white/10 text-slate-300">{STATUS_LABEL[theme.status]}</span>
               </li>
             ))}
           </ul>
