@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const themes = await prisma.theme.findMany({
       where: {
         ...(status ? { status } : {}),
-        ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
+        ...(q ? { name: { contains: q } } : {}),
       },
       orderBy: [{ followerCount: 'desc' }, { createdAt: 'desc' }],
       take,

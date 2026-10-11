@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
-import { badgeFor, badgeProgress, trustFromContributions, voteWeightFor } from '@/lib/trust';
+import { badgeFor, badgeProgress, trustFromContributions, voteWeightBreakdown, voteWeightFor } from '@/lib/trust';
 
 const NOW = new Date('2026-09-17T00:00:00Z');
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
@@ -87,5 +87,33 @@ describe('badgeProgress', () => {
     expect(badgeProgress(NaN).current).toBe('NEWCOMER');
     expect(badgeProgress(4.9).remaining).toBe(1);
     expect(badgeFor(NaN)).toBe('NEWCOMER');
+  });
+});
+
+describe('voteWeightBreakdown', () => {
+  const at = (createdDaysAgo: number) => ({ trustScore: 2, accountCreatedAt: daysAgo(createdDaysAgo), now: NOW });
+  it('가입 직후: 남은 7일, 감쇠 적용', () => {
+    const b = voteWeightBreakdown(at(0));
+    expect(b.daysLeft).toBe(7);
+    expect(b.multiplier).toBe(RANKING_CONSTANTS.NEW_ACCOUNT_MULTIPLIER);
+    expect(b.weight).toBe(0.5);
+  });
+  it('weight 는 항상 voteWeightFor 와 같다', () => {
+    for (const d of [0, 3, 6.5, 7, 30]) {
+      expect(voteWeightBreakdown(at(d)).weight).toBe(voteWeightFor(at(d) as never));
+    }
+  });
+  it('3일: 4일 남음, 6.5일: 1일 남음(올림)', () => {
+    expect(voteWeightBreakdown(at(3)).daysLeft).toBe(4);
+    expect(voteWeightBreakdown(at(6.5)).daysLeft).toBe(1);
+  });
+  it('정확히 7일이면 감쇠 해제', () => {
+    const b = voteWeightBreakdown(at(7));
+    expect(b.penaltyEndsAt).toBeNull();
+    expect(b.daysLeft).toBe(0);
+    expect(b.weight).toBe(2);
+  });
+  it('신뢰도가 상한을 넘어도 상한으로 제한', () => {
+    expect(voteWeightBreakdown({ trustScore: 999, accountCreatedAt: daysAgo(30), now: NOW }).weight).toBe(3);
   });
 });

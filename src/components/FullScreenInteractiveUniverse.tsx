@@ -308,7 +308,7 @@ export function FullScreenInteractiveUniverse({ initialThemes }: FullScreenInter
 
   // 3. requestAnimationFrame 물결 피지컬 (Wave Motion + Cursor Repulsion Physics) Engine Loop
   useEffect(() => {
-    let startTime = performance.now();
+    const startTime = performance.now();
 
     const renderLoop = (time: number) => {
       const elapsed = (time - startTime) / 1000;

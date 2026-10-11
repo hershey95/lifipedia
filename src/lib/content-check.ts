@@ -12,6 +12,7 @@ const BANNED = ['최고', '1위', '압도', '완벽', '강력 추천', '필수�
 const LIST_URL = /\/(brands|category|categories|list|search)(\/|\?|$)|\/c\/[^/]+\/?$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 외부 JSON 을 느슨하게 읽는 검사기
 type Json = Record<string, any>;
 
 function normUrl(raw: unknown): string | null {
@@ -83,13 +84,13 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
 
     const sources: Json[] = Array.isArray(it.sources) ? it.sources : [];
     if (sources.length < 2) add('error', `출처가 ${sources.length}개입니다 (2개 이상 필요)`, tag);
-    const use = (map: Map<string, Set<string>>, url: string) => map.set(url, (map.get(url) ?? new Set()).add(tag));
+    const track = (map: Map<string, Set<string>>, url: string) => map.set(url, (map.get(url) ?? new Set()).add(tag));
     for (const s of sources) {
       const u = normUrl(s?.url);
       if (!u) add('error', `출처 URL 이 올바르지 않습니다: ${s?.url}`, tag);
       else {
         if (LIST_URL.test(u)) add('error', `출처가 상품 상세가 아닌 목록/브랜드 페이지입니다: ${u}`, tag);
-        use(urlUsers, u);
+        track(urlUsers, u);
       }
       if (!DATE.test(String(s?.accessedAt))) add('error', `출처에 확인일(YYYY-MM-DD)이 없습니다: ${s?.url}`, tag);
     }
@@ -122,8 +123,8 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
       if (!u) add('error', `purchaseLinks URL 이 올바르지 않습니다: ${p?.url}`, tag);
       else {
         if (LIST_URL.test(u)) add('error', `구매링크가 상품 상세가 아닌 목록/브랜드 페이지입니다: ${u}`, tag);
-        use(urlUsers, u);
-        use(buyUsers, u);
+        track(urlUsers, u);
+        track(buyUsers, u);
       }
     }
   }
@@ -132,7 +133,7 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
     if (who.size > 1) add('error', `서로 다른 제품이 같은 구매링크를 씁니다: ${u} ← ${[...who].join(' / ')}`);
   }
   for (const [u, who] of urlUsers) {
-    if (who.size > 1 && !(buyUsers.get(u)?.size! > 1)) {
+    if (who.size > 1 && (buyUsers.get(u)?.size ?? 0) <= 1) {
       add('warn', `여러 제품이 같은 URL 을 출처로 씁니다(제품이 맞는지 확인): ${u} ← ${[...who].join(' / ')}`);
     }
   }

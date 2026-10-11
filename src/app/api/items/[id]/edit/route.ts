@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
-import { ok, fail, handleError, countSince } from '@/lib/api';
+import { ok, fail, handleError, countSince, httpUrl } from '@/lib/api';
 import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { bumpContribution } from '@/lib/contribution';
@@ -19,8 +19,8 @@ const body = z.object({
   description: z.string().trim().min(10).max(20_000),
   specSummary: z.string().trim().max(5_000).nullable().optional(),
   recommendReason: z.string().trim().max(5_000).nullable().optional(),
-  imageUrl: z.string().url().nullable().optional(),
-  purchaseLinks: z.array(z.object({ label: z.string().trim().min(1).max(40), url: z.string().url() })).max(8),
+  imageUrl: httpUrl.nullable().optional(),
+  purchaseLinks: z.array(z.object({ label: z.string().trim().min(1).max(40), url: httpUrl })).max(8),
 });
 
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {

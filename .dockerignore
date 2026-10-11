@@ -10,3 +10,6 @@ coverage
 tests
 README.md
 DEPLOY_NAS.md
+*.db
+*.db-journal
+prisma/dev.db
