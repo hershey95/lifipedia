@@ -13,6 +13,19 @@ describe('profileBody', () => {
   it('제어 문자가 든 이름은 실패', () => {
     expect(profileBody.safeParse({ name: 'a\nb' }).success).toBe(false);
   });
+  it('보이지 않는 문자·방향 제어 문자만/섞인 이름은 실패', () => {
+    expect(profileBody.safeParse({ name: '\u200B\u200B' }).success).toBe(false);
+    expect(profileBody.safeParse({ name: '관리자\u202E' }).success).toBe(false);
+    expect(profileBody.safeParse({ name: '\u2028' }).success).toBe(false);
+  });
+  it('ZWJ 이모지 조합 이름은 허용', () => {
+    expect(profileBody.safeParse({ name: '👨‍👩‍👧 가족' }).success).toBe(true);
+  });
+  it('소개: 줄바꿈·탭 허용, NUL·방향 제어 문자 거부', () => {
+    expect(profileBody.safeParse({ bio: '첫 줄\n둘째\t줄' }).success).toBe(true);
+    expect(profileBody.safeParse({ bio: 'a\u0000b' }).success).toBe(false);
+    expect(profileBody.safeParse({ bio: 'x\u202Ey' }).success).toBe(false);
+  });
   it('소개 200자 통과, 201자 실패, 빈 소개는 통과', () => {
     expect(profileBody.safeParse({ bio: 'a'.repeat(200) }).success).toBe(true);
     expect(profileBody.safeParse({ bio: 'a'.repeat(201) }).success).toBe(false);
