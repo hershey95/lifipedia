@@ -70,3 +70,25 @@ export function voteWeightFor(params: {
     ageDays < RANKING_CONSTANTS.NEW_ACCOUNT_DAYS ? RANKING_CONSTANTS.NEW_ACCOUNT_MULTIPLIER : 1;
   return Number((base * multiplier).toFixed(4));
 }
+
+/**
+ * 화면 표시용 투표 가중치 분해. weight 는 반드시 voteWeightFor 로 얻는다(중복 계산 금지).
+ * 신뢰도는 저장된 trustScore 를 넣는다 — 투표 라우트가 쓰는 값과 같아야 화면과 실제가 일치한다.
+ */
+export function voteWeightBreakdown(params: { trustScore: number; accountCreatedAt: Date; now?: Date }): {
+  weight: number;
+  multiplier: number;
+  penaltyEndsAt: Date | null;
+  daysLeft: number;
+} {
+  const now = params.now ?? new Date();
+  const weight = voteWeightFor({ ...params, now });
+  const endsAt = new Date(params.accountCreatedAt.getTime() + RANKING_CONSTANTS.NEW_ACCOUNT_DAYS * 86_400_000);
+  const penalized = now.getTime() < endsAt.getTime();
+  return {
+    weight,
+    multiplier: penalized ? RANKING_CONSTANTS.NEW_ACCOUNT_MULTIPLIER : 1,
+    penaltyEndsAt: penalized ? endsAt : null,
+    daysLeft: penalized ? Math.ceil((endsAt.getTime() - now.getTime()) / 86_400_000) : 0,
+  };
+}
