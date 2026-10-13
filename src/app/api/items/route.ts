@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
-import { ok, fail, handleError, httpUrl } from '@/lib/api';
+import { ok, fail, handleError, httpUrl, countSince } from '@/lib/api';
+import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { uniqueSlug } from '@/lib/slug';
 import { validateTierAgainstPeers } from '@/lib/tier';
 import { canContribute } from '@/lib/theme-lifecycle';
@@ -31,6 +32,10 @@ export async function POST(request: Request) {
     const user = await currentUser();
     if (!user) return fail(401, '로그인이 필요합니다.');
     if (isSuspended(user)) return fail(403, '제재 중인 계정입니다.');
+
+    const recentCreates = await countSince(prisma.item, { createdById: user.id }, 86_400);
+    const rate = checkRate(recentCreates, ABUSE_LIMITS.ITEMS_PER_DAY, 86_400);
+    if (!rate.allowed) return fail(429, rate.reason!);
 
     const body = createBody.parse(await request.json());
 

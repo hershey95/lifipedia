@@ -7,6 +7,12 @@ export const ABUSE_LIMITS = {
   VOTES_PER_HOUR: 40,
   /** 시간당 위키 편집 상한 */
   EDITS_PER_HOUR: 20,
+  /** 하루 문서 생성 상한 — 쓰레기 문서로 기여(신뢰도)를 쌓는 것을 막는다 */
+  ITEMS_PER_DAY: 10,
+  /** 시간당 토론 댓글 상한 */
+  COMMENTS_PER_HOUR: 20,
+  /** 하루 신고 상한 */
+  REPORTS_PER_DAY: 20,
   /** 시간당 테마 제안 상한 */
   THEME_PROPOSALS_PER_DAY: 3,
   /**
