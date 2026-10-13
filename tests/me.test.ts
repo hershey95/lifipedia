@@ -68,6 +68,15 @@ describe('mergeActivity', () => {
   });
 });
 
+describe('profileBody 오류 메시지', () => {
+  it('한글 메시지를 낸다', () => {
+    const r = profileBody.safeParse({ name: '   ' });
+    expect(r.success).toBe(false);
+    expect(JSON.stringify(r.error?.issues)).toContain('이름은 1자 이상');
+    expect(JSON.stringify(profileBody.safeParse({ name: '가'.repeat(31) }).error?.issues)).toContain('30자까지');
+  });
+});
+
 describe('safeCallbackUrl', () => {
   it('내부 경로만 허용한다', () => {
     expect(safeCallbackUrl('/me')).toBe('/me');

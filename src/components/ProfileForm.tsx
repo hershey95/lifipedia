@@ -35,6 +35,11 @@ export function ProfileForm({
         body: JSON.stringify({ name, bio }),
       });
       if (res.ok) {
+        const saved = await res.json().catch(() => null);
+        if (saved) {
+          setName(saved.name ?? '');
+          setBio(saved.bio ?? '');
+        }
         setMessage('저장했습니다.');
         setFailed(false);
         router.refresh();
