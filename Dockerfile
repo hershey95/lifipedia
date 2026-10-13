@@ -17,8 +17,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG DATABASE_URL="postgresql://placeholder:placeholder@placeholder:5432/placeholder"
-ENV DATABASE_URL=${DATABASE_URL}
+# 빌드 단계에서는 prisma generate 와 next build 만 하므로 임시 경로면 충분하다(실제 DB 는 런타임 볼륨).
+ENV DATABASE_URL="file:/tmp/build.db"
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npx prisma generate
@@ -42,6 +42,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 
+# SQLite 데이터 디렉터리. compose 의 named volume 이 여기에 붙고, migrate 가 소유권을 1001 로 맞춘다.
+RUN mkdir -p /data && chown nextjs:nodejs /data
 USER nextjs
 EXPOSE 3000
 

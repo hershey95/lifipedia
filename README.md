@@ -19,7 +19,7 @@
 ## 기술 스택
 
 - **프론트/백엔드**: Next.js 15 (App Router) + TypeScript, Tailwind CSS
-- **DB**: PostgreSQL + Prisma ORM (편집 이력/투표 등 관계형 데이터에 적합)
+- **DB**: SQLite + Prisma ORM (운영·개발 모두 SQLite 단일 파일. 규모가 커지면 PostgreSQL 이전을 재검토)
 - **인증**: NextAuth (GitHub/Google OAuth, DB 세션)
 - **테스트**: Vitest (순수 로직 유닛 테스트 69개)
 - **배포**: Vercel 기준 `vercel.json`에 Cron 3개 정의 (월간/연간 스냅샷, 생애주기 정리)
@@ -87,7 +87,7 @@ npm run dev
 ### 옵션 A — NAS / 셀프호스팅 (Docker)
 
 시놀로지 Container Manager, QNAP Container Station 등 Docker를 지원하는 NAS에서
-`docker compose up -d --build` 한 줄로 앱 + PostgreSQL을 통째로 띄울 수 있습니다.
+`docker compose up -d --build` 한 줄로 앱을 통째로 띄울 수 있습니다(DB는 SQLite 파일, Docker 볼륨에 보관).
 자세한 절차는 **[DEPLOY_NAS.md](./DEPLOY_NAS.md)** 참고. `Dockerfile`은 멀티스테이지
 빌드로 `next.config.mjs`의 `output: 'standalone'`을 활용해 최종 이미지를 가볍게 만듭니다.
 
@@ -97,7 +97,7 @@ npm run dev
   `?periodType=YEARLY`, `/api/cron/lifecycle`). 각 엔드포인트는 `CRON_SECRET` 환경변수로
   보호되며 `Authorization: Bearer <CRON_SECRET>` 헤더 또는 Vercel Cron의 기본 호출(GET)로
   인증됩니다.
-- DB는 Neon, Supabase 등 서버리스 PostgreSQL을 권장합니다.
+- Vercel 은 파일 시스템이 영구적이지 않아 SQLite 를 쓸 수 없다. 이 옵션을 쓰려면 DB 를 서버리스 DB(예: Turso/libSQL 또는 PostgreSQL)로 바꾸는 별도 작업이 필요하다. 현재 운영 기준은 옵션 A(NAS, SQLite)다.
 
 ### 공통 설정
 

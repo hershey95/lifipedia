@@ -9,7 +9,7 @@
 - **Git Branch**: `claude/peaceful-pasteur-abbqgx` (기본 작업 브랜치)
 - **Git Remote**: `https://github.com/hershey95/lifipedia.git`
 - **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Prisma ORM, Vitest (69 tests), NextAuth
-- **DB Mode**: SQLite (로컬 개발용 `dev.db`), PostgreSQL (시놀로지 NAS / 프로덕션 배포용)
+- **DB Mode**: SQLite (로컬 `prisma/dev.db`, NAS 운영은 Docker 볼륨 `/data/lifipedia.db`). PostgreSQL 은 쓰지 않는다(2026-10-12 결정)
 
 ---
 
