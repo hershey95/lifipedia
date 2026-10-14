@@ -130,7 +130,7 @@ export function ThemeExplorer({ initialThemes }: ThemeExplorerProps) {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="chip bg-accent/20 text-accent border-accent/30">🧠 브레인스토밍 탐색기</span>
+            <span className="chip bg-accent/20 text-accent-fg border-accent/30">🧠 브레인스토밍 탐색기</span>
             <span className="text-xs text-slate-400">인기도별 반응형 버블 & 멀티 계층</span>
           </div>
           <h2 className="mt-2 text-2xl font-black text-white tracking-tight sm:text-3xl">
@@ -274,7 +274,7 @@ export function ThemeExplorer({ initialThemes }: ThemeExplorerProps) {
                 </div>
 
                 {/* 테마 제목 */}
-                <h3 className="font-extrabold text-white group-hover:text-accent transition-colors">
+                <h3 className="font-extrabold text-white group-hover:text-accent-fg transition-colors">
                   {node.name}
                 </h3>
 
@@ -291,7 +291,7 @@ export function ThemeExplorer({ initialThemes }: ThemeExplorerProps) {
 
                   <div className="flex items-center gap-1.5">
                     {hasSub && !searchQuery ? (
-                      <span className="text-accent font-bold group-hover:translate-x-0.5 transition-transform">
+                      <span className="text-accent-fg font-bold group-hover:translate-x-0.5 transition-transform">
                         파고들기 ➔
                       </span>
                     ) : (
@@ -326,7 +326,7 @@ export function ThemeExplorer({ initialThemes }: ThemeExplorerProps) {
       {currentParentNode && (
         <div className="mt-4 rounded-xl border border-white/10 bg-accent/10 p-4 flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-accent">현재 탐색 중인 테마</span>
+            <span className="text-xs font-bold text-accent-fg">현재 탐색 중인 테마</span>
             <p className="text-sm font-bold text-white">{currentParentNode.name}</p>
           </div>
           <Link
@@ -388,7 +388,7 @@ function TreeItemKey({
               className="rounded-xl border border-white/10 bg-black/30 p-2.5 cursor-pointer hover:border-accent/50 transition-all group"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-200 group-hover:text-accent">
+                <span className="text-xs font-bold text-slate-200 group-hover:text-accent-fg">
                   {sub.name}
                 </span>
                 <span className="text-[10px] text-slate-500">👥 {sub.followerCount}</span>

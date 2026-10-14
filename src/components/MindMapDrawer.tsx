@@ -35,7 +35,7 @@ export function MindMapDrawer({ node, onClose }: MindMapDrawerProps) {
         <div className="space-y-6">
           {/* 헤더 버튼 & 노드 구조 표시 */}
           <div className="flex items-center justify-between">
-            <span className="chip bg-accent/20 text-accent border-accent/40 text-xs">
+            <span className="chip bg-accent/20 text-accent-fg border-accent/40 text-xs">
               {node.type === 'ROOT' && '🌐 메인 노드'}
               {node.type === 'CATEGORY' && '📂 대분류 테마'}
               {node.type === 'THEME' && '💡 세분화 테마'}
@@ -74,7 +74,7 @@ export function MindMapDrawer({ node, onClose }: MindMapDrawerProps) {
             {node.subThemesCount !== undefined && node.subThemesCount > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">🌿 하위 브랜치 테마</span>
-                <span className="font-bold text-accent">{node.subThemesCount}개</span>
+                <span className="font-bold text-accent-fg">{node.subThemesCount}개</span>
               </div>
             )}
 

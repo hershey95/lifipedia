@@ -73,7 +73,7 @@ export function MarkdownEditor({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <label className="text-sm font-bold text-slate-200 flex items-center gap-1.5">
           <span>{label}</span>
-          {required && <span className="text-accent">*</span>}
+          {required && <span className="text-accent-fg">*</span>}
         </label>
 
         {/* 탭 토글 & 템플릿 버튼 */}
@@ -193,7 +193,7 @@ export function MarkdownEditor({
         </div>
       ) : (
         <div className="card bg-[#070b14]/90 border-accent/40 p-5 min-h-48 space-y-2 overflow-y-auto">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2 text-xs text-accent font-bold">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 text-xs text-accent-fg font-bold">
             <span>👁️ 실시간 위키피디아 렌더링 미리보기</span>
             <span className="text-[10px] text-slate-400">[[교차링크]] 마우스 호버 시 팝업 카드 동작</span>
           </div>

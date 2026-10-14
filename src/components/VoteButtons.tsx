@@ -53,7 +53,7 @@ export function VoteButtons({ itemId, initialUp, initialDown, initialMyVote, dis
       <div className="flex gap-2">
         <button
           type="button"
-          className={`${base} ${myVote === 'UP' ? 'border-accent text-accent' : ''}`}
+          className={`${base} ${myVote === 'UP' ? 'border-accent text-accent-fg' : ''}`}
           onClick={() => cast('UP')}
           disabled={disabled || pending}
           aria-pressed={myVote === 'UP'}
