@@ -46,6 +46,54 @@
     @apply whitespace-pre-wrap text-[15px] leading-7 text-slate-300;
   }
 
+  /* 서버 마크다운 렌더 (WikiMarkdown) */
+  .wiki-md {
+    @apply text-[15px] leading-7 text-slate-300;
+  }
+  .wiki-md > * + * {
+    @apply mt-3;
+  }
+  .wiki-md h2 {
+    @apply mt-6 border-b border-white/10 pb-1 text-lg font-bold text-slate-100 scroll-mt-20;
+  }
+  .wiki-md h3 {
+    @apply mt-4 text-base font-semibold text-slate-100 scroll-mt-20;
+  }
+  .wiki-md a {
+    @apply underline underline-offset-4 decoration-1;
+  }
+  .wiki-md ul {
+    @apply list-disc pl-5;
+  }
+  .wiki-md ol {
+    @apply list-decimal pl-5;
+  }
+  .wiki-md blockquote {
+    @apply border-l-2 border-white/20 pl-3 text-slate-400;
+  }
+  .wiki-md code {
+    @apply rounded bg-white/10 px-1 py-0.5 text-[13px];
+  }
+  .wiki-md pre {
+    @apply overflow-x-auto rounded-lg bg-black/40 p-3;
+  }
+  .wiki-md pre code {
+    @apply bg-transparent p-0;
+  }
+  .wiki-md-table {
+    @apply overflow-x-auto;
+  }
+  .wiki-md table {
+    @apply w-full border-collapse text-sm;
+  }
+  .wiki-md th,
+  .wiki-md td {
+    @apply border border-white/10 px-2 py-1 text-left align-top;
+  }
+  .wiki-md th {
+    @apply bg-white/[0.06] text-slate-100;
+  }
+
   /* Interactive Brainstorming Node Explorer */
   .glass-panel {
     @apply rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.02] backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-indigo-950/40;

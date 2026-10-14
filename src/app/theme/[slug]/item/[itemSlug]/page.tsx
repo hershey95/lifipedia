@@ -10,6 +10,8 @@ import { TierBadge } from '@/components/TierBadge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { AdSlot } from '@/components/AdSlot';
 import { ReportButton } from '@/components/ReportButton';
+import { WikiMarkdown } from '@/components/WikiMarkdown';
+import { extractToc } from '@/lib/markdown';
 
 type Params = { params: Promise<{ slug: string; itemSlug: string }> };
 
@@ -50,6 +52,7 @@ export default async function ItemPage({ params }: Params) {
   const me = await currentUser();
   const myVote = me ? item.votes.find((vote) => vote.userId === me.id) : undefined;
   const breakdown = computeScore(item.votes as ScoredVote[]);
+  const toc = extractToc(item.description);
   const links = (item.purchaseLinks as { label: string; url: string }[] | null) ?? [];
 
   return (
@@ -106,19 +109,32 @@ export default async function ItemPage({ params }: Params) {
             </div>
           ) : null}
 
+          {toc.length >= 3 ? (
+            <nav aria-label="목차" className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm">
+              <p className="mb-2 font-semibold text-slate-200">목차</p>
+              <ol className="flex flex-col gap-1">
+                {toc.map((t) => (
+                  <li key={t.id} className={t.depth === 3 ? 'pl-4' : ''}>
+                    <a href={`#${t.id}`}>{t.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          ) : null}
+
           <Section title="설명">
-            <p className="prose-wiki">{item.description}</p>
+            <WikiMarkdown source={item.description} />
           </Section>
 
           {item.recommendReason ? (
             <Section title="추천 이유">
-              <p className="prose-wiki">{item.recommendReason}</p>
+              <WikiMarkdown source={item.recommendReason} />
             </Section>
           ) : null}
 
           {item.specSummary ? (
             <Section title="스펙 요약">
-              <p className="prose-wiki">{item.specSummary}</p>
+              <WikiMarkdown source={item.specSummary} />
             </Section>
           ) : null}
 
