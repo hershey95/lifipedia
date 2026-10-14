@@ -28,7 +28,10 @@ export async function recordEdit(
   const creditedTodayOnItem = await tx.contributionEvent.count({
     where: { userId: p.userId, itemId: p.itemId, kind: 'EDIT', credited: true, voidedAt: null, createdAt: { gte: dayStart } },
   });
-  const decision = judgeEdit({ ...p, creditedTodayOnItem });
+  const creditedToday = await tx.contributionEvent.count({
+    where: { userId: p.userId, credited: true, voidedAt: null, createdAt: { gte: dayStart } },
+  });
+  const decision = judgeEdit({ ...p, creditedTodayOnItem, creditedToday });
   await tx.contributionEvent.create({
     data: { userId: p.userId, kind: 'EDIT', itemId: p.itemId, editId: p.editId, credited: decision.credited, reason: decision.reason },
   });
@@ -38,25 +41,41 @@ export async function recordEdit(
 
 /**
  * 리비전 `toRevision` 으로 되돌리면, 그 이후 ~ 되돌리기 직전까지의 편집이 취소된 것이다.
- * 해당 편집으로 받은 기여를 무효화하고 영향받은 사용자의 신뢰도를 다시 계산한다.
- * ponytail: 되돌리기를 다시 되돌려도 무효화는 복원하지 않는다. 필요해지면 voidedByEditId 로 복원.
+ * 해당 편집으로 받은 기여를 무효화한다. 반대로 이번 되돌리기가 이전 되돌리기의 구간을 다시 덮으면
+ * (되돌리기를 되돌림) 그 되돌리기가 무효화했던 기여를 복원한다. 영향받은 사용자는 신뢰도를 다시 계산한다.
  */
 export async function voidRevertedContributions(
   tx: Prisma.TransactionClient,
   p: { itemId: string; toRevision: number; revertRevision: number; revertEditId: string },
 ) {
-  const reverted = await tx.editHistory.findMany({
+  const range = await tx.editHistory.findMany({
     where: { itemId: p.itemId, revision: { gt: p.toRevision, lt: p.revertRevision } },
     select: { id: true },
   });
-  const events = await tx.contributionEvent.findMany({
-    where: { editId: { in: reverted.map((r) => r.id) }, credited: true, voidedAt: null },
+  const ids = range.map((r) => r.id);
+  const affected = new Set<string>();
+
+  // 복원: 범위 안의 되돌리기 편집이 무효화했던 이벤트
+  const restore = await tx.contributionEvent.findMany({
+    where: { voidedByEditId: { in: ids }, voidedAt: { not: null } },
     select: { id: true, userId: true },
   });
-  if (events.length === 0) return;
-  await tx.contributionEvent.updateMany({
-    where: { id: { in: events.map((e) => e.id) } },
-    data: { voidedAt: new Date(), voidedByEditId: p.revertEditId },
+  if (restore.length) {
+    await tx.contributionEvent.updateMany({ where: { id: { in: restore.map((e) => e.id) } }, data: { voidedAt: null, voidedByEditId: null } });
+    restore.forEach((e) => affected.add(e.userId));
+  }
+
+  // 무효화: 범위 안의, 아직 유효한 적립 이벤트 (복원된 것은 제외하려고 복원 뒤에 조회)
+  const events = await tx.contributionEvent.findMany({
+    where: { editId: { in: ids }, credited: true, voidedAt: null },
+    select: { id: true, userId: true },
   });
-  for (const userId of new Set(events.map((e) => e.userId))) await recomputeTrust(tx, userId);
+  if (events.length) {
+    await tx.contributionEvent.updateMany({
+      where: { id: { in: events.map((e) => e.id) } },
+      data: { voidedAt: new Date(), voidedByEditId: p.revertEditId },
+    });
+    events.forEach((e) => affected.add(e.userId));
+  }
+  for (const userId of affected) await recomputeTrust(tx, userId);
 }

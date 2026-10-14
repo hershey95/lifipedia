@@ -5,6 +5,7 @@ import { ok, fail, handleError, countSince } from '@/lib/api';
 import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { recordEdit, voidRevertedContributions } from '@/lib/contribution';
+import { CONTRIBUTION_RULES, REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
 import { buildDiff, changedFields, diffDelta, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +24,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     if (!user) return fail(401, '로그인이 필요합니다.');
     if (isSuspended(user)) return fail(403, '제재 중인 계정입니다.');
 
+    if (user.contributionCount < CONTRIBUTION_RULES.MIN_CONTRIBUTIONS_TO_REVERT) {
+      return fail(403, `되돌리기는 기여 ${CONTRIBUTION_RULES.MIN_CONTRIBUTIONS_TO_REVERT}건 이상부터 할 수 있습니다.`);
+    }
+
     const recentEdits = await countSince(prisma.editHistory, { editorId: user.id }, 3_600);
     const rate = checkRate(recentEdits, ABUSE_LIMITS.EDITS_PER_HOUR, 3_600);
     if (!rate.allowed) return fail(429, rate.reason!);
@@ -39,6 +44,9 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       return fail(409, '그 사이 문서가 바뀌었습니다. 최신 문서를 확인하고 다시 시도해 주세요.', { currentRevision: item.revision });
     }
     if (payload.toRevision >= item.revision) return fail(400, '현재보다 이전 리비전으로만 되돌릴 수 있습니다.');
+    if (item.revision - payload.toRevision > REVERT_LOOKBACK_REVISIONS) {
+      return fail(400, `최근 ${REVERT_LOOKBACK_REVISIONS}개 리비전 안으로만 되돌릴 수 있습니다.`);
+    }
 
     const target = await prisma.editHistory.findUnique({
       where: { itemId_revision: { itemId, revision: payload.toRevision } },
@@ -55,10 +63,11 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     const diff = buildDiff(current, restored, item.revision, nextRevision);
 
     await prisma.$transaction(async (tx) => {
-      await tx.item.update({
-        where: { id: itemId },
+      const { count } = await tx.item.updateMany({
+        where: { id: itemId, revision: item.revision },
         data: { ...(restored as unknown as Record<string, never>), revision: nextRevision },
       });
+      if (count === 0) throw Object.assign(new Error('revision race'), { code: 'P2002' });
       const history = await tx.editHistory.create({
         data: {
           itemId,

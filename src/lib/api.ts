@@ -13,6 +13,9 @@ export function handleError(error: unknown) {
   if (error instanceof z.ZodError) {
     return fail(400, '입력값이 올바르지 않습니다.', { issues: (error as z.ZodError).issues });
   }
+  if ((error as { code?: string })?.code === 'P2002') {
+    return fail(409, '동시에 같은 변경이 발생했습니다. 새로고침 후 다시 시도해 주세요.');
+  }
   console.error(error);
   return fail(500, '서버 오류가 발생했습니다.');
 }

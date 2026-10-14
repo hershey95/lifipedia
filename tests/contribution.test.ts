@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { judgeEdit } from '@/lib/contribution-rules';
 import { diffDelta, snapshotHash, toSnapshot } from '@/lib/wiki';
 
-const base = { revertOfRevision: null, changedFields: ['description'], deltaChars: 50, creditedTodayOnItem: 0 };
+const base = { revertOfRevision: null, changedFields: ['description'], deltaChars: 50, creditedTodayOnItem: 0, creditedToday: 0 };
 
 describe('judgeEdit', () => {
   it('충분한 변경은 적립', () => expect(judgeEdit(base)).toEqual({ credited: true, reason: null }));
@@ -13,6 +13,13 @@ describe('judgeEdit', () => {
   it('같은 문서 하루 3번째는 미적립', () => {
     expect(judgeEdit({ ...base, creditedTodayOnItem: 1 }).credited).toBe(true);
     expect(judgeEdit({ ...base, creditedTodayOnItem: 2 }).reason).toBe('DAILY_ITEM_CAP');
+  });
+});
+
+describe('전체 일일 상한', () => {
+  it('하루 8건째까지 적립, 이후 미적립', () => {
+    expect(judgeEdit({ ...base, creditedToday: 7 }).credited).toBe(true);
+    expect(judgeEdit({ ...base, creditedToday: 8 }).reason).toBe('DAILY_CAP');
   });
 });
 

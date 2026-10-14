@@ -4,12 +4,16 @@ export const CONTRIBUTION_RULES = {
   MIN_EDIT_DELTA_CHARS: 20,
   /** 같은 문서에 사용자 한 명이 하루에 적립받을 수 있는 편집 수 */
   MAX_CREDITED_EDITS_PER_ITEM_PER_DAY: 2,
+  /** 사용자 한 명의 하루 전체 적립 상한 (다계정·문서 돌려막기 파밍 완화) */
+  MAX_CREDITED_PER_DAY: 8,
+  /** 되돌리기로 타인의 기여를 무효화할 수 있는 최소 기여 수 (신규 계정 괴롭힘 방지) */
+  MIN_CONTRIBUTIONS_TO_REVERT: 5,
 } as const;
 
 /** 크기와 무관하게 의미 있는 변경으로 치는 필드 */
 const SUBSTANTIVE = new Set(['tier', 'priceKrw', 'purchaseLinks', 'name']);
 
-export type CreditReason = 'REVERT' | 'TOO_SMALL' | 'DAILY_ITEM_CAP';
+export type CreditReason = 'REVERT' | 'TOO_SMALL' | 'DAILY_ITEM_CAP' | 'DAILY_CAP';
 export type CreditDecision = { credited: true; reason: null } | { credited: false; reason: CreditReason };
 
 export function judgeEdit(input: {
@@ -17,11 +21,13 @@ export function judgeEdit(input: {
   changedFields: string[];
   deltaChars: number;
   creditedTodayOnItem: number;
+  creditedToday: number;
 }): CreditDecision {
   if (input.revertOfRevision != null) return { credited: false, reason: 'REVERT' };
   const substantive = input.changedFields.some((f) => SUBSTANTIVE.has(f));
   if (!substantive && input.deltaChars < CONTRIBUTION_RULES.MIN_EDIT_DELTA_CHARS) return { credited: false, reason: 'TOO_SMALL' };
   if (input.creditedTodayOnItem >= CONTRIBUTION_RULES.MAX_CREDITED_EDITS_PER_ITEM_PER_DAY) return { credited: false, reason: 'DAILY_ITEM_CAP' };
+  if (input.creditedToday >= CONTRIBUTION_RULES.MAX_CREDITED_PER_DAY) return { credited: false, reason: 'DAILY_CAP' };
   return { credited: true, reason: null };
 }
 
