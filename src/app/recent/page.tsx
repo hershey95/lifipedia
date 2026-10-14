@@ -47,14 +47,16 @@ export default async function RecentPage({ searchParams }: { searchParams: Promi
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-slate-100">최근 변경</h1>
       {page.length === 0 ? (
-        <p className="text-sm text-slate-400">아직 변경 내역이 없습니다.</p>
+        <p className="text-sm text-slate-400">
+          아직 변경 내역이 없습니다. <Link href="/">테마 둘러보기</Link>
+        </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
+        <ul aria-label="최근 변경 목록" className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
           {page.map((r) => {
             const kind = changeKind(r.revision, r.revertOfRevision);
             const ev = byEdit.get(r.id);
             return (
-              <li key={r.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3 text-sm">
+              <li key={r.id} className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 break-words px-4 py-3 text-sm">
                 <time className="w-28 shrink-0 text-xs text-slate-400" dateTime={r.createdAt.toISOString()}>
                   {fmt(r.createdAt)}
                 </time>
@@ -65,6 +67,7 @@ export default async function RecentPage({ searchParams }: { searchParams: Promi
                 <Link
                   href={`/theme/${r.item.theme.slug}/item/${r.item.slug}/history`}
                   className="text-xs text-slate-400"
+                  aria-label={`리비전 ${r.revision} 이력`}
                 >
                   r{r.revision}
                 </Link>
@@ -73,11 +76,11 @@ export default async function RecentPage({ searchParams }: { searchParams: Promi
                     {r.editor.name ?? '익명'}
                   </Link>
                 ) : (
-                  <span className="text-slate-500">탈퇴한 사용자</span>
+                  <span className="text-slate-400">탈퇴한 사용자</span>
                 )}
-                {r.summary ? <span className="text-slate-400">— {r.summary}</span> : null}
+                {r.summary ? <span className="text-slate-400 [overflow-wrap:anywhere]">— {r.summary}</span> : null}
                 {ev && (!ev.credited || ev.voidedAt) ? (
-                  <span className="text-xs text-slate-500">{ev.voidedAt ? '기여 무효' : '기여 미적립'}</span>
+                  <span className="text-xs text-slate-400">{ev.voidedAt ? '기여 무효' : '기여 미적립'}</span>
                 ) : null}
               </li>
             );

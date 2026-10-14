@@ -53,11 +53,11 @@
   .wiki-md > * + * {
     @apply mt-3;
   }
-  .wiki-md h2 {
-    @apply mt-6 border-b border-white/10 pb-1 text-lg font-bold text-slate-100 scroll-mt-20;
-  }
   .wiki-md h3 {
-    @apply mt-4 text-base font-semibold text-slate-100 scroll-mt-20;
+    @apply mt-6 border-b border-white/10 pb-1 text-base font-bold text-slate-100 scroll-mt-20;
+  }
+  .wiki-md h4 {
+    @apply mt-4 text-[15px] font-semibold text-slate-100 scroll-mt-20;
   }
   .wiki-md a {
     @apply underline underline-offset-4 decoration-1;

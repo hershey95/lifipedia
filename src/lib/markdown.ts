@@ -25,7 +25,7 @@ export function extractToc(md: string): TocEntry[] {
     if (fenced) continue;
     const m = /^(#{2,3})\s+(.+?)\s*#*\s*$/.exec(line);
     if (!m) continue;
-    const text = m[2].trim();
+    const text = m[2].replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_`~]/g, '').trim();
     out.push({ id: headingId(text, seen), text, depth: m[1].length as 2 | 3 });
   }
   return out;

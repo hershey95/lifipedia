@@ -57,7 +57,7 @@ export default async function ItemPage({ params }: Params) {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="text-sm text-ink/50">
+      <nav aria-label="경로" className="text-sm text-ink/60">
         <Link href="/themes">테마</Link> / <Link href={`/theme/${item.theme.slug}`}>{item.theme.name}</Link> /{' '}
         <Link href={`/theme/${item.theme.slug}/${TIER_SLUGS[item.tier]}`}>{TIER_LABELS[item.tier]}</Link>
       </nav>
@@ -104,7 +104,7 @@ export default async function ItemPage({ params }: Params) {
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <article className="flex flex-col gap-6">
           {item.imageUrl ? (
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/5">
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-white/5">
               <Image src={item.imageUrl} alt={item.name} fill className="object-contain" unoptimized />
             </div>
           ) : null}
@@ -128,13 +128,13 @@ export default async function ItemPage({ params }: Params) {
 
           {item.recommendReason ? (
             <Section title="추천 이유">
-              <WikiMarkdown source={item.recommendReason} />
+              <WikiMarkdown source={item.recommendReason} ids={false} />
             </Section>
           ) : null}
 
           {item.specSummary ? (
             <Section title="스펙 요약">
-              <WikiMarkdown source={item.specSummary} />
+              <WikiMarkdown source={item.specSummary} ids={false} />
             </Section>
           ) : null}
 
@@ -154,7 +154,7 @@ export default async function ItemPage({ params }: Params) {
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-ink/45">
+              <p className="mt-2 text-xs text-ink/60">
                 구매는 외부 사이트에서 이루어집니다. Lifipedia 는 결제를 취급하지 않습니다.
               </p>
             </Section>
@@ -175,7 +175,7 @@ export default async function ItemPage({ params }: Params) {
               <Row label="Wilson 하한" value={breakdown.wilsonLowerBound.toFixed(3)} />
               <Row label="참여 보정" value={breakdown.participationFactor.toFixed(3)} />
             </dl>
-            <p className="mt-3 text-xs text-ink/45">
+            <p className="mt-3 text-xs text-ink/60">
               모든 항목은 공개된 동일한 식으로 계산됩니다.{' '}
               <Link href="/how-ranking-works">산정 방식</Link>
             </p>
@@ -191,7 +191,7 @@ export default async function ItemPage({ params }: Params) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 border-b border-black/10 pb-1 text-lg font-bold">{title}</h2>
+      <h2 className="mb-2 border-b border-white/10 pb-1 text-lg font-bold">{title}</h2>
       {children}
     </section>
   );

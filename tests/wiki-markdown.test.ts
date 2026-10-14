@@ -9,7 +9,7 @@ describe('WikiMarkdown', () => {
   it('제목·표·목록을 렌더하고 목차 id 와 일치한다', () => {
     const md = '## 개요\n\n- a\n- b\n\n## 한계\n\n| x | y |\n|---|---|\n| 1 | 2 |\n\n## 한계\n\n끝';
     const out = html(md);
-    expect(out).toContain('<h2 id="개요">');
+    expect(out).toContain('<h3 id="개요">');
     expect(out).toContain('<table>');
     for (const t of extractToc(md)) expect(out).toContain(`id="${t.id}"`);
   });

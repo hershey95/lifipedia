@@ -29,3 +29,9 @@ describe('wikiLinksToMarkdown', () => {
     expect(wikiLinksToMarkdown('```\n[[a]]\n```')).toBe('```\n[[a]]\n```');
   });
 });
+
+describe('extractToc 표시 텍스트', () => {
+  it('굵게·링크 문법 기호를 제거한다', () => {
+    expect(extractToc('## **가격** [기준](http://x)')[0].text).toBe('가격 기준');
+  });
+});
