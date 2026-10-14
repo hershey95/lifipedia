@@ -1,6 +1,7 @@
 /**
  * 위키 편집 — 편집 이력과 동시 편집 충돌 처리.
  */
+import { createHash } from 'node:crypto';
 import { createTwoFilesPatch } from 'diff';
 
 /** 편집 이력에 남기고 되돌릴 수 있는 필드들 */
@@ -85,4 +86,30 @@ export function resolveEdit(params: {
 
   if (theirs.length === 0) return { status: 'clean', merged };
   return { status: 'stale-but-mergeable', merged, alsoChangedByOthers: theirs };
+}
+
+/** 키 순서에 의존하지 않는 정규화 JSON. 같은 내용이면 항상 같은 문자열. */
+export function canonicalJson(snapshot: ItemSnapshot): string {
+  return JSON.stringify(EDITABLE_FIELDS.map((f) => [f, sortKeys(snapshot[f] ?? null)]));
+}
+
+function sortKeys(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(sortKeys);
+  if (v && typeof v === 'object') {
+    return Object.fromEntries(Object.entries(v as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, x]) => [k, sortKeys(x)]));
+  }
+  return v;
+}
+
+export function snapshotHash(snapshot: ItemSnapshot): string {
+  return createHash('sha256').update(canonicalJson(snapshot)).digest('hex');
+}
+
+/** 변경 문자 수(삽입+삭제). 파일 헤더 줄(+++/---)은 제외한다. */
+export function diffDelta(diff: string): number {
+  let n = 0;
+  for (const line of diff.split('\n')) {
+    if ((line.startsWith('+') && !line.startsWith('+++')) || (line.startsWith('-') && !line.startsWith('---'))) n += line.length - 1;
+  }
+  return n;
 }

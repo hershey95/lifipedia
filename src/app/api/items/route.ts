@@ -6,8 +6,8 @@ import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { uniqueSlug } from '@/lib/slug';
 import { validateTierAgainstPeers } from '@/lib/tier';
 import { canContribute } from '@/lib/theme-lifecycle';
-import { toSnapshot, buildDiff } from '@/lib/wiki';
-import { bumpContribution } from '@/lib/contribution';
+import { toSnapshot, buildDiff, snapshotHash } from '@/lib/wiki';
+import { recordCreate } from '@/lib/contribution';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       // 최초 리비전도 이력에 남긴다 (되돌리기 기준점).
       const snapshot = toSnapshot(created as unknown as Record<string, unknown>);
       const empty = toSnapshot({});
-      await tx.editHistory.create({
+      const history = await tx.editHistory.create({
         data: {
           itemId: created.id,
           editorId: user.id,
@@ -92,12 +92,13 @@ export async function POST(request: Request) {
           summary: '문서 생성',
           diff: buildDiff(empty, snapshot, 0, 1),
           snapshot: snapshot as unknown as object,
+          contentHash: snapshotHash(snapshot),
         },
       });
 
       await tx.theme.update({ where: { id: theme.id }, data: { lastActivityAt: new Date() } });
 
-      await bumpContribution(tx, user.id);
+      await recordCreate(tx, { userId: user.id, itemId: created.id, editId: history.id });
 
       return created;
     });

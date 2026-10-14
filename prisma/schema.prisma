@@ -41,13 +41,14 @@ model User {
 
   accounts       Account[]
   sessions       Session[]
-  proposedThemes Theme[]       @relation("ThemeProposer")
+  proposedThemes Theme[]             @relation("ThemeProposer")
   follows        ThemeFollow[]
-  createdItems   Item[]        @relation("ItemCreator")
+  createdItems   Item[]              @relation("ItemCreator")
   edits          EditHistory[]
+  contributions  ContributionEvent[]
   votes          Vote[]
   comments       TalkComment[]
-  reports        Report[]      @relation("Reporter")
+  reports        Report[]            @relation("Reporter")
 
   @@index([trustScore])
 }
@@ -101,11 +102,11 @@ model Theme {
   slug        String      @unique
   name        String
   description String?
-  category    String?     // e.g. "연령대", "주거/독립", "상황/이벤트", "취미/라이프"
+  category    String? // e.g. "연령대", "주거/독립", "상황/이벤트", "취미/라이프"
   status      ThemeStatus @default(PROPOSED)
 
-  parentId String?
-  parent   Theme?  @relation("ThemeHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId  String?
+  parent    Theme?  @relation("ThemeHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   subThemes Theme[] @relation("ThemeHierarchy")
 
   proposerId String?
@@ -201,11 +202,35 @@ model EditHistory {
   diff     String // unified diff
   snapshot Json // 편집 직후의 전체 필드 스냅샷 (되돌리기용)
 
+  contentHash      String? // sha256(정규화된 snapshot). 수동 되돌리기 감지용
+  revertOfRevision Int? // 이 편집이 복원한 리비전 번호 (되돌리기 API 또는 해시 일치)
+
   createdAt DateTime @default(now())
 
   @@unique([itemId, revision])
   @@index([itemId, createdAt])
   @@index([editorId, createdAt])
+  @@index([itemId, contentHash])
+  @@index([createdAt, id])
+}
+
+/// 기여 원장. 신뢰도는 여기서 '적립됐고 무효화되지 않은' 건수로만 계산한다.
+/// itemId 는 FK 없이 문자열로 둔다 — 문서가 삭제돼도 원장은 남는다.
+model ContributionEvent {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind           String // ITEM_CREATE | EDIT
+  itemId         String?
+  editId         String?   @unique // EditHistory.id (멱등 키)
+  credited       Boolean // 적립 규칙 통과 여부. 미적립도 기록해 재현 가능하게
+  reason         String? // 미적립 사유: TOO_SMALL | DAILY_ITEM_CAP | REVERT
+  voidedAt       DateTime?
+  voidedByEditId String? // 이 이벤트를 무효화한 되돌리기 EditHistory.id
+  createdAt      DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([itemId, createdAt])
 }
 
 model TalkComment {
