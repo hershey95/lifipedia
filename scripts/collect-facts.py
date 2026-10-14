@@ -17,7 +17,10 @@ norm = lambda s: re.sub(r"[^0-9a-z가-힣]", "", s.lower().replace("×", "x"))
 def fetch(url):
     if url in cache:
         return cache[url]
-    r = subprocess.run(["curl", "-sL", "-m", "25", "-A", UA, "-w", "\n%{http_code}", url], capture_output=True)
+    # 코스트코 상세 페이지는 JS 로 그리는 SPA 라 정적 HTML 에 상품 텍스트가 없다. 같은 상품의 공개 REST JSON 으로 대신 읽는다.
+    m = re.search(r"costco\.co\.kr/.*?/p/(\d+)", url)
+    fetch_url = f"https://www.costco.co.kr/rest/v2/korea/products/{m.group(1)}?fields=FULL" if m else url
+    r = subprocess.run(["curl", "-sL", "-m", "25", "-A", UA, "-w", "\n%{http_code}", fetch_url], capture_output=True)
     raw = r.stdout.decode("utf-8", "ignore")
     body, _, code = raw.rpartition("\n")
     code = code if r.returncode == 0 else "FAIL"
