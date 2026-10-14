@@ -8,7 +8,7 @@
 
 - **Git Branch**: `claude/peaceful-pasteur-abbqgx` (기본 작업 브랜치)
 - **Git Remote**: `https://github.com/hershey95/lifipedia.git`
-- **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Prisma ORM, Vitest (69 tests), NextAuth
+- **Tech Stack**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Prisma ORM, Vitest (125 tests), NextAuth
 - **DB Mode**: SQLite (로컬 `prisma/dev.db`, NAS 운영은 Docker 볼륨 `/data/lifipedia.db`). PostgreSQL 은 쓰지 않는다(2026-10-12 결정)
 
 ---
@@ -70,8 +70,35 @@ Claude ↔ Gemini 는 서로의 결과물을 `docs/reviews/` 에 리뷰로 남�
 
 ```bash
 npm run typecheck    # TypeScript 타입 검사 (에러 0개 필수)
-npm test             # Vitest 단위 테스트 (69개 전원 통과 필수)
+npm test             # Vitest 단위 테스트 (125개 전원 통과 필수)
 ```
+
+---
+
+## 🤝 Antigravity ↔ Claude 상호 충돌 방지 협업 규칙 (Rules of Engagement, 2026-10-15 제안)
+
+작업물이 서로 꼬이거나 Git 충돌이 발생하는 것을 방지하기 위해 다음 4대 협업 규칙을 준수합니다:
+
+1. **브랜치 분리 및 독립 관리 (Branch Isolation)**
+   - **Claude Code**: 기능/아키텍처 브랜치 (`claude/peaceful-pasteur-abbqgx` 또는 `feat/*`)를 주 무대로 사용 (W43 작업: 서버 마크다운 렌더, `/recent` 피드 등).
+   - **Antigravity (Gemini)**: 콘텐츠/UI 브랜치 (`content/*` 또는 `gemini/*`)를 주 무대로 사용 (콘텐츠 조사, 팩트체크, UI 디테일 개선 등).
+   - **원칙**: 서로의 전용 브랜치에 직접 푸시하지 않고, 최신 커밋을 가져올 때는 상대 브랜치를 `git merge`하여 반영합니다.
+
+2. **작업 선점 및 파일 락 (Task & File Claiming)**
+   - 동일 파일을 동시에 수정하여 발생하는 충돌을 방지하기 위해, 작업 시작 시 본 문서 또는 Orca 터미널 메시지를 통해 대상 파일/범위를 선점 명시합니다.
+   - 선점된 파일은 작업 완료 및 커밋 전까지 상대 에이전트가 수정하지 않습니다.
+
+3. **푸시 전 무결성 게이트 (Pre-Push Quality Gate)**
+   - 모든 커밋 및 푸시 전 아래 3개 검증을 필수로 통과해야 합니다:
+     ```bash
+     npm run typecheck    # TypeScript 타입 검사 (에러 0개)
+     npm test             # Vitest 단위 테스트 (125개 전원 통과)
+     npm run content:check -- content/<파일>.json # 콘텐츠 수정 시 필수
+     ```
+
+4. **소통 및 인수인계 채널 다각화**
+   - **실시간/프롬프트 전달**: Orca CLI 터미널(`orca terminal send`)을 통해 직접 알림 전송.
+   - **영구 기록/리뷰**: `AGENT_HANDOVER.md` 및 `docs/reviews/`를 통해 검토 내역 및 상태 비동기 동기화.
 
 ---
 
@@ -113,4 +140,19 @@ npm test             # Vitest 단위 테스트 (69개 전원 통과 필수)
   - macOS 샌드박스 환경에서는 `tsx` CLI 직접 실행 시 IPC 파이프 바인딩(`listen EPERM`)이 발생하므로, TS 스크립트 실행 시 `node --import tsx <script>` 방식이 안정적으로 작동함.
 - **다음 작업 제안**:
   - 브랜치 `content/2026-10-09-camping-2` 내용 교차 리뷰 후 로컬 DB 반영 (`npm run content:import -- content/camping-2.json`).
+
+### [2026-10-15] Antigravity (Gemini CLI) ➔ Claude Code
+- **주요 환경 및 실행 능력 변화 (핵심)**:
+  - Antigravity가 이제 CLI 환경 및 완전한 권한(`--dangerously-skip-permissions`, `always-proceed`)으로 동작합니다.
+  - 시스템 `osxkeychain` GitHub 인증이 연동되어 **`git push` / `git pull`을 독립적으로 직접 수행**할 수 있게 되었습니다.
+  - 기존의 단방향 소통 제약, 세션 타임아웃, Git 푸시 불가 한계가 모두 해소되어 완전한 동등 협업 에이전트로 동작합니다.
+- **완료 및 동기화된 작업**:
+  - Claude의 최신 W43 작업(`87e0726` 색 브리지, `eec349a` 기여 원장 보안 검토 반영)을 브랜치(`content/2026-10-09-camping-2`)에 병합 완료.
+  - `content/camping-2.json` 팩트체크 및 10-13, 10-14 리뷰 지적사항 반영 완료 (원문 대조, 인용 보강, 스펙 검증).
+  - 테스트 및 무결성 검증: `npm run typecheck` 통과, `npm test` 125개 전원 통과, `npm run content:check` 오류 0/경고 0.
+  - 피드백 답신 문서 2건 정리 완료: `docs/reviews/inbox/claude/2026-10-13-feedback-reply.md`, `2026-10-14-feedback-reply.md`.
+- **협업 및 충돌 방지 룰 제안**:
+  - 위 "Antigravity ↔ Claude 상호 충돌 방지 협업 규칙 (Rules of Engagement)" 섹션을 준수하여 상호 작업 충돌을 예방합니다.
+- **Claude의 다음 예정 작업 지원**:
+  - Claude의 원래 다음 예정 작업인 **서버 마크다운 렌더(목차, 인포박스)** 및 **`/recent` 피드 개발**을 `claude/peaceful-pasteur-abbqgx` 브랜치에서 계속 진행해 주시면, Antigravity는 이에 간섭하지 않고 콘텐츠 조사 및 검증을 담당하겠습니다.
 
