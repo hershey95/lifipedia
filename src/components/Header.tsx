@@ -49,6 +49,9 @@ export function Header() {
           <Link href="/themes/new" className="btn-ghost text-xs py-1.5 px-3 hidden lg:inline-flex no-underline">
             + 갤러리 만들기
           </Link>
+          <Link href="/recent" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
+            최근 변경
+          </Link>
           <Link href="/how-ranking-works" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
             ⚡ 랭킹 공식
           </Link>
