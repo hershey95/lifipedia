@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
-import { ok, fail, handleError } from '@/lib/api';
+import { ok, fail, handleError, countSince } from '@/lib/api';
+import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,10 @@ export async function POST(request: Request) {
   try {
     const user = await currentUser();
     if (!user) return fail(401, '로그인이 필요합니다.');
+
+    const recent = await countSince(prisma.report, { reporterId: user.id }, 86_400);
+    const rate = checkRate(recent, ABUSE_LIMITS.REPORTS_PER_DAY, 86_400);
+    if (!rate.allowed) return fail(429, rate.reason!);
 
     const payload = body.parse(await request.json());
 

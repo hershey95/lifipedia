@@ -70,7 +70,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-purple-950 to-slate-900 p-6 sm:p-10 border border-white/15 shadow-2xl backdrop-blur-xl">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="flex items-center gap-2">
-            <span className="chip bg-accent/20 text-accent border-accent/40 font-bold text-xs">
+            <span className="chip bg-accent/20 text-accent-fg border-accent/40 font-bold text-xs">
               🏛️ r/Lifipedia 집단지성 위키
             </span>
             <span className="chip bg-emerald-500/20 text-emerald-400 border-emerald-400/40 text-[10px]">
@@ -163,13 +163,13 @@ export default async function HomePage() {
                 {gal.category && <span className="chip bg-white/10 text-slate-300 text-[10px]">#{gal.category}</span>}
                 <span className="text-[10px] text-slate-500">👥 {gal.followerCount}</span>
               </div>
-              <h4 className="font-bold text-slate-100 group-hover:text-accent transition-colors text-base">
+              <h4 className="font-bold text-slate-100 group-hover:text-accent-fg transition-colors text-base">
                 {gal.name}
               </h4>
               {gal.description && <p className="text-xs text-slate-400 line-clamp-2">{gal.description}</p>}
               <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
                 <span>📦 위키 {gal._count.items}개</span>
-                <span className="text-accent font-bold group-hover:translate-x-0.5 transition-transform">
+                <span className="text-accent-fg font-bold group-hover:translate-x-0.5 transition-transform">
                   입장 ➔
                 </span>
               </div>
@@ -193,13 +193,13 @@ export default async function HomePage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <TierBadge tier={item.tier} />
-                  <span className="chip bg-accent/20 text-accent font-bold text-[10px]">
+                  <span className="chip bg-accent/20 text-accent-fg font-bold text-[10px]">
                     +{momentum.toFixed(1)} Pts
                   </span>
                 </div>
                 <Link
                   href={`/theme/${item.theme.slug}/item/${item.slug}`}
-                  className="block font-bold text-white hover:text-accent no-underline text-base truncate"
+                  className="block font-bold text-white hover:text-accent-fg no-underline text-base truncate"
                 >
                   {item.name}
                 </Link>
@@ -212,7 +212,7 @@ export default async function HomePage() {
                 <Link href={`/gallery/${item.theme.slug}`} className="no-underline text-slate-400 hover:text-white truncate">
                   r/{item.theme.name}
                 </Link>
-                <Link href={`/theme/${item.theme.slug}/item/${item.slug}`} className="text-accent font-bold no-underline">
+                <Link href={`/theme/${item.theme.slug}/item/${item.slug}`} className="text-accent-fg font-bold no-underline">
                   위키 보기 ➔
                 </Link>
               </div>

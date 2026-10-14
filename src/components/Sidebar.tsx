@@ -39,7 +39,7 @@ export function Sidebar({ groups }: SidebarProps) {
       <div className="card bg-slate-900/80 border-white/10 p-4 space-y-4 shadow-xl backdrop-blur-xl">
         <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <span className="text-xs font-black text-slate-300 tracking-wider">🏛️ 5대 라이프 허브</span>
-          <span className="chip bg-accent/20 text-accent text-[10px]">r/Lifipedia</span>
+          <span className="chip bg-accent/20 text-accent-fg text-[10px]">r/Lifipedia</span>
         </div>
 
         {/* 5대 허브 그룹 아코디언 */}

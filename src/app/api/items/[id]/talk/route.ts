@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
-import { ok, fail, handleError } from '@/lib/api';
+import { ok, fail, handleError, countSince } from '@/lib/api';
+import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     const user = await currentUser();
     if (!user) return fail(401, '로그인이 필요합니다.');
     if (isSuspended(user)) return fail(403, '제재 중인 계정입니다.');
+
+    const recent = await countSince(prisma.talkComment, { authorId: user.id }, 3_600);
+    const rate = checkRate(recent, ABUSE_LIMITS.COMMENTS_PER_HOUR, 3_600);
+    if (!rate.allowed) return fail(429, rate.reason!);
 
     const payload = body.parse(await request.json());
 

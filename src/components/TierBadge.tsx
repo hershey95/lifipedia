@@ -3,7 +3,7 @@ import { TIER_LABELS, type Tier } from '@/lib/tier';
 const STYLES: Record<Tier, string> = {
   BUDGET: 'bg-budget/10 text-budget',
   MID: 'bg-mid/10 text-mid',
-  PREMIUM: 'bg-premium/10 text-premium',
+  PREMIUM: 'bg-premium/10 text-premium-fg',
 };
 
 export function TierBadge({ tier }: { tier: Tier }) {

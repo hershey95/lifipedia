@@ -1,7 +1,8 @@
 # 시놀로지 NAS에서 Lifipedia 실행하기
 
 DSM 7.2 이상이면 **Container Manager** 앱의 "프로젝트" 기능으로 SSH 없이도
-`docker-compose.yml` 하나로 앱 + PostgreSQL을 통째로 띄울 수 있습니다.
+`docker-compose.yml` 하나로 앱을 통째로 띄울 수 있습니다. DB는 SQLite 파일 하나
+(`/data/lifipedia.db`, Docker 볼륨 `data`)입니다.
 (DSM 7.1 이하는 앱스토어에 "Docker" 라는 이름으로 같은 앱이 있습니다 — 화면 구성은
 거의 동일합니다.)
 
@@ -48,7 +49,7 @@ DSM 7.2 이상이면 **Container Manager** 앱의 "프로젝트" 기능으로 SS
 
 빌드가 시작됩니다 (Node.js 빌드 과정이 포함되어 있어 NAS 사양에 따라 5~15분
 정도 걸릴 수 있습니다). **프로젝트 → lifipedia → 컨테이너** 탭에서 `app`,
-`db`, `migrate` 세 컨테이너의 상태를 볼 수 있고, `migrate`는 할 일을 마치면
+`migrate` 두 컨테이너의 상태를 볼 수 있고, `migrate`는 할 일을 마치면
 자동으로 "종료됨" 상태가 되는 게 정상입니다(에러 아님).
 
 ### 4. 접속 확인
@@ -97,13 +98,31 @@ sudo docker compose up -d --build
 ```bash
 sudo docker compose logs -f app          # 앱 로그 보기
 sudo docker compose down                  # 중지 (DB 데이터는 유지됨)
-sudo docker compose down -v               # 중지 + DB 데이터까지 완전 삭제
+sudo docker compose down -v               # 중지 + DB 데이터까지 완전 삭제 (되돌릴 수 없음)
 sudo docker compose up -d --build         # 코드 수정 후 재빌드/재기동
-sudo docker compose exec db psql -U lifipedia   # DB 직접 접속
+sudo docker compose run --rm migrate sh -c "npx prisma studio"   # (선택) DB 둘러보기
 ```
 
 GUI로만 하고 싶다면 Container Manager → 프로젝트 → lifipedia 화면에서
 **중지/시작/재구축(Rebuild)** 버튼으로 대부분 대응됩니다.
+
+---
+
+## 백업과 복구 (SQLite)
+
+데이터는 한 파일이라 복사만 하면 됩니다. 안전하게 하려면 앱을 잠깐 멈추고 복사하세요.
+
+```bash
+cd /volume1/docker/lifipedia
+sudo docker compose stop app
+sudo docker run --rm -v lifipedia_data:/data -v "$PWD":/backup alpine \
+  cp /data/lifipedia.db /backup/lifipedia-$(date +%Y%m%d).db
+sudo docker compose start app
+```
+
+복구는 같은 방식으로 반대로 복사한 뒤 `chown 1001:1001 /data/lifipedia.db` 를 해 주세요.
+작업 스케줄러로 매일 새벽에 위 스크립트를 돌리고, 백업 파일은 NAS 밖 저장소에도 두는 것을 권장합니다.
+`.env` 의 `CRON_SECRET` 은 필수입니다(비어 있으면 앱이 뜨지 않습니다).
 
 ---
 
@@ -157,10 +176,9 @@ NAS 자체에서 실행하는 스크립트이므로 `localhost:3000`으로 충�
   (프로젝트 → lifipedia → 컨테이너 → app → 로그). 대부분 `.env`의
   `NEXTAUTH_SECRET`이 비어 있거나 DB 연결 실패입니다.
 - **`migrate` 컨테이너가 "종료됨(빨간불)"으로 멈춤** → 정상 종료가 아니라
-  에러로 죽은 것입니다. 로그를 보면 대부분 DB 비밀번호 불일치입니다 —
-  `.env`의 `POSTGRES_PASSWORD`를 나중에 바꿨다면, `db` 컨테이너를 최초 생성할
-  때만 비밀번호가 적용되므로 프로젝트를 **정지 → 볼륨 삭제 옵션 체크 → 다시 빌드**
-  해야 합니다.
+  에러로 죽은 것입니다. 로그를 확인하세요. 스키마 변경이 데이터를 지우는 종류이면
+  `prisma db push`가 일부러 멈춥니다(`--accept-data-loss`를 쓰지 않음). 이 경우 아래
+  "백업"을 먼저 해 두고 변경 내용을 확인한 뒤 진행하세요.
 - **File Station에 `.env.docker.example`이 안 보임** → 숨김 파일 표시가 꺼져
   있을 수 있습니다. File Station 우측 상단 톱니바퀴 → 숨김 파일 표시.
 - **NAS가 오래되어 빌드가 너무 느림/멈춤** → Node.js 빌드는 메모리를 꽤 씁니다.

@@ -4,8 +4,9 @@ import { currentUser, isSuspended } from '@/lib/auth';
 import { ok, fail, handleError, countSince, httpUrl } from '@/lib/api';
 import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
-import { bumpContribution } from '@/lib/contribution';
-import { buildDiff, changedFields, resolveEdit, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
+import { recordEdit } from '@/lib/contribution';
+import { buildDiff, changedFields, diffDelta, resolveEdit, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
+import { REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     const rate = checkRate(recentEdits, ABUSE_LIMITS.EDITS_PER_HOUR, 3_600);
     if (!rate.allowed) return fail(429, rate.reason!);
 
-    const payload = body.parse(await request.json());
+    const payload = body.parse(await request.json().catch(() => null));
 
     const item = await prisma.item.findUnique({
       where: { id: itemId },
@@ -71,29 +72,51 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     }
 
     const nextRevision = item.revision + 1;
+    const diff = buildDiff(current, resolution.merged, item.revision, nextRevision);
+    const contentHash = snapshotHash(resolution.merged);
+
+    // 최근 리비전 중 같은 내용이 있으면 '수동 되돌리기'로 보고 미적립 처리한다.
+    // 타인 기여의 무효화는 되돌리기 API 에서만 일어난다 (오탐으로 남의 기여를 깎지 않도록).
+    const lookback = await prisma.editHistory.findFirst({
+      where: { itemId, contentHash, revision: { gte: item.revision - REVERT_LOOKBACK_REVISIONS, lt: item.revision } },
+      orderBy: { revision: 'desc' },
+      select: { revision: true },
+    });
+    const revertOfRevision = lookback?.revision ?? null;
 
     const saved = await prisma.$transaction(async (tx) => {
-      const updated = await tx.item.update({
-        where: { id: itemId },
+      const { count } = await tx.item.updateMany({
+        where: { id: itemId, revision: item.revision },
         data: {
           ...(resolution.merged as unknown as Record<string, never>),
           revision: nextRevision,
         },
       });
+      if (count === 0) throw Object.assign(new Error('revision race'), { code: 'P2002' });
+      const updated = { revision: nextRevision };
 
-      await tx.editHistory.create({
+      const history = await tx.editHistory.create({
         data: {
           itemId,
           editorId: user.id,
           revision: nextRevision,
           summary: payload.summary,
-          diff: buildDiff(current, resolution.merged, item.revision, nextRevision),
+          diff,
           snapshot: resolution.merged as unknown as object,
+          contentHash,
+          revertOfRevision,
         },
       });
 
       await tx.theme.update({ where: { id: item.theme.id }, data: { lastActivityAt: new Date() } });
-      await bumpContribution(tx, user.id);
+      await recordEdit(tx, {
+        userId: user.id,
+        itemId,
+        editId: history.id,
+        revertOfRevision,
+        changedFields: changedFields(current, resolution.merged),
+        deltaChars: diffDelta(diff),
+      });
 
       return updated;
     });

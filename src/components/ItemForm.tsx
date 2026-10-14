@@ -238,7 +238,7 @@ export function ItemForm(props: Props) {
         </label>
       ) : null}
 
-      {notice ? <p className="text-sm text-accent">{notice}</p> : null}
+      {notice ? <p className="text-sm text-accent-fg">{notice}</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       <button type="submit" className="btn-primary self-start" disabled={busy}>

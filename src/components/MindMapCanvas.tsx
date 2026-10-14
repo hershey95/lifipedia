@@ -319,7 +319,7 @@ export function MindMapCanvas({ initialThemes }: MindMapCanvasProps) {
     <div className="relative w-full h-[650px] rounded-3xl overflow-hidden border border-white/15 bg-[#070b14] shadow-2xl select-none">
       {/* 캔버스 상단 컨트롤 바 */}
       <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2 bg-black/40 backdrop-blur-xl p-2 rounded-2xl border border-white/10">
-        <span className="chip bg-accent/20 text-accent border-accent/30 text-xs font-bold px-3">
+        <span className="chip bg-accent/20 text-accent-fg border-accent/30 text-xs font-bold px-3">
           🌌 마인드맵 인터랙티브 캔버스
         </span>
 
@@ -460,7 +460,7 @@ export function MindMapCanvas({ initialThemes }: MindMapCanvasProps) {
                         <p className="text-[10px] text-slate-400">👥 {node.followerCount}명 팔로우</p>
                       )}
                       {node.hasChildren && (
-                        <div className="mt-1.5 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-[10px] text-accent font-bold">
+                        <div className="mt-1.5 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-[10px] text-accent-fg font-bold">
                           <span>{isExpanded ? '접기 ▲' : '가지 펼치기 ▼'}</span>
                         </div>
                       )}

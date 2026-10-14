@@ -39,6 +39,7 @@ export const authOptions: NextAuthOptions = {
 export type ActingUser = {
   id: string;
   trustScore: number;
+  contributionCount: number;
   createdAt: Date;
   suspendedUntil: Date | null;
 };
@@ -51,7 +52,7 @@ export async function currentUser(): Promise<ActingUser | null> {
 
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, trustScore: true, createdAt: true, suspendedUntil: true },
+    select: { id: true, trustScore: true, contributionCount: true, createdAt: true, suspendedUntil: true },
   });
   return user ?? null;
 }

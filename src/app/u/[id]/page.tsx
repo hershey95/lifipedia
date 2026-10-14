@@ -40,7 +40,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
       <header className="card">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-extrabold">{user.name ?? '이름 없는 사용자'}</h1>
-          <span className="chip bg-accent/10 text-accent">{user.badgeLevel}</span>
+          <span className="chip bg-accent/10 text-accent-fg">{user.badgeLevel}</span>
           <OwnProfileLink profileId={user.id} />
         </div>
         {user.bio ? <p className="mt-2 text-sm text-slate-300">{user.bio}</p> : null}

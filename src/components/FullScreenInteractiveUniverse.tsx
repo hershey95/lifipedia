@@ -438,7 +438,7 @@ export function FullScreenInteractiveUniverse({ initialThemes }: FullScreenInter
           >
             🌟 Lifipedia Universe
           </button>
-          <span className="chip bg-accent/20 text-accent border-accent/40 text-xs hidden sm:inline-flex">
+          <span className="chip bg-accent/20 text-accent-fg border-accent/40 text-xs hidden sm:inline-flex">
             🌊 풀뷰포트 물결 피지컬 캔버스
           </span>
         </div>
@@ -619,7 +619,7 @@ export function FullScreenInteractiveUniverse({ initialThemes }: FullScreenInter
                         <p className="text-xs text-slate-400 font-medium">👥 {node.followerCount}명 팔로우</p>
                       )}
                       {node.hasChildren && (
-                        <div className="mt-2 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-xs text-accent font-black">
+                        <div className="mt-2 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-xs text-accent-fg font-black">
                           <span>{isExpanded ? '가지 접기 ▲' : '가지 펼치기 ▼'}</span>
                         </div>
                       )}

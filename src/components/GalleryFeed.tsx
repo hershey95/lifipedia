@@ -80,7 +80,7 @@ export function GalleryFeed({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="chip bg-accent/20 text-accent border-accent/40 font-bold">
+              <span className="chip bg-accent/20 text-accent-fg border-accent/40 font-bold">
                 r/{theme.slug}
               </span>
               {theme.category && (
@@ -257,8 +257,8 @@ export function GalleryFeed({
                       <li key={item.id} className="card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-accent">#{idx + 1}</span>
-                            <Link href={`/theme/${theme.slug}/item/${item.slug}`} className="font-bold text-white group-hover:text-accent no-underline text-base">
+                            <span className="text-xs font-black text-accent-fg">#{idx + 1}</span>
+                            <Link href={`/theme/${theme.slug}/item/${item.slug}`} className="font-bold text-white group-hover:text-accent-fg no-underline text-base">
                               {item.name}
                             </Link>
                             {item.priceKrw && (
@@ -289,7 +289,7 @@ export function GalleryFeed({
         <div className="space-y-4">
           <div className="card p-4 bg-white/5 border-white/10 flex items-center justify-between">
             <span className="text-xs text-slate-300">유저 자유 토론 및 구매 문의 Q&A</span>
-            <span className="chip bg-accent/20 text-accent text-xs">레딧 스타일 소통</span>
+            <span className="chip bg-accent/20 text-accent-fg text-xs">레딧 스타일 소통</span>
           </div>
 
           {comments.length === 0 ? (
@@ -326,7 +326,7 @@ export function GalleryFeed({
               {editHistory.map((hist) => (
                 <li key={hist.id} className="card p-4 space-y-2">
                   <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="font-bold text-accent">Revision #{hist.revision}</span>
+                    <span className="font-bold text-accent-fg">Revision #{hist.revision}</span>
                     <span>{new Date(hist.createdAt).toLocaleString()}</span>
                   </div>
                   {hist.summary && <p className="text-xs text-slate-300">요약: {hist.summary}</p>}

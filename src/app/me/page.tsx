@@ -94,7 +94,7 @@ export default async function MePage() {
           Karma
         </h2>
         <p className="mt-2 text-sm">
-          뱃지 <span className="chip bg-accent/10 text-accent">{progress.current}</span> · 기여{' '}
+          뱃지 <span className="chip bg-accent/10 text-accent-fg">{progress.current}</span> · 기여{' '}
           {me.contributionCount.toLocaleString('ko-KR')}건 · 신뢰도 {me.trustScore.toFixed(2)}
         </p>
         {progress.next ? (

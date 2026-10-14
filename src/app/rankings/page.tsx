@@ -66,7 +66,7 @@ export default async function RankingsPage({
               <Link
                 key={`${p.periodType}-${p.periodKey}`}
                 href={`/rankings?period=${p.periodKey}`}
-                className={`btn-ghost no-underline ${p.periodKey === selected ? 'border-accent text-accent' : ''}`}
+                className={`btn-ghost no-underline ${p.periodKey === selected ? 'border-accent text-accent-fg' : ''}`}
               >
                 {p.periodKey}
                 <span className="ml-1 text-xs text-ink/40">{p.periodType === 'YEARLY' ? '연간' : '월간'}</span>

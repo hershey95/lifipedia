@@ -11,15 +11,15 @@ export const profileBody = z
     name: z
       .string()
       .trim()
-      .min(1)
-      .max(30)
+      .min(1, '이름은 1자 이상이어야 합니다.')
+      .max(30, '이름은 30자까지 입력할 수 있습니다.')
       .refine((s) => !HIDDEN.test(s), '이름에 제어·숨김 문자를 쓸 수 없습니다.')
       .refine((s) => /[\p{L}\p{N}\p{S}\p{P}]/u.test(s), '이름에 보이는 글자가 있어야 합니다.')
       .optional(),
     bio: z
       .string()
       .trim()
-      .max(200)
+      .max(200, '소개는 200자까지 입력할 수 있습니다.')
       .refine((s) => !BIO_HIDDEN.test(s), '소개에 제어·숨김 문자를 쓸 수 없습니다.')
       .optional(),
   })

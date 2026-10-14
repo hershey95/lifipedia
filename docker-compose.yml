@@ -1,53 +1,39 @@
 name: lifipedia
 
+# 운영 DB 는 SQLite 한 파일(/data/lifipedia.db)이다. prisma/schema.prisma 의 provider 와 같다.
+# 데이터는 named volume `data` 에 있으므로 컨테이너를 다시 만들어도 유지된다.
+# 백업: DEPLOY_NAS.md 의 "백업" 절 참고.
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: lifipedia
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lifipedia}
-      POSTGRES_DB: lifipedia
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lifipedia"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    # NAS 밖에서 DB에 직접 붙을 필요가 없다면 이 포트 매핑은 제거해도 된다.
-    ports:
-      - '5432:5432'
-
-  # 스키마를 DB에 반영하는 1회성 작업. app 이 뜨기 전에 자동으로 한 번 실행된다.
+  # 스키마를 DB 에 반영하는 1회성 작업. app 이 뜨기 전에 자동으로 한 번 실행된다.
+  # --accept-data-loss 를 쓰지 않는다: 데이터가 지워지는 스키마 변경이면 실패하고 멈춘다(의도).
   # (prisma CLI 는 builder 스테이지에만 있어 이 서비스만 별도로 그 스테이지를 쓴다.)
   migrate:
     build:
       context: .
       target: builder
     environment:
-      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
-    command: npx prisma db push --skip-generate --accept-data-loss
-    depends_on:
-      db:
-        condition: service_healthy
+      DATABASE_URL: file:/data/lifipedia.db
+    # 앱 컨테이너(uid 1001)가 DB 파일을 쓸 수 있게 소유권을 맞춘다.
+    command: sh -c "npx prisma db push --skip-generate && chown -R 1001:1001 /data"
+    volumes:
+      - data:/data
 
   app:
     build:
       context: .
-      args:
-        DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
+      DATABASE_URL: file:/data/lifipedia.db
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET 를 .env 에 설정해 주세요}
-      CRON_SECRET: ${CRON_SECRET:-change-me}
+      CRON_SECRET: ${CRON_SECRET:?CRON_SECRET 를 .env 에 설정해 주세요 (openssl rand -base64 32)}
       THEME_PROMOTION_THRESHOLD: ${THEME_PROMOTION_THRESHOLD:-20}
       GITHUB_ID: ${GITHUB_ID:-}
       GITHUB_SECRET: ${GITHUB_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    volumes:
+      - data:/data
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -55,17 +41,20 @@ services:
       - '${APP_PORT:-3000}:3000'
 
   # 선택: 샘플 데이터를 넣고 싶을 때만 `docker compose --profile seed run --rm seed`
+  # 주의: seed 는 DB 를 비우고 시뮬레이션 투표를 넣는다. 실제 운영 데이터가 있는 DB 에서는 실행하지 말 것.
   seed:
     build:
       context: .
       target: builder
     profiles: ['seed']
     environment:
-      DATABASE_URL: postgresql://lifipedia:${POSTGRES_PASSWORD:-lifipedia}@db:5432/lifipedia
-    command: npx tsx prisma/seed.ts
+      DATABASE_URL: file:/data/lifipedia.db
+    command: sh -c "npx tsx prisma/seed.ts && chown -R 1001:1001 /data"
+    volumes:
+      - data:/data
     depends_on:
       migrate:
         condition: service_completed_successfully
 
 volumes:
-  db_data:
+  data:

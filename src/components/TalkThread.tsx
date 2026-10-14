@@ -45,7 +45,7 @@ export function TalkThread({ itemId, comments }: { itemId: string; comments: Tal
             {depth < 3 ? (
               <button
                 type="button"
-                className="mt-1 text-xs text-accent"
+                className="mt-1 text-xs text-accent-fg"
                 onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
               >
                 {replyTo === comment.id ? '취소' : '답글'}

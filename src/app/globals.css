@@ -4,6 +4,10 @@
 
 :root {
   --max-width: 72rem;
+  /* RGB 3원소: tailwind 알파 표기(text-ink/60)와 함께 쓰기 위함. 값은 docs/design/ref-design-system.md */
+  --fg: 230 233 239;
+  --accent-fg: 142 162 255;
+  --premium-fg: 213 160 240;
 }
 
 @layer base {
@@ -12,7 +16,7 @@
     word-break: keep-all;
   }
   a {
-    @apply text-accent hover:text-accent/80 transition-colors;
+    @apply text-accent-fg hover:text-accent-fg/80 transition-colors;
   }
 }
 
