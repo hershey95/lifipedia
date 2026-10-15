@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
-import { ok, fail, handleError, countSince } from '@/lib/api';
+import { ok, fail, handleError, countSince, httpUrl } from '@/lib/api';
 import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { recordEdit, voidRevertedContributions } from '@/lib/contribution';
@@ -56,6 +56,12 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
 
     const current = toSnapshot(item as unknown as Record<string, unknown>);
     const restored = toSnapshot(target.snapshot as unknown as ItemSnapshot);
+    // 구 리비전이 느슨한 스키마 시절의 값(javascript: 등)을 담고 있을 수 있어 현재 규칙으로 다시 검증한다.
+    const r = restored as unknown as { imageUrl?: string | null; purchaseLinks?: { url: string }[] | null };
+    const urls = [r.imageUrl, ...(r.purchaseLinks ?? []).map((l) => l.url)].filter((u): u is string => !!u);
+    if (!urls.every((u) => httpUrl.safeParse(u).success)) {
+      return fail(400, '복원할 스냅샷에 허용되지 않는 링크가 있어 되돌릴 수 없습니다. 직접 편집해 주세요.');
+    }
     const fields = changedFields(current, restored);
     if (fields.length === 0) return fail(400, '현재 내용과 같아 되돌릴 것이 없습니다.');
 

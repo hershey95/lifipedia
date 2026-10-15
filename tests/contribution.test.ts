@@ -37,3 +37,12 @@ describe('diffDelta', () => {
     expect(diffDelta('--- a\n+++ b\n@@ -1 +1 @@\n-abc\n+abcdef\n context')).toBe(3 + 6);
   });
 });
+
+describe('httpUrl (되돌리기 스냅샷 재검증에 쓰는 규칙)', () => {
+  it('위험 스킴을 거절한다', async () => {
+    const { httpUrl } = await import('@/lib/api');
+    expect(httpUrl.safeParse('javascript:alert(1)').success).toBe(false);
+    expect(httpUrl.safeParse('data:text/html,x').success).toBe(false);
+    expect(httpUrl.safeParse('https://example.com/a').success).toBe(true);
+  });
+});

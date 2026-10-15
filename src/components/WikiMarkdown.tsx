@@ -1,4 +1,5 @@
 import { isValidElement, type ReactNode } from 'react';
+import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { headingId, wikiLinksToMarkdown } from '@/lib/markdown';
@@ -30,7 +31,7 @@ export function WikiMarkdown({ source, ids = true }: { source: string; ids?: boo
           h3: ({ children }) => <h4 id={ids ? headingId(textOf(children), seen) : undefined}>{children}</h4>,
           a: ({ href, children }) =>
             href?.startsWith('/') ? (
-              <a href={href}>{children}</a>
+              <Link href={href}>{children}</Link>
             ) : (
               <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc">
                 {children} <span aria-hidden>↗</span>
