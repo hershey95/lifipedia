@@ -30,7 +30,7 @@
         {
           "claim": "코스트코 코리아 판매가 73,990원 명시",
           "source": 1,
-          "quote": "헬리녹스 체어원 경량 캠핑 의자  Helinox Chair One Classic Camping Chair         상품 #   693907                      73,990원"
+          "quote": "\"formattedValue\" : \"73,990원\""
         }
       ],
       "purchaseLinks": [
@@ -45,7 +45,7 @@
       "tier": "BUDGET",
       "priceKrw": 99000,
       "specSummary": "크기 191×129cm, 패브릭+PVC 2중 구조, 탈착식 에어펌프·캐리백 포함, 전 차종 호환 표기, 코스트코 판매가 99,000원",
-      "description": "## 개요\n차량 뒷공간(2열~트렁크)에 깔아 평평한 잠자리를 만드는 차박용 에어매트입니다. 에어펌프가 함께 구성되어 있어 별도 펌프를 사지 않아도 됩니다.\n\n## 특징\n- 크기는 191×129cm로 표기됩니다.\n- 표면은 패브릭 소재, 내부는 PVC 2중 구조입니다.\n- 구성품은 매트 본품, 탈착식 에어펌프, 전용 캐리백입니다.\n- 판매 페이지는 앞좌석 폴딩이 되지 않는 경차를 제외한 차종에 쓸 수 있다고 안내합니다.\n\n## 장점\n- 에어펌프가 동봉되어 별도 구매 없이 바로 사용할 수 있습니다.\n\n## 단점\n- 무게는 페이지에 명시되지 않아 확인이 필요합니다.\n- 차종마다 실내 형상이 달라 실제 맞음새는 본인 차량 기준으로 따져봐야 합니다.\n\n## 이런 분께\n처음 차박을 시작하며 잠자리 단차 문제를 저렴하게 해결하고 싶은 분께 맞습니다.\n\n가격 기준: 코스트코 코리아(99,000원), 2026-10-09",
+      "description": "## 개요\n차량 뒷공간(2열~트렁크)에 깔아 평평한 잠자리를 만드는 차박용 에어매트입니다. 에어펌프가 함께 구성되어 있어 별도 펌프를 사지 않아도 됩니다.\n\n## 특징\n- 크기는 191×129cm로 표기됩니다.\n- 표면은 패브릭 소재, 내부는 PVC 2중 구조입니다.\n- 구성품은 매트 본품, 탈착식 에어펌프, 전용 캐리백입니다.\n- 판매 페이지는 앞좌석 폴딩이 되지 않는 경차를 제외한 차종에 쓸 수 있다고 안내합니다.\n\n## 장점\n- 에어펌프가 동봉되어 별도 구매 없이 바로 사용할 수 있습니다.\n\n## 단점\n- 무게는 페이지에 명시되지 않아 확인이 필요합니다.\n- 차종마다 실내 형상이 달라 실제 맞음새는 본인 차량 기준으로 따져봐야 합니다.\n\n## 이런 분께\n처음 차박을 시작하며 잠자리 단차 문제를 저렴하게 해결하고 싶은 분께 맞습니다.\n\n가격 기준: 코스트코 코리아(기본가 99,000원, 한시 쿠폰가 89,000원 ~10/18, 조회 시점 온라인 품절), 2026-10-15",
       "recommendReason": "코스트코 코리아 판매 페이지에서 크기 191x129cm와 99,000원 가격이 확인되는 입문용 매트입니다.",
       "sources": [
         {
@@ -66,9 +66,14 @@
           "quote": "크기 : 191 x 129cm"
         },
         {
-          "claim": "코스트코 판매가 99,000원 명시",
+          "claim": "코스트코 판매가 기본가 99,000원 명시",
           "source": 1,
-          "quote": "681376 판매금액 99,000원 배송"
+          "quote": "\"formattedValue\" : \"99,000원\""
+        },
+        {
+          "claim": "코스트코 한시 할인가 89,000원 명시",
+          "source": 1,
+          "quote": "\"formattedValue\" : \"89,000원\""
         }
       ],
       "purchaseLinks": [
@@ -101,7 +106,7 @@
         {
           "claim": "패키지 8.5kg 및 탱크 5.3kg 무게 명시",
           "source": 1,
-          "quote": "크기  패키지: W 32 x L 26 x H 56cm, 8.5kg  코돌이 탱크: 지름 28 x H 31 cm, 5.3kg"
+          "quote": "패키지: W 32 x L 26 x H 56cm, 8.5kg  코돌이 탱크: 지름 28 x H 31 cm, 5.3kg"
         },
         {
           "claim": "3kg 가스통 용량 명시",
@@ -111,7 +116,7 @@
         {
           "claim": "코스트코 판매가 129,900원 명시",
           "source": 1,
-          "quote": "코도리 가스 버너 세트  Kodori Gas Burner Set         상품 #   680109                      129,900원"
+          "quote": "\"formattedValue\" : \"129,900원\""
         }
       ],
       "purchaseLinks": [
@@ -142,9 +147,14 @@
       ],
       "evidence": [
         {
-          "claim": "256Wh 용량 및 코스트코 판매가 299,900원 명시",
+          "claim": "코스트코 판매가 299,900원 명시",
           "source": 1,
-          "quote": "Ecoflow 리버 2 캠핑용 파워뱅크(256Wh)  Ecoflow River 2 Power Bank 256Wh         상품 #   666393                      299,900원"
+          "quote": "\"formattedValue\" : \"299,900원\""
+        },
+        {
+          "claim": "256Wh 용량 명시",
+          "source": 1,
+          "quote": "Ecoflow 리버 2 캠핑용 파워뱅크(256Wh)"
         },
         {
           "claim": "최대 600W 출력 명시",
@@ -169,7 +179,7 @@
       "sources": [
         {
           "title": "코스트코 코리아 - 에코플로우 델타2 맥스 파워뱅크 2048Wh",
-          "url": "https://www.costco.co.kr/p/682243",
+          "url": "https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-Equipment/Ecoflow-Delta-2-Max-Power-Bank-2048Wh/p/682243",
           "accessedAt": "2026-10-09"
         },
         {
@@ -180,20 +190,25 @@
       ],
       "evidence": [
         {
-          "claim": "2048Wh 용량 및 판매가 2,249,000원 명시",
+          "claim": "코스트코 판매가 2,249,000원 명시",
           "source": 1,
-          "quote": "에코플로우 델타2 맥스 파워뱅크 2048Wh  EcoFlow DELTA 2 Max Power Bank 2048Wh         상품 #   682243                      2,249,000원"
+          "quote": "\"formattedValue\" : \"2,249,000원\""
+        },
+        {
+          "claim": "2048Wh 용량 명시",
+          "source": 1,
+          "quote": "에코플로우 델타2 맥스 파워뱅크 2048Wh"
         },
         {
           "claim": "무게 23kg 명시",
           "source": 1,
-          "quote": "무게 : 약 23kg     제조자/수입자  Ecoflow / 동남종합상사 주식회사     제조국 또는 원산지  중국     취급 방법 및 취급 시 주의사항  강한 충격에 주의하세요."
+          "quote": "사이즈 : L 497 x W 242 x H 305mm  \\n무게 : 약 23kg"
         }
       ],
       "purchaseLinks": [
         {
           "label": "코스트코 코리아",
-          "url": "https://www.costco.co.kr/p/682243"
+          "url": "https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-Equipment/Ecoflow-Delta-2-Max-Power-Bank-2048Wh/p/682243"
         }
       ]
     },
@@ -220,7 +235,7 @@
         {
           "claim": "코스트코 판매가 1,449,990원 명시",
           "source": 1,
-          "quote": "잭커리 휴대용 파워뱅크 1000 Plus + 솔라패널 세트  Jackery Power Bank 1000 Plus + Solar Panel Set         상품 #   684187                      1,449,990원"
+          "quote": "\"formattedValue\" : \"1,449,990원\""
         }
       ],
       "purchaseLinks": [
