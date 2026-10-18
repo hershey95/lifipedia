@@ -10,11 +10,13 @@
 - [x] 6 /recent (8f94f61)
 
 ## W44 (10/19~10/25)
-- [ ] 1 문서 보호 수준 `src/lib/protection.ts`
-- [ ] 2 주시목록 + 분류 `Theme.category` 화면
-- [ ] 3 갤러리 통합 `/theme/[slug]` (+ 문서 인포박스)
-- [ ] 4 디자인 토큰 이행 1단계 + 라이트 테마
-- [ ] 5 버그 3건 (FollowButton, 투표 트랜잭션, 신고 중복)
+설계서: `docs/design/2026-W44-protection-gallery.md` (8.1 요일표 순서로 집는다. 번호는 ROADMAP 과 같다)
+- [ ] 5 버그 3건 — 월: `/gallery` 308 리다이렉트로 FollowButton 해결, 투표 트랜잭션 + 버튼 busy, 몰림 신고 `USER` 1건 (설계 7절)
+- [ ] 4a 토큰 정의(CSS 변수 다크·라이트, tailwind 매핑, body) — 월 (6.1)
+- [ ] 1 문서 보호 수준 `protection.ts` + edit/revert 403 + 화면 — 화 (3절)
+- [ ] 2 분류 `/themes?category=` — 화, 주시목록 `/recent?scope=following` — 수 (4절)
+- [ ] 3 갤러리 통합 `/theme/[slug]?tab=` + 문서 인포박스 — 수 (5절)
+- [ ] 4b·4c `ink`·팔레트 치환, 라이트 토글(가드 통과 시에만 노출), 가드 테스트 — 목 (6.2~6.4)
 
 ## W45 / W46
 ROADMAP.md 의 표를 따른다. 해당 주가 되면 이 파일에 옮겨 적는다.
