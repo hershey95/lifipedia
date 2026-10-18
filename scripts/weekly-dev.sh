@@ -42,7 +42,7 @@ perl -e 'alarm shift; exec @ARGV' 10800 claude -p "$COMMON $TASK" \
     "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(ls:*)" "Bash(curl:*)" "Bash(python3 scripts/collect-facts.py:*)" \
   --disallowedTools "Bash(git push:*)" "Bash(git reset:*)" "Bash(git checkout:*)" "Bash(rm:*)" "Edit(scripts/**)" "Write(scripts/**)" "Edit(prisma/*.db)" "Edit(.env*)" >> "$LOG" 2>&1
 log "claude exit=$?"
-rm -f "/tmp/lifipedia-dev-$DATE.db"
+rm -f "/tmp/lifipedia-dev-$DATE.db"; unset DATABASE_URL
 
 git add -A docs >> "$LOG" 2>&1; git diff --cached --quiet || git commit -q -m "docs: $DATE 무인 개발 보고 (자동)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>" >> "$LOG" 2>&1
 if [ -n "$(git status --porcelain)" ]; then # 커밋되지 않은 코드 변경 = 미완. 보존하고 되돌린다
