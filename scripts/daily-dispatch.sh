@@ -6,7 +6,7 @@
 #   ④ 보고서·피드백 문서만 claude 브랜치로 발행(커밋·push). 에이전트가 아니라 이 스크립트가 한다
 #   DRY=1 scripts/daily-dispatch.sh   # Gemini 를 깨우지 않고 Claude 점검만 시험
 set -u
-export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" # /usr/sbin: ai 가 lsof 로 Antigravity 포트를 찾는다
 WORK=/Users/macmini/.gemini/antigravity/worktrees/Lifipedia/lifipedia-nas-deployment-setup
 GEM=/Users/macmini/Lifipedia
 BRANCH=claude/peaceful-pasteur-abbqgx
