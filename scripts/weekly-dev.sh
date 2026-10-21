@@ -39,7 +39,7 @@ perl -e 'alarm shift; exec @ARGV' 10800 claude -p "$COMMON $TASK" \
   --model "$MODEL" --permission-mode dontAsk --max-budget-usd 20 \
   --allowedTools "Read" "Grep" "Glob" "Edit" "Write" \
     "Bash(npm run:*)" "Bash(npm test:*)" "Bash(npx tsc:*)" "Bash(npx vitest:*)" "Bash(npx prisma generate:*)" "Bash(npx prisma validate:*)" "Bash(npx prisma db push:*)" \
-    "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(ls:*)" "Bash(curl:*)" "Bash(python3 scripts/collect-facts.py:*)" \
+    "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(ls:*)" "Bash(cat:*)" "Bash(grep:*)" "Bash(head:*)" "Bash(tail:*)" "Bash(wc:*)" "Bash(curl:*)" "Bash(python3 scripts/collect-facts.py:*)" \
   --disallowedTools "Bash(git push:*)" "Bash(git reset:*)" "Bash(git checkout:*)" "Bash(rm:*)" "Edit(scripts/**)" "Write(scripts/**)" "Edit(prisma/*.db)" "Edit(.env*)" >> "$LOG" 2>&1
 log "claude exit=$?"
 rm -f "/tmp/lifipedia-dev-$DATE.db"; unset DATABASE_URL
