@@ -11,7 +11,7 @@
 
 ## W44 (10/19~10/25)
 설계서: `docs/design/2026-W44-protection-gallery.md` (8.1 요일표 순서로 집는다. 번호는 ROADMAP 과 같다)
-- [ ] 5 버그 3건 — 월: `/gallery` 308 리다이렉트로 FollowButton 해결, 투표 트랜잭션 + 버튼 busy, 몰림 신고 `USER` 1건 (설계 7절)
+- [x] 5 (490db33, 게이트는 사람이 확인) 버그 3건 — 월: `/gallery` 308 리다이렉트로 FollowButton 해결, 투표 트랜잭션 + 버튼 busy, 몰림 신고 `USER` 1건 (설계 7절)
 - [ ] 4a 토큰 정의(CSS 변수 다크·라이트, tailwind 매핑, body) — 월 (6.1)
 - [ ] 1 문서 보호 수준 `protection.ts` + edit/revert 403 + 화면 — 화 (3절)
 - [ ] 2 분류 `/themes?category=` — 화, 주시목록 `/recent?scope=following` — 수 (4절)
