@@ -20,30 +20,38 @@ export function VoteButtons({ itemId, initialUp, initialDown, initialMyVote, dis
   const [down, setDown] = useState(initialDown);
   const [myVote, setMyVote] = useState(initialMyVote);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function cast(type: 'UP' | 'DOWN') {
     if (status !== 'authenticated') {
       void signIn();
       return;
     }
+    if (busy) return;
     setError(null);
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/items/${itemId}/vote`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type }),
+      });
+      const data = await response.json();
 
-    const response = await fetch(`/api/items/${itemId}/vote`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type }),
-    });
-    const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? '투표에 실패했습니다.');
+        return;
+      }
 
-    if (!response.ok) {
-      setError(data.error ?? '투표에 실패했습니다.');
-      return;
+      setMyVote(data.myVote);
+      setUp(data.breakdown.rawUpCount);
+      setDown(data.breakdown.rawDownCount);
+      startTransition(() => router.refresh());
+    } catch {
+      setError('네트워크 오류로 투표에 실패했습니다.');
+    } finally {
+      setBusy(false);
     }
-
-    setMyVote(data.myVote);
-    setUp(data.breakdown.rawUpCount);
-    setDown(data.breakdown.rawDownCount);
-    startTransition(() => router.refresh());
   }
 
   const base = 'btn-ghost gap-1.5 disabled:opacity-40';
@@ -55,7 +63,7 @@ export function VoteButtons({ itemId, initialUp, initialDown, initialMyVote, dis
           type="button"
           className={`${base} ${myVote === 'UP' ? 'border-accent text-accent-fg' : ''}`}
           onClick={() => cast('UP')}
-          disabled={disabled || pending}
+          disabled={disabled || pending || busy}
           aria-pressed={myVote === 'UP'}
         >
           <span aria-hidden>▲</span> 추천 <span className="tabular-nums">{up}</span>
@@ -64,7 +72,7 @@ export function VoteButtons({ itemId, initialUp, initialDown, initialMyVote, dis
           type="button"
           className={`${base} ${myVote === 'DOWN' ? 'border-black/40 text-ink' : ''}`}
           onClick={() => cast('DOWN')}
-          disabled={disabled || pending}
+          disabled={disabled || pending || busy}
           aria-pressed={myVote === 'DOWN'}
         >
           <span aria-hidden>▼</span> 비추천 <span className="tabular-nums">{down}</span>

@@ -315,6 +315,7 @@ enum ReportTargetType {
   ITEM
   COMMENT
   THEME
+  USER
 }
 
 enum ReportStatus {

@@ -65,11 +65,11 @@ export function Sidebar({ groups }: SidebarProps) {
                 {isOpen && (
                   <ul className="pl-3 space-y-0.5 border-l border-white/10 ml-2">
                     {group.galleries.map((gal) => {
-                      const isActive = pathname === `/gallery/${gal.slug}`;
+                      const isActive = pathname === `/theme/${gal.slug}`;
                       return (
                         <li key={gal.slug}>
                           <Link
-                            href={`/gallery/${gal.slug}`}
+                            href={`/theme/${gal.slug}`}
                             className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium no-underline transition-all ${
                               isActive
                                 ? 'bg-accent text-white font-bold shadow-md shadow-accent/20'

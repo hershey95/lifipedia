@@ -41,7 +41,7 @@ export function WikiTextRenderer({ text }: WikiLinkProps) {
               }}
               onMouseLeave={() => setHoverState(null)}
             >
-              <Link href={`/gallery/${targetSlug}`} className="no-underline text-inherit">
+              <Link href={`/theme/${targetSlug}`} className="no-underline text-inherit">
                 📚 {targetName}
               </Link>
             </span>

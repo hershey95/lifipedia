@@ -1,16 +1,21 @@
 /** DB 를 읽어 점수를 갱신하는 계층. 순수 계산은 lib/ranking.ts 에 있다. */
+import type { Prisma } from '@prisma/client';
 import { prisma } from './db';
 import { computeScore, rankItems, type ScoredVote, type ScoreBreakdown } from './ranking';
 
-export async function recomputeItemScore(itemId: string, asOf: Date = new Date()): Promise<ScoreBreakdown> {
-  const votes = await prisma.vote.findMany({
+export async function recomputeItemScore(
+  itemId: string,
+  asOf: Date = new Date(),
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+): Promise<ScoreBreakdown> {
+  const votes = await db.vote.findMany({
     where: { itemId },
     select: { type: true, weight: true, createdAt: true, userId: true },
   });
 
   const breakdown = computeScore(votes as ScoredVote[], asOf);
 
-  await prisma.item.update({
+  await db.item.update({
     where: { id: itemId },
     data: {
       score: breakdown.score,

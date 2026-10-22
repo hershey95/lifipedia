@@ -128,7 +128,7 @@ export default async function HomePage() {
                   {root.subThemes.map((sub) => (
                     <Link
                       key={sub.slug}
-                      href={`/gallery/${sub.slug}`}
+                      href={`/theme/${sub.slug}`}
                       className="chip bg-white/5 hover:bg-accent text-slate-300 hover:text-white border-white/10 no-underline text-[11px] transition-all"
                     >
                       r/{sub.name}
@@ -156,7 +156,7 @@ export default async function HomePage() {
           {subGalleries.map((gal) => (
             <Link
               key={gal.id}
-              href={`/gallery/${gal.slug}`}
+              href={`/theme/${gal.slug}`}
               className="card bg-white/[0.03] hover:bg-white/[0.07] border-white/10 p-4 space-y-2 no-underline group transition-all"
             >
               <div className="flex items-center justify-between">
@@ -209,7 +209,7 @@ export default async function HomePage() {
               </div>
 
               <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                <Link href={`/gallery/${item.theme.slug}`} className="no-underline text-slate-400 hover:text-white truncate">
+                <Link href={`/theme/${item.theme.slug}`} className="no-underline text-slate-400 hover:text-white truncate">
                   r/{item.theme.name}
                 </Link>
                 <Link href={`/theme/${item.theme.slug}/item/${item.slug}`} className="text-accent-fg font-bold no-underline">
