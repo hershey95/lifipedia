@@ -12,11 +12,20 @@
 ## W44 (10/19~10/25)
 설계서: `docs/design/2026-W44-protection-gallery.md` (8.1 요일표 순서로 집는다. 번호는 ROADMAP 과 같다)
 - [x] 5 (490db33, 게이트는 사람이 확인) 버그 3건 — 월: `/gallery` 308 리다이렉트로 FollowButton 해결, 투표 트랜잭션 + 버튼 busy, 몰림 신고 `USER` 1건 (설계 7절)
-- [ ] 4a 토큰 정의(CSS 변수 다크·라이트, tailwind 매핑, body) — 월 (6.1)
-- [ ] 1 문서 보호 수준 `protection.ts` + edit/revert 403 + 화면 — 화 (3절)
-- [ ] 2 분류 `/themes?category=` — 화, 주시목록 `/recent?scope=following` — 수 (4절)
-- [ ] 3 갤러리 통합 `/theme/[slug]?tab=` + 문서 인포박스 — 수 (5절)
-- [ ] 4b·4c `ink`·팔레트 치환, 라이트 토글(가드 통과 시에만 노출), 가드 테스트 — 목 (6.2~6.4)
+- [~] 4a·1·2·3·4b·4c — 미착수, **W45 로 이월**(무인 세션 Bash 권한 문제, `reviews/retro/2026-W44-retro.md`). 아래 W45 섹션에서 집는다
 
-## W45 / W46
-ROADMAP.md 의 표를 따른다. 해당 주가 되면 이 파일에 옮겨 적는다.
+## W45 (10/26~11/1)
+설계서: `docs/design/2026-W45-comment-vote-notify.md` (8.1 작업 큐 순서로 집는다. A = W44 이월, 설계는 W44 설계서 절 번호)
+- [ ] A-4a 토큰 정의 + **스키마 한 번에**(Report 인덱스, CommentVote·TalkComment 필드, Notification) `db:push` — 월 (W44 6.1, W45 4.1·5.1)
+- [ ] A-1 문서 보호 수준 `protection.ts` + edit/revert 403 + 화면 — 월~화 (W44 3절)
+- [ ] A-2 분류 `/themes?category=` + 주시목록 `/recent?scope=following` — 화 (W44 4절)
+- [ ] A-3 갤러리 통합 `/theme/[slug]?tab=` + 문서 인포박스 — 수 (W44 5절)
+- [ ] B (W45-2) 댓글 투표·트리 정렬·개념글, 갤러리 토론 탭 `best=1` — 목 (W45 4절)
+- [ ] C (W45-1) 알림 3종·헤더 배지·`/notifications` — 목, 넘치면 W46 월 (W45 5절)
+- [ ] A-4b·4c `ink`·팔레트 치환, 라이트 토글(가드 통과 시에만 노출), 가드 테스트 — 남는 날 (W44 6.2~6.4)
+- [ ] D (W45-5) `ink` 별칭 삭제 — A-4b 와 같은 날 (W45 6절)
+- [~] W45-3 `useOptimistic` — W46 로 (설계서 9절 #3)
+- [~] W45-4 신고 처리·제재 — W46 로, 검토자 결정 대기 (설계서 7.2, 9절 #4)
+
+## W46
+ROADMAP.md 의 표 + W45 에서 넘긴 3·4. 해당 주가 되면 이 파일에 옮겨 적는다.
