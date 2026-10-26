@@ -49,6 +49,8 @@ model User {
   votes          Vote[]
   comments       TalkComment[]
   reports        Report[]            @relation("Reporter")
+  commentVotes   CommentVote[]
+  notifications  Notification[]
 
   @@index([trustScore])
 }
@@ -247,7 +249,50 @@ model TalkComment {
   isRemoved Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  // 댓글 투표 캐시 (W45-2). 랭킹·신뢰도에는 들어가지 않는다.
+  upCount   Int       @default(0)
+  downCount Int       @default(0)
+  bestScore Float     @default(0) // 가중 Wilson 하한. 표가 바뀔 때만 다시 계산
+  conceptAt DateTime? // 개념글 등재 시각. 한 번 기록하면 표 철회로 지우지 않는다
+  votes     CommentVote[]
+
   @@index([itemId, createdAt])
+  @@index([conceptAt])
+}
+
+model CommentVote {
+  commentId String
+  comment   TalkComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      VoteType
+  weight    Float // 투표 시점 고정 (Vote 와 같은 원칙)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@id([commentId, userId])
+  @@index([userId, createdAt])
+}
+
+enum NotificationKind {
+  TALK_REPLY // 내 댓글에 답글
+  EDIT_REVERTED // 내 편집이 다른 사람의 되돌리기로 취소됨
+  CONCEPT_REACHED // 내 댓글이 개념글이 됨
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  actorId   String? // 행위자. 개념글은 null
+  itemId    String? // FK 없음: 문서가 지워져도 행은 남는다
+  refId     String // 필수: SQLite unique 는 NULL 끼리 같다고 보지 않는다
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@unique([userId, kind, refId])
+  @@index([userId, readAt, createdAt])
 }
 
 // ---------------------------------------------------------------- 투표
@@ -336,4 +381,5 @@ model Report {
   createdAt  DateTime         @default(now())
 
   @@index([status, createdAt])
+  @@index([targetType, targetId, status])
 }

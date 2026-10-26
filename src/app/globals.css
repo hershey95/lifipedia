@@ -2,17 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
   --max-width: 72rem;
-  /* RGB 3원소: tailwind 알파 표기(text-ink/60)와 함께 쓰기 위함. 값은 docs/design/ref-design-system.md */
+  /* RGB 3원소: tailwind 알파 표기(text-fg/60)와 함께 쓰기 위함. 값은 docs/design/ref-design-system.md 2.2 */
+  --bg: 13 17 23;
+  --bg-subtle: 10 13 19;
+  --bg-inset: 7 9 14;
+  --surface: 22 27 38;
+  --surface-raised: 30 37 51;
+  --border: 38 45 59;
+  --border-strong: 61 70 87;
   --fg: 230 233 239;
+  --fg-muted: 170 179 194;
+  --fg-subtle: 139 149 165;
+  --fg-disabled: 92 101 115;
+  --accent: 59 91 219;
+  --accent-hover: 54 79 199;
   --accent-fg: 142 162 255;
-  --premium-fg: 213 160 240;
+  --accent-soft: 26 33 66;
+  --link-visited: 177 151 252;
+  --success-fg: 81 207 102;
+  --success-bg: 16 36 26;
+  --warn-fg: 252 196 25;
+  --warn-bg: 43 36 16;
+  --danger-fg: 255 135 135;
+  --danger-bg: 44 21 23;
+  --tier-budget-fg: 105 219 124;
+  --tier-budget-bg: 18 38 26;
+  --tier-mid-fg: 255 192 120;
+  --tier-mid-bg: 43 30 12;
+  --tier-premium-fg: 229 153 247;
+  --tier-premium-bg: 37 20 43;
+  --tier-budget-solid: 47 158 68;
+  --tier-mid-solid: 240 140 0;
+  --tier-premium-solid: 156 54 181;
+  --premium-fg: var(--tier-premium-fg);
+}
+
+/* 라이트는 data-theme="light" 로만 켠다. OS 설정 자동 적용(@media)은 화면 치환(4b)과 가드 테스트(4c)가 끝난 뒤에 추가한다. */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: 255 255 255;
+  --bg-subtle: 246 247 249;
+  --bg-inset: 238 240 243;
+  --surface: 255 255 255;
+  --surface-raised: 241 243 245;
+  --border: 223 227 232;
+  --border-strong: 138 147 163;
+  --fg: 26 29 36;
+  --fg-muted: 74 81 96;
+  --fg-subtle: 107 114 128;
+  --fg-disabled: 160 167 180;
+  --accent-fg: 59 91 219;
+  --accent-soft: 237 242 255;
+  --link-visited: 103 65 217;
+  --success-fg: 30 112 48;
+  --success-bg: 235 251 238;
+  --warn-fg: 138 90 0;
+  --warn-bg: 255 249 219;
+  --danger-fg: 201 42 42;
+  --danger-bg: 255 245 245;
+  --tier-budget-fg: 30 112 48;
+  --tier-budget-bg: 235 251 238;
+  --tier-mid-fg: 154 74 0;
+  --tier-mid-bg: 255 244 230;
+  --tier-premium-fg: 134 46 156;
+  --tier-premium-bg: 248 240 252;
 }
 
 @layer base {
   body {
-    @apply bg-[#0b0f19] text-[#e2e8f0] antialiased min-h-screen selection:bg-accent selection:text-white;
+    @apply bg-bg text-fg antialiased min-h-screen selection:bg-accent selection:text-white;
     word-break: keep-all;
   }
   a {
