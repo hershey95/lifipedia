@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
+import { PROTECTION_RULES } from '@/lib/protection';
 import { ABUSE_LIMITS } from '@/lib/abuse';
 import { BADGE_THRESHOLDS } from '@/lib/trust';
 import { THEME_LIFECYCLE, promotionThreshold } from '@/lib/theme-lifecycle';
@@ -121,6 +122,25 @@ export default function HowRankingWorksPage() {
         </p>
       </Section>
 
+      <Section title="7. 문서 보호" id="protection">
+        <p className="text-ink/75">
+          보호 단계는 저장하지 않고 매번 계산하며, 조건이 사라지면 자동으로 풀립니다. 보호는 편집과 되돌리기에만
+          적용되고 투표·토론·신고는 막지 않습니다.
+        </p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-ink/75">
+          <li>
+            <strong>반보호</strong>: 최근 {PROTECTION_RULES.EDIT_WAR_WINDOW_HOURS}시간 되돌리기{' '}
+            {PROTECTION_RULES.EDIT_WAR_SEMI_REVERTS}회 이상, 가격대 1위 문서, 또는 서로 다른{' '}
+            {PROTECTION_RULES.OPEN_REPORTERS_SEMI}명(계정 {PROTECTION_RULES.SEMI_MIN_ACCOUNT_DAYS}일 이상)의 미처리 신고.
+            계정 {PROTECTION_RULES.SEMI_MIN_ACCOUNT_DAYS}일·기여 {PROTECTION_RULES.SEMI_MIN_CONTRIBUTIONS}건 이상이면 편집할 수 있습니다.
+          </li>
+          <li>
+            <strong>확장 보호</strong>: 같은 기간 되돌리기 {PROTECTION_RULES.EDIT_WAR_EXTENDED_REVERTS}회 이상.
+            계정 {PROTECTION_RULES.EXTENDED_MIN_ACCOUNT_DAYS}일·기여 {PROTECTION_RULES.EXTENDED_MIN_CONTRIBUTIONS}건 이상이면 편집할 수 있습니다.
+          </li>
+        </ul>
+      </Section>
+
       <p className="rounded-xl bg-accent/5 p-4 text-sm text-ink/70">
         이 문서에 적힌 상수는 실제 코드(<code>src/lib/ranking.ts</code>)에서 직접 읽어와 표시됩니다.
         문서와 구현이 어긋날 수 없습니다.
@@ -129,9 +149,9 @@ export default function HowRankingWorksPage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, id, children }: { title: string; id?: string; children: React.ReactNode }) {
   return (
-    <section>
+    <section id={id} className="scroll-mt-20">
       <h2 className="mb-3 border-b border-black/10 pb-2 text-xl font-bold">{title}</h2>
       {children}
     </section>

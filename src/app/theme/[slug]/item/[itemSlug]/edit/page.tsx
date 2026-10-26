@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
+import { currentUser } from '@/lib/auth';
+import { canEditAt, protectionMessage, reasonText, userLevel } from '@/lib/protection';
+import { loadProtection } from '@/lib/protection-service';
 import { ItemForm } from '@/components/ItemForm';
 
 export const metadata: Metadata = { title: '문서 편집', robots: { index: false } };
@@ -22,6 +25,27 @@ export default async function EditItemPage({ params }: { params: Promise<{ slug:
         <Link href={`/theme/${item.theme.slug}/item/${item.slug}`}>문서로 돌아가기</Link>
       </div>
     );
+  }
+
+  const me = await currentUser();
+  if (me) {
+    const p = await loadProtection(item);
+    const mine = userLevel(me);
+    if (!canEditAt(p.level, mine)) {
+      const why = p.reasons.map((r) => reasonText(r, p.signals)).join(', ');
+      return (
+        <div role="status" className="card text-sm">
+          <p>
+            {why} 때문에 {protectionMessage(p.level)}
+          </p>
+          <p className="mt-2">
+            <Link href={`/theme/${item.theme.slug}/item/${item.slug}/talk`}>토론에 의견 남기기</Link>
+            {' · '}
+            <Link href={`/theme/${item.theme.slug}/item/${item.slug}`}>문서로 돌아가기</Link>
+          </p>
+        </div>
+      );
+    }
   }
 
   return (

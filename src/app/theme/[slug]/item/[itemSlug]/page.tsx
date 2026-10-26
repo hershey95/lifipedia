@@ -6,6 +6,8 @@ import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
 import { computeScore, type ScoredVote } from '@/lib/ranking';
 import { TIER_SLUGS, TIER_LABELS } from '@/lib/tier';
+import { loadProtection } from '@/lib/protection-service';
+import { protectionLabel, reasonText } from '@/lib/protection';
 import { TierBadge } from '@/components/TierBadge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { AdSlot } from '@/components/AdSlot';
@@ -54,6 +56,7 @@ export default async function ItemPage({ params }: Params) {
   const breakdown = computeScore(item.votes as ScoredVote[]);
   const toc = extractToc(item.description);
   const links = (item.purchaseLinks as { label: string; url: string }[] | null) ?? [];
+  const protection = await loadProtection(item);
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,7 +70,16 @@ export default async function ItemPage({ params }: Params) {
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-extrabold">{item.name}</h1>
             <TierBadge tier={item.tier} />
+            {protection.level !== 'NONE' && (
+              <span className="chip bg-warn-bg text-warn-fg">{protectionLabel(protection.level)}</span>
+            )}
           </div>
+          {protection.level !== 'NONE' && (
+            <p className="mt-1 text-sm text-fg-muted">
+              {protection.reasons.map((r) => reasonText(r, protection.signals)).join(' · ')} ·{' '}
+              <Link href="/how-ranking-works#protection">보호 규칙</Link>
+            </p>
+          )}
           <p className="mt-2 text-sm text-ink/55">
             {item.priceKrw ? `${item.priceKrw.toLocaleString('ko-KR')}원 · ` : ''}
             리비전 {item.revision} · 작성 {item.createdBy?.name ?? '탈퇴한 사용자'} ·{' '}

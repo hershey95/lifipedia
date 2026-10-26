@@ -6,7 +6,9 @@ import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { recordEdit, voidRevertedContributions } from '@/lib/contribution';
 import { CONTRIBUTION_RULES, REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
-import { buildDiff, changedFields, diffDelta, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
+import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
+import { loadProtection } from '@/lib/protection-service';
+import { buildDiff,changedFields, diffDelta, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +42,12 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     });
     if (!item || item.isRemoved) return fail(404, '항목을 찾을 수 없습니다.');
     if (!canContribute(item.theme.status)) return fail(403, '정식 테마에서만 편집할 수 있습니다.');
+
+    const p = await loadProtection(item);
+    const mine = userLevel(user);
+    if (!canEditAt(p.level, mine)) {
+      return fail(403, protectionMessage(p.level), { protection: { required: p.level, reasons: p.reasons, userLevel: mine } });
+    }
     if (payload.baseRevision !== item.revision) {
       return fail(409, '그 사이 문서가 바뀌었습니다. 최신 문서를 확인하고 다시 시도해 주세요.', { currentRevision: item.revision });
     }

@@ -7,6 +7,8 @@ import { canContribute } from '@/lib/theme-lifecycle';
 import { recordEdit } from '@/lib/contribution';
 import { buildDiff, changedFields, diffDelta, resolveEdit, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 import { REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
+import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
+import { loadProtection } from '@/lib/protection-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +45,12 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     });
     if (!item || item.isRemoved) return fail(404, '항목을 찾을 수 없습니다.');
     if (!canContribute(item.theme.status)) return fail(403, '정식 테마에서만 편집할 수 있습니다.');
+
+    const p = await loadProtection(item);
+    const mine = userLevel(user);
+    if (!canEditAt(p.level, mine)) {
+      return fail(403, protectionMessage(p.level), { protection: { required: p.level, reasons: p.reasons, userLevel: mine } });
+    }
 
     const current = toSnapshot(item as unknown as Record<string, unknown>);
 
