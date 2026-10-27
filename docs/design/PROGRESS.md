@@ -18,8 +18,8 @@
 설계서: `docs/design/2026-W45-comment-vote-notify.md` (8.1 작업 큐 순서로 집는다. A = W44 이월, 설계는 W44 설계서 절 번호)
 - [x] A-4a 토큰 정의 + 스키마 한 번에 (c8c6651) — **`db:push` 는 미적용**(무인 금지 사항, 사람이 실행해야 함). 라이트는 `data-theme="light"` 로만 켬
 - [x] A-1 문서 보호 수준 `protection.ts` + edit/revert 403 + 화면 (fdbe618) — 빌드 prerender 는 DB 미동기화로 실패, 컴파일·타입은 통과
-- [ ] A-2 분류 `/themes?category=` + 주시목록 `/recent?scope=following` — 화 (W44 4절)
-- [ ] A-3 갤러리 통합 `/theme/[slug]?tab=` + 문서 인포박스 — 수 (W44 5절)
+- [x] A-2 분류 `/themes?category=` + 주시목록 `/recent?scope=following` (cbcfc31) — 화 (W44 4절)
+- [x] A-3 갤러리 통합 `/theme/[slug]?tab=` + 문서 인포박스 (8b21b9e) — 수 (W44 5절). 최근 변경은 측면 대신 하단 섹션. `/gallery` 308·링크 교체는 이미 완료 상태였음
 - [ ] B (W45-2) 댓글 투표·트리 정렬·개념글, 갤러리 토론 탭 `best=1` — 목 (W45 4절)
 - [ ] C (W45-1) 알림 3종·헤더 배지·`/notifications` — 목, 넘치면 W46 월 (W45 5절)
 - [ ] A-4b·4c `ink`·팔레트 치환, 라이트 토글(가드 통과 시에만 노출), 가드 테스트 — 남는 날 (W44 6.2~6.4)
