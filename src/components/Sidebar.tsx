@@ -60,6 +60,12 @@ export function Sidebar({ groups }: SidebarProps) {
                   </span>
                   <span className="text-[10px] text-slate-500 font-normal">{isOpen ? '▼' : '▶'}</span>
                 </button>
+                <Link
+                  href={`/themes?category=${encodeURIComponent(group.hubName)}`}
+                  className="block px-2 text-[10px] text-slate-500 no-underline hover:text-slate-300"
+                >
+                  {group.hubName} 전체 보기
+                </Link>
 
                 {/* 서브 갤러리 리스트 */}
                 {isOpen && (

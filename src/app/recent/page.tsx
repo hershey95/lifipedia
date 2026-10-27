@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
-import { changeKind, decodeCursor, encodeCursor, type ChangeKind } from '@/lib/recent';
+import { currentUser } from '@/lib/auth';
+import { changeKind, decodeCursor, encodeCursor, recentWhere, type ChangeKind } from '@/lib/recent';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '최근 변경', description: '위키 문서의 최근 편집·되돌리기 내역' };
@@ -15,16 +17,20 @@ const KIND_STYLE: Record<ChangeKind, string> = {
 };
 const fmt = (d: Date) => d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'short', timeStyle: 'short' });
 
-export default async function RecentPage({ searchParams }: { searchParams: Promise<{ cursor?: string }> }) {
-  const cur = decodeCursor((await searchParams).cursor);
+export default async function RecentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cursor?: string; scope?: string }>;
+}) {
+  const sp = await searchParams;
+  const cur = decodeCursor(sp.cursor);
+  const following = sp.scope === 'following';
+  const me = following ? await currentUser() : null;
+  if (following && !me) redirect(`/signin?callbackUrl=${encodeURIComponent('/recent?scope=following')}`);
+  const followCount = me ? await prisma.themeFollow.count({ where: { userId: me.id } }) : 0;
 
   const rows = await prisma.editHistory.findMany({
-    where: {
-      item: { isRemoved: false },
-      ...(cur
-        ? { OR: [{ createdAt: { lt: cur.createdAt } }, { createdAt: cur.createdAt, id: { lt: cur.id } }] }
-        : {}),
-    },
+    where: recentWhere(cur, me?.id ?? null),
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     take: PAGE + 1,
     select: {
@@ -46,9 +52,31 @@ export default async function RecentPage({ searchParams }: { searchParams: Promi
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-slate-100">최근 변경</h1>
+      <nav aria-label="범위" className="flex gap-3 text-sm">
+        <Link href="/recent" aria-current={following ? undefined : 'page'} className={following ? '' : 'font-bold'}>
+          전체
+        </Link>
+        <Link
+          href="/recent?scope=following"
+          aria-current={following ? 'page' : undefined}
+          className={following ? 'font-bold' : ''}
+        >
+          팔로우한 갤러리
+        </Link>
+      </nav>
       {page.length === 0 ? (
         <p className="text-sm text-slate-400">
-          아직 변경 내역이 없습니다. <Link href="/">테마 둘러보기</Link>
+          {!following ? (
+            <>
+              아직 변경 내역이 없습니다. <Link href="/">테마 둘러보기</Link>
+            </>
+          ) : followCount === 0 ? (
+            <>
+              팔로우한 갤러리가 없습니다. <Link href="/themes">갤러리 둘러보기</Link>
+            </>
+          ) : (
+            '팔로우한 갤러리에 다른 사람의 변경이 아직 없습니다.'
+          )}
         </p>
       ) : (
         <ul aria-label="최근 변경 목록" className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
@@ -88,7 +116,7 @@ export default async function RecentPage({ searchParams }: { searchParams: Promi
         </ul>
       )}
       {next ? (
-        <Link href={`/recent?cursor=${next}`} className="btn-ghost no-underline self-start">
+        <Link href={`/recent?${following ? 'scope=following&' : ''}cursor=${next}`} className="btn-ghost no-underline self-start">
           더 보기
         </Link>
       ) : null}

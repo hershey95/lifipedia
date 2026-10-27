@@ -187,6 +187,9 @@ export default async function MePage() {
         <h2 id="follow-h" className="mb-2 text-lg font-bold">
           팔로우한 테마
         </h2>
+        <p className="mb-2 text-sm">
+          <Link href="/recent?scope=following">팔로우한 갤러리의 최근 변경 →</Link>
+        </p>
         {follows.length === 0 ? (
           <p className="card text-sm text-slate-400">
             팔로우한 테마가 없습니다. <Link href="/themes">갤러리 둘러보기</Link>

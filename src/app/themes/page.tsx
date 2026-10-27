@@ -17,8 +17,17 @@ const SECTIONS = [
   { status: 'DORMANT' as const, title: '휴면 테마', hint: '오랫동안 활동이 없어 읽기 전용입니다.' },
 ];
 
-export default async function ThemesPage() {
+export default async function ThemesPage({ searchParams }: { searchParams: Promise<{ category?: string | string[] }> }) {
+  const raw = (await searchParams).category;
+  const category = typeof raw === 'string' && raw ? raw : null;
+  const cats = await prisma.theme.findMany({
+    where: { category: { not: null } },
+    distinct: ['category'],
+    select: { category: true },
+    orderBy: { category: 'asc' },
+  });
   const themes = await prisma.theme.findMany({
+    where: category ? { category } : {},
     orderBy: [{ followerCount: 'desc' }, { createdAt: 'desc' }],
     select: {
       slug: true, name: true, description: true, status: true,
@@ -35,6 +44,23 @@ export default async function ThemesPage() {
         </div>
         <Link href="/themes/new" className="btn-primary no-underline">테마 제안</Link>
       </header>
+
+      <nav aria-label="분류" className="flex flex-wrap gap-2 text-sm">
+        {[{ label: '전체', value: null as string | null }, ...cats.map((c) => ({ label: c.category!, value: c.category }))].map(
+          (c) => (
+            <Link
+              key={c.label}
+              href={c.value ? `/themes?category=${encodeURIComponent(c.value)}` : '/themes'}
+              aria-current={c.value === category ? 'page' : undefined}
+              className={`chip no-underline ${c.value === category ? 'font-bold' : ''}`}
+            >
+              {c.label}
+            </Link>
+          ),
+        )}
+      </nav>
+
+      {category && themes.length === 0 ? <p className="card text-sm text-ink/60">이 분류에 테마가 없습니다.</p> : null}
 
       {SECTIONS.map((section) => {
         const list = themes.filter((theme) => theme.status === section.status);

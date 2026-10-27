@@ -25,7 +25,7 @@ async function loadItem(themeSlug: string, itemSlug: string) {
       isRemoved: false,
     },
     include: {
-      theme: { select: { slug: true, name: true, status: true } },
+      theme: { select: { slug: true, name: true, status: true, category: true } },
       createdBy: { select: { id: true, name: true, badgeLevel: true } },
       votes: { select: { type: true, weight: true, createdAt: true, userId: true } },
       _count: { select: { edits: true, comments: true } },
@@ -61,7 +61,12 @@ export default async function ItemPage({ params }: Params) {
   return (
     <div className="flex flex-col gap-6">
       <nav aria-label="경로" className="text-sm text-ink/60">
-        <Link href="/themes">테마</Link> / <Link href={`/theme/${item.theme.slug}`}>{item.theme.name}</Link> /{' '}
+        {item.theme.category ? (
+          <Link href={`/themes?category=${encodeURIComponent(item.theme.category)}`}>{item.theme.category}</Link>
+        ) : (
+          <Link href="/themes">테마</Link>
+        )}{' '}
+        / <Link href={`/theme/${item.theme.slug}`}>{item.theme.name}</Link> /{' '}
         <Link href={`/theme/${item.theme.slug}/${TIER_SLUGS[item.tier]}`}>{TIER_LABELS[item.tier]}</Link>
       </nav>
 
