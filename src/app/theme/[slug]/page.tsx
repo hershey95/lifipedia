@@ -10,14 +10,21 @@ import { FollowButton } from '@/components/FollowButton';
 import { AdSlot } from '@/components/AdSlot';
 import { TierBadge } from '@/components/TierBadge';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
+import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 
-type Params = { params: Promise<{ slug: string }> };
+type Params = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const LIST_MAX = 100;
+const fmt = (d: Date) => d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'short', timeStyle: 'short' });
 
 async function loadTheme(slug: string) {
   return prisma.theme.findUnique({
     where: { slug: decodeURIComponent(slug) },
     select: {
-      id: true, slug: true, name: true, description: true, status: true,
+      id: true, slug: true, name: true, description: true, status: true, category: true,
       followerCount: true, createdAt: true,
       proposer: { select: { id: true, name: true } },
       _count: { select: { items: true } },
@@ -37,20 +44,53 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function ThemePage({ params }: Params) {
+export default async function ThemePage({ params, searchParams }: Params) {
   const { slug } = await params;
   const theme = await loadTheme(slug);
   if (!theme) notFound();
+  const { tab, sort, tier: tierFilter } = parseFeedParams(await searchParams);
 
   const me = await currentUser();
-  const [following, tierTops] = await Promise.all([
+  const itemWhere = { themeId: theme.id, isRemoved: false };
+  const [following, tierTops, listItems, talkRows, recent] = await Promise.all([
     me
       ? prisma.themeFollow.findUnique({
           where: { themeId_userId: { themeId: theme.id, userId: me.id } },
           select: { themeId: true },
         })
       : Promise.resolve(null),
-    Promise.all(TIERS.map((tier) => rankTier({ themeId: theme.id, tier, limit: 3 }))),
+    tab === 'rank'
+      ? Promise.all(TIERS.map((tier) => rankTier({ themeId: theme.id, tier, limit: 3 })))
+      : Promise.resolve([]),
+    tab === 'list'
+      ? prisma.item.findMany({
+          where: { ...itemWhere, ...(tierFilter && { tier: tierFilter }) },
+          orderBy: [...FEED_ORDER_BY[sort]],
+          take: LIST_MAX,
+          select: {
+            id: true, slug: true, name: true, tier: true, priceKrw: true, upCount: true, updatedAt: true,
+            _count: { select: { comments: { where: { isRemoved: false } } } },
+          },
+        })
+      : Promise.resolve([]),
+    tab === 'talk'
+      ? prisma.talkComment.findMany({
+          where: { isRemoved: false, item: itemWhere },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          take: 20,
+          select: {
+            id: true, body: true, createdAt: true,
+            author: { select: { name: true } },
+            item: { select: { name: true, slug: true } },
+          },
+        })
+      : Promise.resolve([]),
+    prisma.editHistory.findMany({
+      where: { item: itemWhere },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 5,
+      select: { id: true, revision: true, createdAt: true, item: { select: { name: true, slug: true } } },
+    }),
   ]);
 
   const progress = promotionProgress(theme.followerCount, promotionThreshold());
@@ -66,6 +106,11 @@ export default async function ThemePage({ params }: Params) {
           </div>
           {theme.description ? <p className="mt-2 max-w-2xl text-ink/70">{theme.description}</p> : null}
           <p className="mt-2 text-xs text-ink/50">
+            {theme.category ? (
+              <>
+                <Link href={`/themes?category=${encodeURIComponent(theme.category)}`}>#{theme.category}</Link> ·{' '}
+              </>
+            ) : null}
             제안: {theme.proposer?.name ?? '탈퇴한 사용자'} · 항목 {theme._count.items.toLocaleString('ko-KR')}개
           </p>
         </div>
@@ -108,6 +153,127 @@ export default async function ThemePage({ params }: Params) {
       <AdSlot slot="theme-top" />
 
       {isActive ? (
+        <nav aria-label="갤러리 보기" className="flex gap-4 border-b border-white/10 pb-2 text-sm">
+          {(
+            [
+              ['rank', '순위'],
+              ['list', '목록'],
+              ['talk', '토론'],
+            ] as const
+          ).map(([t, label]) => (
+            <Link
+              key={t}
+              href={feedHref(theme.slug, { tab: t })}
+              aria-current={tab === t ? 'page' : undefined}
+              className={tab === t ? 'font-bold' : ''}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+
+      {isActive && tab === 'list' ? (
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <p className="flex flex-wrap items-center gap-2">
+              <span className="text-ink/60">정렬</span>
+              {(['hot', 'new', 'top'] as const).map((s) => (
+                <Link
+                  key={s}
+                  href={feedHref(theme.slug, { tab: 'list', sort: s, tier: tierFilter })}
+                  aria-current={sort === s ? 'page' : undefined}
+                  className={sort === s ? 'font-bold' : ''}
+                >
+                  {{ hot: '인기', new: '최신', top: '추천순' }[s]}
+                </Link>
+              ))}
+            </p>
+            <p className="flex flex-wrap items-center gap-2">
+              <span className="text-ink/60">가격대</span>
+              {[null, ...TIERS].map((t) => (
+                <Link
+                  key={t ?? 'all'}
+                  href={feedHref(theme.slug, { tab: 'list', sort, tier: t })}
+                  aria-current={tierFilter === t ? 'page' : undefined}
+                  className={tierFilter === t ? 'font-bold' : ''}
+                >
+                  {t ? TIER_LABELS[t] : '전체'}
+                </Link>
+              ))}
+            </p>
+          </div>
+          <p className="text-xs text-ink/50">인기 = 마지막 투표 시점의 점수입니다. 순위 탭과 순서가 다를 수 있습니다.</p>
+          {listItems.length === 0 ? (
+            <p className="card text-sm text-ink/60">
+              아직 문서가 없습니다. <Link href={`/theme/${theme.slug}/item/new`}>첫 항목을 작성해 보세요.</Link>
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <caption className="sr-only">{theme.name} 문서 목록</caption>
+                <thead className="text-left text-xs text-ink/60">
+                  <tr>
+                    <th scope="col" className="py-1 pr-2">번호</th>
+                    <th scope="col" className="py-1 pr-2">가격대</th>
+                    <th scope="col" className="py-1 pr-2">제품</th>
+                    <th scope="col" className="py-1 pr-2 text-right">가격</th>
+                    <th scope="col" className="py-1 pr-2 text-right">추천</th>
+                    <th scope="col" className="py-1">수정일</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {listItems.map((it, i) => (
+                    <tr key={it.id}>
+                      <td className="py-2 pr-2 tabular-nums text-ink/50">{i + 1}</td>
+                      <td className="py-2 pr-2"><TierBadge tier={it.tier} /></td>
+                      <td className="py-2 pr-2">
+                        <Link href={`/theme/${theme.slug}/item/${it.slug}`} className="font-semibold">{it.name}</Link>{' '}
+                        <Link href={`/theme/${theme.slug}/item/${it.slug}/talk`} className="text-xs text-ink/50">
+                          [{it._count.comments}]
+                        </Link>
+                      </td>
+                      <td className="py-2 pr-2 text-right tabular-nums">
+                        {it.priceKrw ? `${it.priceKrw.toLocaleString('ko-KR')}원` : '-'}
+                      </td>
+                      <td className="py-2 pr-2 text-right tabular-nums">{it.upCount.toLocaleString('ko-KR')}</td>
+                      <td className="py-2 text-xs text-ink/60">{fmt(it.updatedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {listItems.length >= LIST_MAX ? (
+            <p className="text-xs text-ink/50">상위 {LIST_MAX}개만 표시합니다.</p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {isActive && tab === 'talk' ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xl font-bold">최근 토론</h2>
+          {talkRows.length === 0 ? (
+            <p className="card text-sm text-ink/60">아직 토론이 없습니다.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
+              {talkRows.map((c) => (
+                <li key={c.id} className="px-4 py-3 text-sm">
+                  <Link href={`/theme/${theme.slug}/item/${c.item.slug}/talk`} className="font-semibold">{c.item.name}</Link>
+                  <span className="text-xs text-ink/50">
+                    {' '}· {c.author?.name ?? '탈퇴한 사용자'} · {fmt(c.createdAt)}
+                  </span>
+                  <p className="mt-1 text-ink/70 [overflow-wrap:anywhere]">
+                    {c.body.length > 120 ? `${c.body.slice(0, 120)}…` : c.body}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
+      {isActive && tab === 'rank' ? (
         <section className="flex flex-col gap-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-xl font-bold">가격대별 순위</h2>
@@ -165,6 +331,25 @@ export default async function ThemePage({ params }: Params) {
           })}
         </section>
       ) : null}
+
+      <section aria-labelledby="recent-h">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 id="recent-h" className="text-sm font-bold">최근 변경</h2>
+          <Link href="/recent" className="text-xs">전체 보기</Link>
+        </div>
+        {recent.length === 0 ? (
+          <p className="text-xs text-ink/50">아직 변경이 없습니다.</p>
+        ) : (
+          <ul className="flex flex-col gap-1 text-xs text-ink/70">
+            {recent.map((r) => (
+              <li key={r.id}>
+                <time dateTime={r.createdAt.toISOString()}>{fmt(r.createdAt)}</time> ·{' '}
+                <Link href={`/theme/${theme.slug}/item/${r.item.slug}`}>{r.item.name}</Link> r{r.revision}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <AdSlot slot="theme-inline" />
     </div>

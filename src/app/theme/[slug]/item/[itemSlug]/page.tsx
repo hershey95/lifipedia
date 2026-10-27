@@ -120,12 +120,6 @@ export default async function ItemPage({ params }: Params) {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <article className="flex flex-col gap-6">
-          {item.imageUrl ? (
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-white/5">
-              <Image src={item.imageUrl} alt={item.name} fill className="object-contain" unoptimized />
-            </div>
-          ) : null}
-
           {toc.length >= 3 ? (
             <nav aria-label="목차" className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm">
               <p className="mb-2 font-semibold text-slate-200">목차</p>
@@ -155,46 +149,60 @@ export default async function ItemPage({ params }: Params) {
             </Section>
           ) : null}
 
-          {links.length > 0 ? (
-            <Section title="구매 링크">
-              <ul className="flex flex-wrap gap-2">
-                {links.map((link) => (
-                  <li key={link.url}>
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow sponsored"
-                      className="btn-ghost no-underline"
-                    >
-                      {link.label} ↗
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 text-xs text-ink/60">
-                구매는 외부 사이트에서 이루어집니다. Lifipedia 는 결제를 취급하지 않습니다.
-              </p>
-            </Section>
-          ) : null}
-
           <AdSlot slot="item-bottom" />
         </article>
 
-        <aside className="flex flex-col gap-4">
-          <div className="card">
-            <h2 className="text-sm font-bold">이 문서의 점수</h2>
-            <p className="mt-1 text-3xl font-extrabold tabular-nums">{breakdown.score.toFixed(1)}</p>
-            <dl className="mt-3 flex flex-col gap-1 text-xs text-ink/60">
+        <aside aria-label="문서 정보" className="order-first flex flex-col gap-4 lg:order-none">
+          <div className="card flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <TierBadge tier={item.tier} />
+              <h2 className="text-sm font-bold">{item.name}</h2>
+            </div>
+            {item.imageUrl ? (
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-white/5">
+                <Image src={item.imageUrl} alt={item.name} fill className="object-contain" unoptimized />
+              </div>
+            ) : null}
+            <dl className="flex flex-col gap-1 text-xs text-ink/60">
+              <Row label="가격대" value={TIER_LABELS[item.tier]} />
+              <Row label="가격" value={item.priceKrw ? `${item.priceKrw.toLocaleString('ko-KR')}원` : '-'} />
               <Row label="참여자" value={`${breakdown.distinctVoters}명`} />
-              <Row label="유효 찬성" value={breakdown.effectiveUp.toFixed(2)} />
-              <Row label="유효 비추천" value={breakdown.effectiveDown.toFixed(2)} />
-              <Row label="찬성 비율" value={`${(breakdown.upRatio * 100).toFixed(0)}%`} />
-              <Row label="Wilson 하한" value={breakdown.wilsonLowerBound.toFixed(3)} />
-              <Row label="참여 보정" value={breakdown.participationFactor.toFixed(3)} />
+              <Row label="점수" value={breakdown.score.toFixed(1)} />
             </dl>
-            <p className="mt-3 text-xs text-ink/60">
-              모든 항목은 공개된 동일한 식으로 계산됩니다.{' '}
-              <Link href="/how-ranking-works">산정 방식</Link>
+            <details className="text-xs text-ink/60">
+              <summary className="cursor-pointer font-semibold">점수 상세</summary>
+              <dl className="mt-2 flex flex-col gap-1">
+                <Row label="유효 찬성" value={breakdown.effectiveUp.toFixed(2)} />
+                <Row label="유효 비추천" value={breakdown.effectiveDown.toFixed(2)} />
+                <Row label="찬성 비율" value={`${(breakdown.upRatio * 100).toFixed(0)}%`} />
+                <Row label="Wilson 하한" value={breakdown.wilsonLowerBound.toFixed(3)} />
+                <Row label="참여 보정" value={breakdown.participationFactor.toFixed(3)} />
+              </dl>
+            </details>
+            {links.length > 0 ? (
+              <div>
+                <h3 className="mb-1 text-xs font-bold">구매 링크</h3>
+                <ul className="flex flex-wrap gap-2">
+                  {links.map((link) => (
+                    <li key={link.url}>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow sponsored"
+                        className="btn-ghost no-underline"
+                      >
+                        {link.label} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-ink/60">
+                  구매는 외부 사이트에서 이루어집니다. Lifipedia 는 결제를 취급하지 않습니다.
+                </p>
+              </div>
+            ) : null}
+            <p className="text-xs text-ink/60">
+              모든 항목은 공개된 동일한 식으로 계산됩니다. <Link href="/how-ranking-works">산정 방식</Link>
             </p>
           </div>
 
