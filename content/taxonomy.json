@@ -1,0 +1,1028 @@
+{
+  "version": "1.0.0",
+  "meta": {
+    "description": "Lifipedia 제품 분류 트리 (대->중->소 깊이 3) 및 상황 갤러리 14개 매핑",
+    "generatedAt": "2026-11-08",
+    "sources": [
+      {
+        "title": "다나와 카테고리 분류 체계 (스포츠/골프 > 캠핑)",
+        "url": "https://prod.danawa.com/info/?pcode=5339912",
+        "accessedAt": "2026-11-08"
+      },
+      {
+        "title": "다나와 카테고리 분류 체계 (컴퓨터/노트북/조립PC > 노트북/모니터)",
+        "url": "https://prod.danawa.com/info/?pcode=122624573",
+        "accessedAt": "2026-11-08"
+      },
+      {
+        "title": "다나와 카테고리 분류 체계 (가전/TV > 청소기/세탁기/주방가전)",
+        "url": "https://prod.danawa.com/info/?pcode=96774743",
+        "accessedAt": "2026-11-08"
+      },
+      {
+        "title": "다나와 카테고리 분류 체계 (가전/TV > 이어폰/헤드폰)",
+        "url": "https://prod.danawa.com/info/?pcode=99641561",
+        "accessedAt": "2026-11-08"
+      },
+      {
+        "title": "다나와 카테고리 분류 체계 (가구/조명 > 침대/매트리스/의자)",
+        "url": "https://prod.danawa.com/info/?pcode=5097200",
+        "accessedAt": "2026-11-08"
+      }
+    ]
+  },
+  "categories": [
+    {
+      "slug": "digital-pc",
+      "name": "디지털·PC",
+      "children": [
+        {
+          "slug": "laptops",
+          "name": "노트북",
+          "children": [
+            {
+              "slug": "ultralight-laptops",
+              "name": "초경량·휴대용 노트북"
+            },
+            {
+              "slug": "workstation-laptops",
+              "name": "작업·비즈니스용 노트북"
+            },
+            {
+              "slug": "budget-study-laptops",
+              "name": "가성비·인강용 노트북"
+            },
+            {
+              "slug": "gaming-high-laptops",
+              "name": "고성능 게이밍 노트북"
+            }
+          ]
+        },
+        {
+          "slug": "monitors",
+          "name": "모니터",
+          "children": [
+            {
+              "slug": "4k-uhd-monitors",
+              "name": "27~32인치 4K 고화질 모니터"
+            },
+            {
+              "slug": "high-refresh-gaming-monitors",
+              "name": "고주사율 게이밍 모니터"
+            },
+            {
+              "slug": "ultrawide-work-monitors",
+              "name": "울트라와이드 작업용 모니터"
+            },
+            {
+              "slug": "budget-fhd-monitors",
+              "name": "가성비 FHD 사무용 모니터"
+            }
+          ]
+        },
+        {
+          "slug": "keyboards",
+          "name": "키보드",
+          "children": [
+            {
+              "slug": "mechanical-gaming-keyboards",
+              "name": "기계식 게이밍 키보드"
+            },
+            {
+              "slug": "wireless-ergonomic-keyboards",
+              "name": "무선 인체공학 키보드"
+            },
+            {
+              "slug": "compact-portable-keyboards",
+              "name": "휴대용 미니·텐키리스 키보드"
+            },
+            {
+              "slug": "silent-office-keyboards",
+              "name": "저소음 사무용 키보드"
+            }
+          ]
+        },
+        {
+          "slug": "mice",
+          "name": "마우스",
+          "children": [
+            {
+              "slug": "ergonomic-vertical-mice",
+              "name": "버티컬 인체공학 마우스"
+            },
+            {
+              "slug": "high-precision-gaming-mice",
+              "name": "고성능 무선 게이밍 마우스"
+            },
+            {
+              "slug": "silent-portable-mice",
+              "name": "무소음 휴대용 마우스"
+            },
+            {
+              "slug": "trackball-productivity-mice",
+              "name": "트랙볼 작업용 마우스"
+            }
+          ]
+        },
+        {
+          "slug": "desk-accessories",
+          "name": "데스크 주변기기",
+          "children": [
+            {
+              "slug": "single-dual-monitor-arms",
+              "name": "싱글·듀얼 모니터암"
+            },
+            {
+              "slug": "usb-c-thunderbolt-docks",
+              "name": "USB-C 멀티허브·독"
+            },
+            {
+              "slug": "monitor-light-bars",
+              "name": "모니터 조명 스크린바"
+            },
+            {
+              "slug": "desk-pads-organizers",
+              "name": "데스크 매트·정리용품"
+            }
+          ]
+        },
+        {
+          "slug": "tablets-readers",
+          "name": "태블릿·전자책",
+          "children": [
+            {
+              "slug": "learning-note-tablets",
+              "name": "필기·학습용 태블릿"
+            },
+            {
+              "slug": "flagship-pro-tablets",
+              "name": "플래그십 작업용 태블릿"
+            },
+            {
+              "slug": "ebook-readers",
+              "name": "전자책(E-Book) 리더기"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "home-appliances",
+      "name": "생활가전",
+      "children": [
+        {
+          "slug": "vacuum-cleaners",
+          "name": "청소기",
+          "children": [
+            {
+              "slug": "cordless-stick-vacuums",
+              "name": "무선 스틱 청소기"
+            },
+            {
+              "slug": "robot-vacuums-allinone",
+              "name": "올인원 로봇청소기"
+            },
+            {
+              "slug": "compact-handheld-vacuums",
+              "name": "원룸용 핸디·미니 청소기"
+            },
+            {
+              "slug": "wet-dry-floor-cleaners",
+              "name": "물걸레·습식 청소기"
+            }
+          ]
+        },
+        {
+          "slug": "washing-machines-dryers",
+          "name": "세탁기·건조기",
+          "children": [
+            {
+              "slug": "compact-drum-washers",
+              "name": "소형 드럼세탁기 (9kg 이하)"
+            },
+            {
+              "slug": "large-drum-washers",
+              "name": "대용량 드럼세탁기 (15~24kg)"
+            },
+            {
+              "slug": "compact-clothes-dryers",
+              "name": "1인가구 미니 건조기"
+            },
+            {
+              "slug": "allinone-washer-dryer-towers",
+              "name": "일체형 원바디 세탁건조 타워"
+            }
+          ]
+        },
+        {
+          "slug": "air-care",
+          "name": "공기청정·계절가전",
+          "children": [
+            {
+              "slug": "room-air-purifiers",
+              "name": "방·원룸용 공기청정기"
+            },
+            {
+              "slug": "living-air-purifiers",
+              "name": "거실용 대형 공기청정기"
+            },
+            {
+              "slug": "ultrasonic-warm-humidifiers",
+              "name": "초음파·가열식 가습기"
+            },
+            {
+              "slug": "carbon-electric-mats",
+              "name": "탄소·전기 온열매트"
+            },
+            {
+              "slug": "smart-circulators-fans",
+              "name": "저소음 BLDC 써큘레이터"
+            }
+          ]
+        },
+        {
+          "slug": "clothing-care",
+          "name": "의류관리·다리미",
+          "children": [
+            {
+              "slug": "handheld-garment-steamers",
+              "name": "휴대용 핸디 스팀다리미"
+            },
+            {
+              "slug": "smart-steam-clothing-closets",
+              "name": "의류관리기 (스타일러/에어드레서)"
+            },
+            {
+              "slug": "lint-removers",
+              "name": "충전식 보풀제거기"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "kitchen-appliances",
+      "name": "주방가전",
+      "children": [
+        {
+          "slug": "cooking-ranges",
+          "name": "전기레인지·조리기기",
+          "children": [
+            {
+              "slug": "single-portable-inductions",
+              "name": "1구 휴대용 인덕션"
+            },
+            {
+              "slug": "built-in-3burner-inductions",
+              "name": "3구 빌트인 인덕션"
+            },
+            {
+              "slug": "air-fryers-ovens",
+              "name": "대용량 바스켓·오븐 에어프라이어"
+            },
+            {
+              "slug": "compact-microwaves",
+              "name": "소형 전자레인지"
+            }
+          ]
+        },
+        {
+          "slug": "dishwashers",
+          "name": "식기세척기",
+          "children": [
+            {
+              "slug": "compact-countertop-dishwashers",
+              "name": "카운터탑 3~6인용 소형 식기세척기"
+            },
+            {
+              "slug": "freestanding-dishwashers",
+              "name": "프리스탠딩 8~12인용 식기세척기"
+            },
+            {
+              "slug": "builtin-large-dishwashers",
+              "name": "빌트인 12~14인용 대형 식기세척기"
+            }
+          ]
+        },
+        {
+          "slug": "refrigerators",
+          "name": "냉장고",
+          "children": [
+            {
+              "slug": "compact-single-fridges",
+              "name": "원룸용 소형 냉장고 (150~250L)"
+            },
+            {
+              "slug": "four-door-large-fridges",
+              "name": "4도어 패밀리 대형 냉장고"
+            },
+            {
+              "slug": "kimchi-fridges",
+              "name": "스탠드형 김치냉장고"
+            }
+          ]
+        },
+        {
+          "slug": "coffee-makers",
+          "name": "커피머신",
+          "children": [
+            {
+              "slug": "capsule-coffee-machines",
+              "name": "캡슐 커피머신"
+            },
+            {
+              "slug": "automatic-espresso-machines",
+              "name": "전자동 에스프레소 머신"
+            },
+            {
+              "slug": "pourover-electric-kettles",
+              "name": "온도조절 드립 전기포트"
+            }
+          ]
+        },
+        {
+          "slug": "baby-kitchen-appliances",
+          "name": "육아·수유 가전",
+          "children": [
+            {
+              "slug": "automatic-formula-makers",
+              "name": "자동 분유제조기"
+            },
+            {
+              "slug": "uv-steam-bottle-sterilizers",
+              "name": "젖병 소독·살균기"
+            },
+            {
+              "slug": "baby-food-processors",
+              "name": "이유식 마스터기·믹서기"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "audio-sound",
+      "name": "음향·헤드폰",
+      "children": [
+        {
+          "slug": "headphones",
+          "name": "헤드폰",
+          "children": [
+            {
+              "slug": "wireless-anc-headphones",
+              "name": "무선 노이즈캔슬링(ANC) 오버이어 헤드폰"
+            },
+            {
+              "slug": "budget-entry-headphones",
+              "name": "가성비 입문용 블루투스 헤드폰"
+            },
+            {
+              "slug": "studio-monitor-headphones",
+              "name": "유선 음감·스튜디오 모니터 헤드폰"
+            }
+          ]
+        },
+        {
+          "slug": "earphones",
+          "name": "이어폰",
+          "children": [
+            {
+              "slug": "wireless-anc-earbuds",
+              "name": "무선 노이즈캔슬링 이어폰"
+            },
+            {
+              "slug": "open-ear-bone-conduction",
+              "name": "오픈형·골전도 이어폰"
+            },
+            {
+              "slug": "budget-commute-earbuds",
+              "name": "가성비 통화·통근용 이어폰"
+            }
+          ]
+        },
+        {
+          "slug": "speakers",
+          "name": "스피커",
+          "children": [
+            {
+              "slug": "compact-bluetooth-speakers",
+              "name": "휴대용 블루투스 스피커"
+            },
+            {
+              "slug": "home-interior-speakers",
+              "name": "홈 인테리어 블루투스 스피커"
+            },
+            {
+              "slug": "pc-soundbars-speakers",
+              "name": "PC용 2채널 북쉘프·사운드바"
+            }
+          ]
+        },
+        {
+          "slug": "microphones-audio",
+          "name": "마이크·오디오",
+          "children": [
+            {
+              "slug": "usb-condenser-microphones",
+              "name": "방송·녹음용 USB 콘덴서 마이크"
+            },
+            {
+              "slug": "wireless-pin-microphones",
+              "name": "스마트폰·카메라용 무선 핀마이크"
+            },
+            {
+              "slug": "audio-interfaces",
+              "name": "홈레코딩 오디오 인터페이스"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "camping-outdoor",
+      "name": "캠핑·아웃도어",
+      "children": [
+        {
+          "slug": "tents",
+          "name": "텐트",
+          "children": [
+            {
+              "slug": "backpacking-tents",
+              "name": "1~2인 경량 백패킹 텐트"
+            },
+            {
+              "slug": "family-dome-tents",
+              "name": "3~4인 오토캠핑 돔 텐트"
+            },
+            {
+              "slug": "car-shelter-tents",
+              "name": "차박 도킹 텐트·쉘터"
+            },
+            {
+              "slug": "pop-up-picnic-tents",
+              "name": "원터치 그늘막·피크닉 텐트"
+            }
+          ]
+        },
+        {
+          "slug": "sleeping-gear",
+          "name": "침낭·매트",
+          "children": [
+            {
+              "slug": "down-backpacking-sleeping-bags",
+              "name": "구스·덕다운 경량 백패킹 침낭"
+            },
+            {
+              "slug": "3season-synthetic-sleeping-bags",
+              "name": "3계절 오토캠핑 사각 침낭"
+            },
+            {
+              "slug": "inflatable-air-pads",
+              "name": "경량 백패킹 에어 매트리스"
+            },
+            {
+              "slug": "self-inflating-car-mats",
+              "name": "차박용 자충·에어 매트"
+            }
+          ]
+        },
+        {
+          "slug": "furniture",
+          "name": "캠핑 가구",
+          "children": [
+            {
+              "slug": "ultralight-camping-chairs",
+              "name": "초경량 패킹 폴딩 체어"
+            },
+            {
+              "slug": "relax-armchairs",
+              "name": "오토캠핑 릴렉스 체어"
+            },
+            {
+              "slug": "aluminum-roll-tables",
+              "name": "알루미늄 롤 테이블"
+            },
+            {
+              "slug": "compact-folding-tables",
+              "name": "미니멀 피크닉 접이식 테이블"
+            }
+          ]
+        },
+        {
+          "slug": "cooking-burners",
+          "name": "캠핑 취사·버너",
+          "children": [
+            {
+              "slug": "sunflower-high-output-burners",
+              "name": "해바라기 고화력 가스 버너"
+            },
+            {
+              "slug": "backpacking-micro-stoves",
+              "name": "백패킹 호스·직결식 소형 버너"
+            },
+            {
+              "slug": "hard-anodized-cookware",
+              "name": "경량 코펠·식기 세트"
+            }
+          ]
+        },
+        {
+          "slug": "lighting-power",
+          "name": "랜턴·파워뱅크",
+          "children": [
+            {
+              "slug": "compact-rechargeable-lanterns",
+              "name": "초소형 충전식 LED 랜턴"
+            },
+            {
+              "slug": "high-lumen-area-lanterns",
+              "name": "고광량 메인 캠핑 랜턴"
+            },
+            {
+              "slug": "portable-power-stations-small",
+              "name": "소형 파워뱅크 (200~500Wh)"
+            },
+            {
+              "slug": "portable-power-stations-large",
+              "name": "대용량 차박 파워뱅크 (1000~2000Wh)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "fitness-health",
+      "name": "헬스·홈트",
+      "children": [
+        {
+          "slug": "home-cardio",
+          "name": "유산소 기구",
+          "children": [
+            {
+              "slug": "folding-exercise-bikes",
+              "name": "접이식 실내 자전거"
+            },
+            {
+              "slug": "walking-pads-treadmills",
+              "name": "원룸용 접이식 워킹패드·런닝머신"
+            },
+            {
+              "slug": "indoor-rowing-machines",
+              "name": "가정용 로잉머신"
+            }
+          ]
+        },
+        {
+          "slug": "weight-strength",
+          "name": "근력 운동기구",
+          "children": [
+            {
+              "slug": "adjustable-dumbbells",
+              "name": "무게조절 덤벨 세트"
+            },
+            {
+              "slug": "folding-weight-benches",
+              "name": "접이식 각도조절 인클라인 벤치"
+            },
+            {
+              "slug": "door-pull-up-bars",
+              "name": "문틀 턱걸이 철봉·치닝디핑"
+            }
+          ]
+        },
+        {
+          "slug": "yoga-recovery",
+          "name": "요가·스트레칭·마사지",
+          "children": [
+            {
+              "slug": "nbr-tpe-yoga-mats",
+              "name": "친환경 TPE·고밀도 요가매트"
+            },
+            {
+              "slug": "foam-rollers-massage-balls",
+              "name": "폼롤러·마사지볼 세트"
+            },
+            {
+              "slug": "massage-guns",
+              "name": "휴대용 미니 마사지건"
+            },
+            {
+              "slug": "resistance-bands",
+              "name": "라텍스 루프 밴드·튜빙 세트"
+            }
+          ]
+        },
+        {
+          "slug": "outdoor-sports",
+          "name": "러닝·아웃도어 스포츠",
+          "children": [
+            {
+              "slug": "cushion-running-shoes",
+              "name": "로드 러닝 쿠션화"
+            },
+            {
+              "slug": "trail-running-shoes",
+              "name": "트레일 러닝·경등산화"
+            },
+            {
+              "slug": "running-hydration-vests",
+              "name": "러닝 조끼·하이드레이션 베스트"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "furniture-interior",
+      "name": "가구·인테리어",
+      "children": [
+        {
+          "slug": "beds-mattresses",
+          "name": "침대·매트리스",
+          "children": [
+            {
+              "slug": "storage-single-beds",
+              "name": "원룸용 수납형 싱글·SS 침대"
+            },
+            {
+              "slug": "pocket-spring-mattresses",
+              "name": "독립포켓스프링 매트리스 (Q/K)"
+            },
+            {
+              "slug": "floor-memory-foam-toppers",
+              "name": "바닥 토퍼·메모리폼 매트리스"
+            }
+          ]
+        },
+        {
+          "slug": "desks-chairs",
+          "name": "책상·의자",
+          "children": [
+            {
+              "slug": "ergonomic-mesh-chairs",
+              "name": "인체공학 메시 사무용 의자"
+            },
+            {
+              "slug": "electric-standing-desks",
+              "name": "전동 모션데스크 (높이조절 책상)"
+            },
+            {
+              "slug": "compact-study-desks",
+              "name": "1인용 컴퓨터·학습용 책상 (1200~1400)"
+            },
+            {
+              "slug": "heavy-duty-gaming-chairs",
+              "name": "버킷형 게이밍 의자"
+            }
+          ]
+        },
+        {
+          "slug": "sofas-living",
+          "name": "소파·거실가구",
+          "children": [
+            {
+              "slug": "compact-2seater-sofas",
+              "name": "1~2인용 패브릭 소파"
+            },
+            {
+              "slug": "modular-3-4seater-sofas",
+              "name": "3~4인용 모듈형 거실 소파"
+            },
+            {
+              "slug": "living-tv-stands",
+              "name": "미니멀 거실 TV장·수납장"
+            }
+          ]
+        },
+        {
+          "slug": "lighting-decor",
+          "name": "조명·수납",
+          "children": [
+            {
+              "slug": "standing-floor-lamps",
+              "name": "인테리어 스탠드 장스탠드"
+            },
+            {
+              "slug": "eye-caring-study-lamps",
+              "name": "시력보호 LED 학습 스탠드"
+            },
+            {
+              "slug": "modular-steel-shelves",
+              "name": "모듈 조립식 철제 선반"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "health-care-life",
+      "name": "건강·효도·케어",
+      "children": [
+        {
+          "slug": "massage-equipment",
+          "name": "안마·마사지기",
+          "children": [
+            {
+              "slug": "calf-foot-massagers",
+              "name": "종아리·발 마사지기"
+            },
+            {
+              "slug": "neck-shoulder-massagers",
+              "name": "목·어깨 저주파/온열 마사지기"
+            },
+            {
+              "slug": "premium-massage-chairs",
+              "name": "프리미엄 안마의자"
+            }
+          ]
+        },
+        {
+          "slug": "health-monitoring",
+          "name": "건강 측정·관리",
+          "children": [
+            {
+              "slug": "arm-blood-pressure-monitors",
+              "name": "가정용 팔뚝형 자동 혈압계"
+            },
+            {
+              "slug": "smart-body-composition-scales",
+              "name": "인바디·체성분 스마트 체중계"
+            },
+            {
+              "slug": "infrared-thermometers",
+              "name": "비접촉식 디지털 체온계"
+            }
+          ]
+        },
+        {
+          "slug": "daily-hygiene-grooming",
+          "name": "위생·욕실·이미용",
+          "children": [
+            {
+              "slug": "water-flossers",
+              "name": "휴대용·거치형 구강세정기"
+            },
+            {
+              "slug": "sonic-electric-toothbrushes",
+              "name": "음파 전동칫솔"
+            },
+            {
+              "slug": "bldc-hair-dryers",
+              "name": "BLDC 항공모터 고풍량 헤어드라이어"
+            },
+            {
+              "slug": "smart-waterproof-bidets",
+              "name": "자가설치 방수 전자식 비데"
+            }
+          ]
+        },
+        {
+          "slug": "senior-mobility-care",
+          "name": "실버·시니어 케어",
+          "children": [
+            {
+              "slug": "senior-walking-canes",
+              "name": "접이식 4발 노인 보행 지팡이"
+            },
+            {
+              "slug": "bathroom-safety-bars",
+              "name": "욕실 안전 손잡이·미끄럼방지"
+            },
+            {
+              "slug": "pill-dispenser-organizers",
+              "name": "스마트 요일별 복약 알림기"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "situations": [
+    {
+      "situationSlug": "10대-수험생-갤러리",
+      "name": "10대 수험생 갤러리",
+      "placements": [
+        "budget-study-laptops",
+        "learning-note-tablets",
+        "eye-caring-study-lamps",
+        "ergonomic-mesh-chairs",
+        "compact-study-desks",
+        "silent-office-keyboards",
+        "silent-portable-mice",
+        "wireless-anc-headphones",
+        "room-air-purifiers",
+        "ultrasonic-warm-humidifiers"
+      ]
+    },
+    {
+      "situationSlug": "20대-자취독립-갤러리",
+      "name": "20대 자취·독립 갤러리",
+      "placements": [
+        "single-portable-inductions",
+        "compact-drum-washers",
+        "compact-clothes-dryers",
+        "cordless-stick-vacuums",
+        "compact-handheld-vacuums",
+        "compact-single-fridges",
+        "compact-countertop-dishwashers",
+        "storage-single-beds",
+        "floor-memory-foam-toppers",
+        "capsule-coffee-machines",
+        "compact-microwaves",
+        "carbon-electric-mats"
+      ]
+    },
+    {
+      "situationSlug": "30대-이직육아독립-갤러리",
+      "name": "30대 이직·육아·독립 갤러리",
+      "placements": [
+        "automatic-formula-makers",
+        "uv-steam-bottle-sterilizers",
+        "baby-food-processors",
+        "workstation-laptops",
+        "4k-uhd-monitors",
+        "ergonomic-vertical-mice",
+        "wireless-ergonomic-keyboards",
+        "robot-vacuums-allinone",
+        "air-fryers-ovens",
+        "living-air-purifiers",
+        "capsule-coffee-machines"
+      ]
+    },
+    {
+      "situationSlug": "40대-웰빙건강-갤러리",
+      "name": "40대+ 웰빙·건강 갤러리",
+      "placements": [
+        "calf-foot-massagers",
+        "neck-shoulder-massagers",
+        "arm-blood-pressure-monitors",
+        "smart-body-composition-scales",
+        "folding-exercise-bikes",
+        "walking-pads-treadmills",
+        "massage-guns",
+        "water-flossers",
+        "sonic-electric-toothbrushes",
+        "living-air-purifiers",
+        "carbon-electric-mats"
+      ]
+    },
+    {
+      "situationSlug": "데스크테리어-갤러리",
+      "name": "데스크테리어 갤러리",
+      "placements": [
+        "4k-uhd-monitors",
+        "ultrawide-work-monitors",
+        "single-dual-monitor-arms",
+        "usb-c-thunderbolt-docks",
+        "monitor-light-bars",
+        "desk-pads-organizers",
+        "mechanical-gaming-keyboards",
+        "wireless-ergonomic-keyboards",
+        "ergonomic-vertical-mice",
+        "electric-standing-desks",
+        "ergonomic-mesh-chairs",
+        "pc-soundbars-speakers"
+      ]
+    },
+    {
+      "situationSlug": "주방-미식-갤러리",
+      "name": "주방 & 미식 갤러리",
+      "placements": [
+        "built-in-3burner-inductions",
+        "single-portable-inductions",
+        "air-fryers-ovens",
+        "compact-countertop-dishwashers",
+        "builtin-large-dishwashers",
+        "automatic-espresso-machines",
+        "capsule-coffee-machines",
+        "pourover-electric-kettles",
+        "four-door-large-fridges"
+      ]
+    },
+    {
+      "situationSlug": "신혼집-가전-갤러리",
+      "name": "신혼집 가전 갤러리",
+      "placements": [
+        "four-door-large-fridges",
+        "allinone-washer-dryer-towers",
+        "builtin-large-dishwashers",
+        "robot-vacuums-allinone",
+        "smart-steam-clothing-closets",
+        "built-in-3burner-inductions",
+        "living-air-purifiers",
+        "automatic-espresso-machines",
+        "pocket-spring-mattresses",
+        "modular-3-4seater-sofas"
+      ]
+    },
+    {
+      "situationSlug": "캠핑차박-갤러리",
+      "name": "캠핑·차박 갤러리",
+      "placements": [
+        "backpacking-tents",
+        "family-dome-tents",
+        "car-shelter-tents",
+        "down-backpacking-sleeping-bags",
+        "3season-synthetic-sleeping-bags",
+        "inflatable-air-pads",
+        "self-inflating-car-mats",
+        "ultralight-camping-chairs",
+        "aluminum-roll-tables",
+        "sunflower-high-output-burners",
+        "compact-rechargeable-lanterns",
+        "portable-power-stations-small",
+        "portable-power-stations-large"
+      ]
+    },
+    {
+      "situationSlug": "홈트-헬스-갤러리",
+      "name": "홈트 & 헬스 갤러리",
+      "placements": [
+        "folding-exercise-bikes",
+        "walking-pads-treadmills",
+        "indoor-rowing-machines",
+        "adjustable-dumbbells",
+        "folding-weight-benches",
+        "door-pull-up-bars",
+        "nbr-tpe-yoga-mats",
+        "foam-rollers-massage-balls",
+        "massage-guns",
+        "resistance-bands",
+        "smart-body-composition-scales"
+      ]
+    },
+    {
+      "situationSlug": "게이밍-pc-갤러리",
+      "name": "게이밍 & PC 갤러리",
+      "placements": [
+        "gaming-high-laptops",
+        "high-refresh-gaming-monitors",
+        "mechanical-gaming-keyboards",
+        "high-precision-gaming-mice",
+        "heavy-duty-gaming-chairs",
+        "single-dual-monitor-arms",
+        "pc-soundbars-speakers",
+        "wireless-anc-headphones"
+      ]
+    },
+    {
+      "situationSlug": "집들이-선물-갤러리",
+      "name": "집들이 선물 갤러리",
+      "placements": [
+        "capsule-coffee-machines",
+        "pourover-electric-kettles",
+        "air-fryers-ovens",
+        "room-air-purifiers",
+        "ultrasonic-warm-humidifiers",
+        "compact-handheld-vacuums",
+        "standing-floor-lamps",
+        "home-interior-speakers",
+        "water-flossers",
+        "bldc-hair-dryers"
+      ]
+    },
+    {
+      "situationSlug": "부모님-효도선물-갤러리",
+      "name": "부모님 효도선물 갤러리",
+      "placements": [
+        "premium-massage-chairs",
+        "calf-foot-massagers",
+        "neck-shoulder-massagers",
+        "arm-blood-pressure-monitors",
+        "robot-vacuums-allinone",
+        "smart-steam-clothing-closets",
+        "carbon-electric-mats",
+        "sonic-electric-toothbrushes",
+        "smart-waterproof-bidets",
+        "folding-exercise-bikes"
+      ]
+    },
+    {
+      "situationSlug": "노이즈캔슬링-헤드폰-갤러리",
+      "name": "노이즈캔슬링 헤드폰 갤러리",
+      "placements": [
+        "wireless-anc-headphones",
+        "budget-entry-headphones",
+        "studio-monitor-headphones",
+        "wireless-anc-earbuds",
+        "budget-commute-earbuds",
+        "open-ear-bone-conduction"
+      ]
+    },
+    {
+      "situationSlug": "작업용-노트북-갤러리",
+      "name": "작업용 노트북 갤러리",
+      "placements": [
+        "ultralight-laptops",
+        "workstation-laptops",
+        "budget-study-laptops",
+        "4k-uhd-monitors",
+        "ultrawide-work-monitors",
+        "single-dual-monitor-arms",
+        "usb-c-thunderbolt-docks",
+        "wireless-ergonomic-keyboards",
+        "ergonomic-vertical-mice"
+      ]
+    }
+  ]
+}
