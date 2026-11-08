@@ -29,6 +29,9 @@
 
 ## W47 (11/9~11/15)
 설계서: `docs/design/2026-W47-community-sources.md` (8.1 작업 큐 순서로 집는다). 실패해도 그날 `dev.md` 를 남긴다.
+- [ ] T1 상황·분류 스키마(`Theme.kind`, `SituationCategory`) + 문서 재배치 마이그레이션 스크립트 — 월 (`2026-W47-taxonomy-situation.md` 5절). `db:push`·실제 재배치는 사람이
+- [ ] T2 분류 페이지·경로·상위 요약 + `popularity.ts` — 화
+- [ ] T3 상황 페이지(인기순 분류 카드) + `content/taxonomy.json` import — 수 (Gemini 가 시드 초안을 먼저 올림)
 - [ ] B (W45-2) 댓글 투표·트리 정렬·개념글, 갤러리 토론 탭 `best=1` — 월 (W45 설계서 4절, W47 3절). 스키마는 이미 있음
 - [ ] C (W45-1) 알림 3종·헤더 배지·`/notifications`·90일 정리 — 화 (W45 설계서 5절, W47 4절)
 - [ ] S (W46-1) `Item.sources` + 각주 렌더 + 편집 폼, `tags` 제외 — 수 (W47 5절). `db:push` 는 사람이
