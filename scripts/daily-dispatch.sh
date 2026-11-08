@@ -21,11 +21,14 @@ if [ "${DRY:-0}" = 1 ]; then
 else
   log "dispatch start base=$BASE"
   PROMPT="Claude 자동 지시($DATE): 작업 폴더는 반드시 /Users/macmini/Lifipedia 이고 git 은 git -C /Users/macmini/Lifipedia 로 실행하세요. push 는 금지입니다. 먼저 origin 의 $BRANCH 를 fetch 후 'git merge --no-edit' 로 병합하고 (편집기 대기 금지), 저장소의 GEMINI.md 를 읽고 절차대로 다음 세 가지를 진행하세요. (1) 오늘 계획/요일 작업, (2) docs/reviews/inbox/gemini/ 의 상태 열림 피드백 파일 항목마다 수용·부분 수용·거절+이유를 inbox/claude/ 의 feedback-reply 로 답하고 수용분 반영, (3) Claude 의 최근 24시간 변경(설계서·코드 diff)을 리뷰해 inbox/claude/ 에 gemini-on-claude 로 작성. 사용자 승인은 기다리지 말고 판단해서 조치한 뒤 중요한 것만 답신 맨 위에 적으세요. 끝나면 새 커밋 해시를 알려주세요."
-  if perl -e 'alarm shift; exec @ARGV' "$MAX_WAIT" "$HOME/.local/bin/ai" "$PROMPT" >> "$LOG" 2>&1; then
-    STATUS="완료"
-  else
-    STATUS="TIMEOUT 또는 오류(종료코드 $?)"
-  fi
+  MAX_WAIT=$MAX_WAIT "$WORK/scripts/gemini-send.sh" "$PROMPT" >> "$LOG" 2>&1 # Orca 터미널로 전달, heartbeat end 까지 대기
+  case $? in
+    0) STATUS="완료" ;;
+    2) STATUS="오류: Gemini 터미널 없음(Orca/agy 확인)" ;;
+    3) STATUS="오류: 터미널 전달 실패" ;;
+    4) STATUS="TIMEOUT(전달은 됨, 끝 기록 없음)" ;;
+    *) STATUS="오류(알 수 없음)" ;;
+  esac
 fi
 log "dispatch done status=$STATUS"
 
@@ -44,7 +47,7 @@ FACTS="docs/reviews/daily/$DATE-facts.txt"
 claude -p "docs/reviews/RELAY.md 의 '무인 실행 모드', '정성 평가', '상호 피드백 시퀀스'를 따라 오늘($DATE) 점검·보고해라. Gemini 상태: $STATUS. 시작 전 Gemini 클론 BASE: $BASE. 스크립트가 수집한 사실 파일: $FACTS (먼저 읽을 것). Gemini 의 리뷰·답신은 $GEM/docs/reviews/inbox/claude/ 에서 읽는다. 보고서: docs/reviews/daily/$DATE-daily-report.md (맨 위 '중요 보고'에 사용자 결정이 필요한 것만). 피드백: docs/reviews/inbox/gemini/$DATE-feedback.md, 수용 답신: docs/reviews/inbox/gemini/$DATE-feedback-response.md. 사용자 승인을 기다리지 말고 판단해서 조치해라." \
   --model sonnet --permission-mode dontAsk --add-dir "$GEM" \
   --allowedTools "Read" "WebFetch" "Edit(docs/reviews/daily/**)" "Edit(docs/reviews/inbox/gemini/**)" \
-    "Bash(/Users/macmini/.local/bin/ai:*)" \
+    "Bash(/Users/macmini/.gemini/antigravity/worktrees/Lifipedia/lifipedia-nas-deployment-setup/scripts/gemini-send.sh:*)" \
   --disallowedTools "Bash(git push:*)" "Bash(rm:*)" >> "$LOG" 2>&1
 log "claude inspect exit=$?"
 
