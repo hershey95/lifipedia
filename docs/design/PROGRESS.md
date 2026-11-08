@@ -32,7 +32,11 @@
 - [ ] T1 상황·분류 스키마(`Theme.kind`, `SituationCategory`) + 문서 재배치 마이그레이션 스크립트 — 월 (`2026-W47-taxonomy-situation.md` 5절). `db:push`·실제 재배치는 사람이
 - [ ] T2 분류 페이지·경로·상위 요약 + `popularity.ts` — 화
 - [ ] T3 상황 페이지(인기순 분류 카드) + `content/taxonomy.json` import — 수 (Gemini 가 시드 초안을 먼저 올림)
-- [ ] B (W45-2) 댓글 투표·트리 정렬·개념글, 갤러리 토론 탭 `best=1` — 월 (W45 설계서 4절, W47 3절). 스키마는 이미 있음
+- [ ] V1 조회 지표 `PageView`/`ViewMark` + 집계·정리 — 목 (`2026-W47-taxonomy-situation.md` 7.3). 개인정보 미저장
+- [ ] P1 게시판 `Post`·`PostVote`·글 작성/목록/상세, 상황·분류 게시판 (+ 기존 B 댓글 투표·트리 정렬 흡수) — W48 월 (7.2). `db:push` 는 사람이
+- [ ] P2 추천 답변 문서 첨부·집계·도움됨 — W48 화 (7.2)
+- [ ] P3 상황 페이지 베스트 문서·답변 없는 질문 — W48 수 (7.1)
+- [~] B (W45-2) 댓글 투표 — P1 에 흡수
 - [ ] C (W45-1) 알림 3종·헤더 배지·`/notifications`·90일 정리 — 화 (W45 설계서 5절, W47 4절)
 - [ ] S (W46-1) `Item.sources` + 각주 렌더 + 편집 폼, `tags` 제외 — 수 (W47 5절). `db:push` 는 사람이
 - [ ] K (W44-4b 중 `ink`) `ink` 치환 + 가드 1번, 이어서 D (W45-5) `ink` 정의 삭제 — 목 (W47 6절)
