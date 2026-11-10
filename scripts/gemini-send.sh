@@ -25,7 +25,10 @@ for t in ts:
 [ -n "$HANDLE" ] || { echo "Gemini 터미널을 찾지 못함(Orca 미실행 또는 agy 세션 없음)"; exit 2; }
 
 START=$(date +%Y-%m-%dT%H:%M:%S)
-orca terminal send --terminal "$HANDLE" --text "$PROMPT" --enter >/dev/null 2>&1 || { echo "전달 실패($HANDLE)"; exit 3; }
+SEND_OUT=$(orca terminal send --terminal "$HANDLE" --text "$PROMPT" --enter 2>&1); SEND_RC=$?
+echo "orca send rc=$SEND_RC: $(echo "$SEND_OUT" | head -4 | tr '\n' ' ' | cut -c1-300)"
+# 입력이 수락되면(input_accepted) 전달된 것으로 본다. 종료코드가 0 이 아니어도 수락 문구가 있으면 진행한다.
+if [ "$SEND_RC" -ne 0 ] && ! echo "$SEND_OUT" | grep -q "input_accepted"; then echo "전달 실패($HANDLE)"; exit 3; fi
 echo "전달함: $HANDLE $START"
 
 deadline=$(( $(date +%s) + MAX_WAIT ))
