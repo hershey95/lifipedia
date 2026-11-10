@@ -6,6 +6,7 @@
 - `docs/design/ROADMAP.md`, `docs/design/PROGRESS.md`: 계획과 진행. 작업은 PROGRESS 의 첫 `[ ]` 부터.
 
 ## 구현 규율
+- **도구**: 파일 읽기·검색은 Read/Grep/Glob 도구로 한다. Bash 는 `npm`·`npx`·`git`·`ls`·`cat`·`grep` 용이고 `sed`·`awk`·파이프·`&&` 로 묶은 복합 명령은 무인 세션에서 거부된다(허용 목록에 없음). 한 번에 하나의 단순 명령만 쓴다.
 - 새 기능·버그 수정은 **테스트 먼저**(`tdd` 스킬): 합의된 경계(public 인터페이스)에서만 테스트하고, 구현 세부에 결합하지 않는다.
 - "완료"는 `npx tsc --noEmit`, `npx vitest run`, `npm run build` 를 **직접 돌린 결과**로만 말한다. 돌리지 못했으면 못 했다고 쓴다.
 - 막히면 증상 가리기를 멈추고 원인부터 재현한다(`diagnosing-bugs`).
