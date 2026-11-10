@@ -4,6 +4,7 @@
 
 ## 세션을 시작할 때마다 (사용자 지시 없이 먼저 수행)
 0. 저장소 루트의 `.agent-heartbeat` 파일(git 추적 안 함)에 한 줄을 덧붙인다: `<ISO 시각, Asia/Seoul> start <요일>`. 작업이 끝나면 `<ISO 시각> end <한 일 요약, 실패했으면 이유>`. Claude 가 이 파일로 예약 실행 여부를 확인한다. 실행이 중간에 막혀도 그 사실을 이 파일에 적는다.
+1. `docs/agents/gemini-brief.md`(역할·스킬·디자인 감사·열린 일)를 읽고 따른다.
 1. 저장소 루트의 `GLOSSARY.md` 를 읽고 그 용어만 쓴다(특히 "갤러리"는 상황 갤러리/분류 갤러리로 구분, `_Avoid_` 단어 금지). 병합 뒤에 읽는다.
 1. `git fetch origin claude/peaceful-pasteur-abbqgx` 후 현재 브랜치에 병합한다 (`git merge origin/claude/peaceful-pasteur-abbqgx`).
 2. `docs/reviews/inbox/gemini/` 에서 `상태: 열림` 인 요청 파일을 모두 읽고, 그 안의 지시를 순서대로 처리한다.
