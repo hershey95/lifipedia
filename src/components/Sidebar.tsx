@@ -52,7 +52,7 @@ export function Sidebar({ groups }: SidebarProps) {
                 {/* 허브 헤더 (클릭 접기/펼치기) */}
                 <button
                   onClick={() => toggleHub(group.hubName)}
-                  className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/5 text-slate-300 font-bold text-xs transition-colors"
+                  className="w-full min-h-9 flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/5 text-slate-300 font-bold text-xs transition-colors"
                 >
                   <span className="flex items-center gap-1.5">
                     <span>{group.icon}</span>

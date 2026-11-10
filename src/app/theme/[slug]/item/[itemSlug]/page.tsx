@@ -87,7 +87,7 @@ export default async function ItemPage({ params }: Params) {
           )}
           <p className="mt-2 text-sm text-ink/55">
             {item.priceKrw ? `${item.priceKrw.toLocaleString('ko-KR')}원 · ` : ''}
-            리비전 {item.revision} · 작성 {item.createdBy?.name ?? '탈퇴한 사용자'} ·{' '}
+            리비전 {item.revision} · 작성 {item.createdBy?.name ?? '작성자 정보 없음'} ·{' '}
             <Link href={`/theme/${item.theme.slug}/item/${item.slug}/history`}>
               편집 이력 {item._count.edits}
             </Link>{' '}

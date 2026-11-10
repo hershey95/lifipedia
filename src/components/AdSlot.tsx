@@ -4,6 +4,7 @@
  */
 export function AdSlot({ slot, className = '' }: { slot: 'theme-top' | 'theme-inline' | 'item-side' | 'item-bottom'; className?: string }) {
   const enabled = process.env.NEXT_PUBLIC_ADS_ENABLED === 'true';
+  if (!enabled) return null; // 광고를 붙이기 전에는 자리표시자를 화면에 내보내지 않는다
 
   return (
     <aside
@@ -11,7 +12,6 @@ export function AdSlot({ slot, className = '' }: { slot: 'theme-top' | 'theme-in
       aria-label="광고"
       className={`flex min-h-[90px] items-center justify-center rounded-xl border border-dashed border-black/15 bg-black/[0.02] text-xs text-ink/35 ${className}`}
     >
-      {enabled ? null : `광고 영역 (${slot})`}
     </aside>
   );
 }
