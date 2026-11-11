@@ -72,4 +72,4 @@
 2. **안티**: 다음 실행에서 항목마다 **수용 / 부분 수용 / 거절 + 이유**를 `docs/reviews/inbox/claude/<날짜>-feedback-reply.md` 에 쓰고 수용분을 반영한다. 거절하려면 근거를 제시해야 하고, Claude 가 다음 점검에서 판단한다.
 3. **안티 → Claude**: 같은 실행에서 Claude 의 최근 변경(설계서·코드 diff)을 리뷰해 `docs/reviews/inbox/claude/<날짜>-gemini-on-claude.md` 에 쓴다(`docs/reviews/README.md` 의 리뷰 템플릿).
 4. **Claude**: 이 무인 세션이 안티 의 리뷰와 답신을 읽고 항목마다 수용 / 부분 수용 / 거절 + 이유를 `docs/reviews/inbox/gemini/<날짜>-feedback-response.md` 에 쓴다. **수용된 코드·설계 변경은 대화형 Claude 가 다음 세션 시작 때 구현**한다(이 세션은 코드를 고치지 않는다).
-5. 같은 이견이 2회 반복되면 금요일 Opus 회고에서 판정하고, 방향이 바뀌는 사안은 주간 보고에 올린다.
+5. 같은 이견이 2회 반복되면 금요일 Opus 회고에서 판정하고, 방향이 바뀌는 사안은 금요일 회고(`docs/reviews/retro/`)에 올린다.
