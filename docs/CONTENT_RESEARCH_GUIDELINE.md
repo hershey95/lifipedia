@@ -99,3 +99,11 @@
    - 출처 상세 페이지에서 직접 확인된 실판매가(원)만 정수로 입력. 확인되지 않으면 반드시 `null`.
 4. **결정적 자동 검사 통과**:
    - `npm run content:check -- content/<파일>.json` 실행 시 **오류 0개, 경고 0개** 필수.
+
+## 6. 제출 전 체크 (옛 AGENT_HANDOVER 에서 이전, 2026-11-11)
+- 등록: `npm run content:import -- content/<파일>.json [--dry]`. 예시 `content/camping.json`. 지금은 문서가 **소분류**에 속하도록 `content/taxonomy.json` 의 분류 slug 를 따른다(GLOSSARY 의 문서·소분류).
+- 소분류당 저가/중가/고가 각 2~3개, 실제 판매 중인 **브랜드+모델**만. 한 종류로 쏠리지 않게 섞는다.
+- 확인한 것만 쓴다. 확인 못 한 값은 `null`, 스펙·가격 추측 금지, 가격은 확인일과 함께. `sources` 2개 이상, `purchaseLinks` 는 직접 열어 본 URL 만. 문장은 패러프레이즈, 광고성 표현·근거 없는 "최고/1위" 금지.
+- `[[교차링크]]` 는 기존 갤러리 이름만. 투표·점수를 임의로 만들지 않는다. `db:seed` 는 DB 를 전부 지우므로 콘텐츠 반영에 쓰지 않는다.
+- 같은 사이트에서 페치가 2회 실패하면 포기하고 다른 출처를 쓴다.
+- 커밋 전 `npm run content:check -- content/<파일>.json` 오류 0, `python3 scripts/collect-facts.py` NOT_FOUND 0 을 직접 실행한다. 통과해도 가격·스펙의 사실성은 검증하지 않으므로 "출처 검증됨"이라고 쓰지 않는다.

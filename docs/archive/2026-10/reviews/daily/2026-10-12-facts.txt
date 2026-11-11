@@ -1,0 +1,102 @@
+## Gemini 클론 최근 커밋
+92a2b3f Merge branch 'claude/peaceful-pasteur-abbqgx' of https://github.com/hershey95/lifipedia into content/2026-10-09-camping-2
+3a17fbc docs: 프론트 레퍼런스 설계 + 4영역 통합 로드맵 W43~W46
+bd5396a fix: SQLite 에서 지원되지 않는 검색 mode: 'insensitive' 제거 (검색 API 500 해소)
+7fa0fda docs: 백엔드 레퍼런스 대비 설계(Opus)
+9861308 fix(security): 외부 링크 http(s) 스킴만 허용, DB 파일을 Docker 이미지에서 제외; 보안·디자인 시스템 설계 문서
+c0f4972 fix: UX 검토 반영(어두운 배경 대비, 정지 배너, 폼 오류/alert, 헤더 링크), 빌드 막던 lint 오류 정리
+
+## BASE(92a2b3f)..HEAD 변경 파일
+
+## 작업트리 변경(추적 파일)
+ M content/camping-2.json
+
+## heartbeat 끝 4줄
+2026-10-11T19:29:35+09:00 start 일요일 (2026-10-11-plan 및 feedback 처리)
+2026-10-11T19:34:40+09:00 end 2026-10-11 피드백 반영 완료 (네이처하이크 공식 URL 200 교체, 다나와 최저가 purchaseLinks 일치, 정보 없는 서술 삭제, 범주 대안 실제 제품화, content:check 0 err/0 warn, collect-facts 100% FOUND, HEAD: 8ae505a1bef59760b8b77c73dc8805edd9c0ba74)
+2026-10-12T06:41:45+09:00 start 월요일
+2026-10-12T09:00:10+09:00 start 월요일 (정기 세션: 월요일 작업 및 교차 피드백/리뷰)
+
+## content:check /Users/macmini/Lifipedia/content/camping-2.json
+
+✓ /Users/macmini/Lifipedia/content/camping-2.json  (오류 0, 경고 0)
+
+## content:check /Users/macmini/Lifipedia/content/camping.json
+
+✓ /Users/macmini/Lifipedia/content/camping.json  (오류 0, 경고 0)
+
+## 원문 대조 관찰값 (scripts/collect-facts.py)
+# /Users/macmini/Lifipedia/content/camping-2.json
+
+## 크레모아 쓰리페이스 미니 (CLAYMORE 3FACE mini) | BUDGET | priceKrw=62000
+- URL https://m.prismlight.co.kr/product/detail.html?product_no=600 | http=200 | title='프리즘' | 텍스트길이=21009 | 마커=[] | 주장가격표시=True
+- URL https://prod.danawa.com/info/?pcode=11800708 | http=200 | title='프리즘 크레모아 쓰리페이스 미니 (다크그레이) : 다나와 가격비교' | 텍스트길이=33466 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=2/2 | claim='프리즘 공식몰 판매가 62,000원 명시' | quote='소비자가 69,000원 판매가 62,000원'
+- 인용[2] FOUND | 숫자일치=1/1 | claim='최대 밝기 800루멘 명시' | quote='랜턴(램프) / 실내등 / 최대밝기 : 800루멘 / 전원공급방식 : USB충전식 / 부가기능 : 점멸등 ,'
+
+## 골제로 라이트하우스 마이크로 플래시 (Goal Zero Lighthouse Micro Flash) | BUDGET | priceKrw=71900
+- URL https://goalzero.com/products/lighthouse-micro-flash-usb-rechargeable-lantern | http=200 | title='Lighthouse Micro Flash USB Rechargeable Lantern | Goal Zero' | 텍스트길이=88083 | 마커=[] | 주장가격표시=False
+- URL https://prod.danawa.com/info/?pcode=31394717 | http=200 | title='골제로 랜턴 라이트하우스 마이크로 플래쉬 블랙 (1개) : 다나와 가격비교' | 텍스트길이=22409 | 마커=[] | 주장가격표시=True
+- 인용[2] FOUND | 숫자일치=1/1 | claim='다나와 최저가 71,900원 명시' | quote='이미지출처: 옥션 최저가 71,900 원 최저가 구매하기'
+
+## 써머레스트 네오에어 엑스라이트 NXT R (Therm-a-Rest NeoAir XLite NXT Regular) | MID | priceKrw=193200
+- URL https://www.thermarest.com/sleeping-pads/fast-and-light/neoair-xlite-nxt-sleeping-pad/neoair-xlite-nxt.html | http=200 | title='NeoAir XLite NXT Ultralight Sleeping Pad | Therm-a-Rest\n &nd' | 텍스트길이=96239 | 마커=[] | 주장가격표시=False
+- URL https://prod.danawa.com/info/?pcode=89730698 | http=200 | title='써머레스트 네오에어 엑스라이트 NXT R (51x183) : 다나와 가격비교' | 텍스트길이=27956 | 마커=[] | 주장가격표시=True
+- 인용[2] FOUND | 숫자일치=1/1 | claim='다나와 최저가 193,200원 명시' | quote='최저가 193,200원 무료배송'
+
+## 네이처하이크 클라우드피크 2 텐트 20D (Naturehike Cloud Peak 2 20D Tent) | MID | priceKrw=286200
+- URL https://www.naturehike.com/products/cloud-peak-2-person-4-season-backpacking-tent | http=200 | title='Cloud Peak™ 2-Person 4-Season Backpacking Tent | Nturehike\n&' | 텍스트길이=78857 | 마커=[] | 주장가격표시=False
+- URL https://prod.danawa.com/info/?pcode=5339912 | http=200 | title='네이처하이크 클라우드피크2 텐트 20D 해외구매 : 다나와 가격비교' | 텍스트길이=18559 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=2/2 | claim='공식 최소 무게 약 2.26kg 명시' | quote='Minimum weight: approx.  2.26 kg / 4.98 lbs (excluding the f'
+- 인용[2] FOUND | 숫자일치=2/2 | claim='다나와 20D 원단 표기' | quote='네이처하이크 클라우드피크2 텐트 20D 해외구매'
+- 인용[2] FOUND | 숫자일치=1/1 | claim='다나와 최저가 286,200원 명시' | quote='최저가 286,200원 무료배송'
+
+## 씨투써밋 스파크 7도 레귤러 850필파워 구스다운침낭 (Sea to Summit Spark 7C Down Sleeping Bag) | PREMIUM | priceKrw=413100
+- URL https://seatosummit.com/products/spark-down-sleeping-bag | http=200 | title='Spark Ultralight Down Sleeping Bag for Camping Backpacking |' | 텍스트길이=43370 | 마커=[] | 주장가격표시=False
+- URL https://prod.danawa.com/info/?pcode=73889717 | http=200 | title='씨투써밋 스파크 7도 레귤러 850필파워 구스다운침낭 : 다나와 가격비교' | 텍스트길이=22205 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=1/1 | claim='공식 RDS 인증 850+ 필파워 명시' | quote='RDS-certified, 850+ fillpower goose down with a non-PFC Ultr'
+- 인용[1] FOUND | 숫자일치=3/3 | claim='공식 45°F(약 7°C) 온도 사양 명시' | quote='45°F Regular  45°F Long  30°F Regular'
+- 인용[2] FOUND | 숫자일치=1/1 | claim='다나와 최저가 413,100원 명시' | quote='최저가 413,100원 무료배송'
+
+## 힐레베르그 알락 2 (Hilleberg Allak 2) | PREMIUM | priceKrw=2205180
+- URL https://hilleberg.com/eng/tent/red-label-tents/allak-2/ | http=200 | title='Hilleberg Allak 4-Season Freestanding Backpacking Tent' | 텍스트길이=12539 | 마커=[] | 주장가격표시=False
+- URL https://prod.danawa.com/info/?pcode=7362232 | http=200 | title='힐레베르그 알락 2 : 다나와 가격비교' | 텍스트길이=26172 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=2/2 | claim='공식 Kerlon 1200 원단 및 9mm 폴대 표기' | quote='Kerlon 1200 outer tent fabric and 9mm poles make for a very '
+- 인용[2] FOUND | 숫자일치=1/1 | claim='다나와 최저가 2,205,180원 명시' | quote='최저가 2,205,180원 무료배송'
+# /Users/macmini/Lifipedia/content/camping.json
+
+## 헬리녹스 체어원 클래식 (Helinox Chair One Classic) | BUDGET | priceKrw=73990
+- URL https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-ChairTable/Helinox-Chair-One-Classic-Camping-Cha | http=200 | title='헬리녹스 체어원 경량 캠핑 의자 | 코스트코 코리아' | 텍스트길이=36391 | 마커=[] | 주장가격표시=True
+- URL https://www.helinox.co.kr/board/board.html?code=helinox_image6&type=v&num1=999882&num2=00000 | http=200 | title='Helinox' | 텍스트길이=72650 | 마커=[] | 주장가격표시=False
+- URL https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-ChairTable/Helinox-Chair-One-Camping-Chair-Tan/p | http=200 | title='헬리녹스 체어원 캠핑 체어 - 코요테탄 | 코스트코 코리아' | 텍스트길이=36480 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=2/2 | claim='코스트코 코리아 판매가 73,990원 명시' | quote='헬리녹스 체어원 경량 캠핑 의자  Helinox Chair One Classic Camping Chair  '
+
+## 벤딕트 차박 에어매트 프로 (Vendict Air Mat Pro) | BUDGET | priceKrw=99000
+- URL https://www.costco.co.kr/HardwareAutomotive/Automotive/Auto-Accessories/Vendict-Air-Mat-Pro/p/681376 | http=200 | title='벤딕트 차박 에어매트 프로 | 코스트코 코리아' | 텍스트길이=36069 | 마커=[] | 주장가격표시=True
+- URL https://woopa-mall.com/product/%EB%B2%A4%EB%94%95%ED%8A%B8-%EC%B0%A8%EB%9F%89%EC%9A%A9-%EC%B0%A8%EB%B0%95%EB%A | http=200 | title='벤딕트 차량용 차박매트 자동차 트렁크 에어매트 평탄화 차박용 매트리스 침대 PRO' | 텍스트길이=28918 | 마커=[] | 주장가격표시=False
+- 인용[1] FOUND | 숫자일치=2/2 | claim='제품 크기 191 x 129cm 명시' | quote='크기 : 191 x 129cm'
+- 인용[1] FOUND | 숫자일치=2/2 | claim='코스트코 판매가 99,000원 명시' | quote='681376 판매금액 99,000원 배송'
+
+## 코도리 가스 버너 세트 (코돌이 해바라기 버너) | MID | priceKrw=129900
+- URL https://www.costco.co.kr/GrillsAccessories/GasElectric-Grill/Kodori-Gas-Burner-Set/p/680109 | http=200 | title='코도리 가스 버너 세트 | 코스트코 코리아' | 텍스트길이=36751 | 마커=[] | 주장가격표시=True
+- URL https://www.onulmart.com/products/costco-a7e0b69ceb296433c975 | http=200 | title='코도리 가스 버너 세트 (지난 행사) | 오늘마트' | 텍스트길이=777 | 마커=[] | 주장가격표시=True
+- 인용[1] FOUND | 숫자일치=7/7 | claim='패키지 8.5kg 및 탱크 5.3kg 무게 명시' | quote='크기  패키지: W 32 x L 26 x H 56cm, 8.5kg  코돌이 탱크: 지름 28 x H 31 c'
+- 인용[1] FOUND | 숫자일치=1/1 | claim='3kg 가스통 용량 명시' | quote='가스 충전은 가까운 지역의 3kg 가스통 충전소에서 충전하시면 됩니다.'
+- 인용[1] FOUND | 숫자일치=2/2 | claim='코스트코 판매가 129,900원 명시' | quote='코도리 가스 버너 세트  Kodori Gas Burner Set         상품 #   680109   '
+
+## 에코플로우 RIVER 2 (256Wh) | MID | priceKrw=299900
+- URL https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-Equipment/Ecoflow-River-2-Power-Bank-256Wh/p/666 | http=200 | title='Ecoflow 리버 2 캠핑용 파워뱅크(256Wh) | 코스트코 코리아' | 텍스트길이=35669 | 마커=[] | 주장가격표시=True
+- URL https://kr.ecoflow.com/products/river-2-portable-power-station | http=200 | title='' | 텍스트길이=37165 | 마커=[] | 주장가격표시=False
+- 인용[1] FOUND | 숫자일치=6/6 | claim='256Wh 용량 및 코스트코 판매가 299,900원 명시' | quote='Ecoflow 리버 2 캠핑용 파워뱅크(256Wh)  Ecoflow River 2 Power Bank 256'
+- 인용[1] FOUND | 숫자일치=2/2 | claim='최대 600W 출력 명시' | quote='한 번에 최대 5개의 기기와 동시 사용도 가능하며, 최대 600W 기기의 사용이 가능'
+
+## 에코플로우 DELTA 2 Max (2048Wh) | PREMIUM | priceKrw=2249000
+- URL https://www.costco.co.kr/p/682243 | http=200 | title='에코플로우 델타2 맥스 파워뱅크 2048Wh | 코스트코 코리아' | 텍스트길이=35636 | 마커=[] | 주장가격표시=True
+- URL https://www.ecoflow.com/us/delta-2-max-portable-power-station | http=200 | title='EcoFlow DELTA 2 Max | Max Power Anywhere | Portable Power St' | 텍스트길이=13206 | 마커=[] | 주장가격표시=False
+- 인용[1] FOUND | 숫자일치=6/6 | claim='2048Wh 용량 및 판매가 2,249,000원 명시' | quote='에코플로우 델타2 맥스 파워뱅크 2048Wh  EcoFlow DELTA 2 Max Power Bank 204'
+- 인용[1] FOUND | 숫자일치=1/1 | claim='무게 23kg 명시' | quote='무게 : 약 23kg     제조자/수입자  Ecoflow / 동남종합상사 주식회사     제조국 또는 원산'
+
+## 잭커리 포터블 파워뱅크 1000 Plus + 솔라패널 세트 | PREMIUM | priceKrw=1449990
+- URL https://www.costco.co.kr/SportsFitnessCamping/Camping/Camping-Equipment/Jackery-Power-Bank-1000-Plus-Solar-Pan | http=200 | title='잭커리 휴대용 파워뱅크 1000 Plus + 솔라패널 세트 | 코스트코 코리아' | 텍스트길이=35841 | 마커=[] | 주장가격표시=True
+- URL https://www.jackery.com/products/jackery-explorer-1000-plus-portable-power-station | http=200 | title='Jackery Portable Power Station Explorer 1000 Plus' | 텍스트길이=251678 | 마커=[] | 주장가격표시=False
+- 인용[1] FOUND | 숫자일치=4/4 | claim='코스트코 판매가 1,449,990원 명시' | quote='잭커리 휴대용 파워뱅크 1000 Plus + 솔라패널 세트  Jackery Power Bank 1000 Pl'

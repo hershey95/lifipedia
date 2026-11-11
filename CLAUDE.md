@@ -3,6 +3,7 @@
 협업 상대 에이전트는 **Antigravity**(애칭 **안티**, 예전 문서의 "Gemini")다. 지시는 Orca 터미널로 보낸다(`scripts/gemini-send.sh`). 파일명 `GEMINI.md`·`docs/reviews/inbox/gemini/` 는 도구가 읽으므로 이름을 바꾸지 않는다. 옛 `ai` 명령(`~/.local/bin/ai`, `ask-ai`)은 2026-11-11 삭제했다. 다시 만들거나 호출하지 않는다.
 
 ## 먼저 읽는다
+- `docs/README.md`: 문서 지도. 문서를 새로 만들기 전에 기존 문서에 넣을 곳이 있는지 본다.
 - `GLOSSARY.md`: 도메인 용어. 코드·문서·화면 문구 모두 이 용어만 쓴다. "갤러리"는 단독으로 쓰지 말고 **상황 갤러리** / **분류 갤러리**로 구분한다. 금지어는 `_Avoid_` 줄에 있다.
 - `docs/adr/`: 되돌리기 어려운 결정. 어기려면 먼저 새 ADR 로 근거를 남긴다.
 - `docs/design/ROADMAP.md`, `docs/design/PROGRESS.md`: 계획과 진행. 작업은 PROGRESS 의 첫 `[ ]` 부터.
