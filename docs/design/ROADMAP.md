@@ -65,7 +65,7 @@ W44 는 1/5, W45 는 4/8(이월분 포함) 끝났고 W46 주는 구현 기록이
 | 미정 | 신고 처리·제재 | W45-4 | 검토자 결정(ref-security Q7) |
 
 ## 주간 운영
-일: Opus 가 그 주 설계서(`docs/design/2026-W<주차>-*.md`) 확정 → 월~목: Sonnet 구현, 영역별 직후 보안/UX 검토자(`docs/agents/`) → 금: Opus 회고 → 토: 격차 분석·`BACKLOG.md`. Gemini 는 설계서와 코드 diff 리뷰, 콘텐츠 병행.
+일: Opus 가 그 주 설계서(`docs/design/2026-W<주차>-*.md`) 확정 → 월~목: Sonnet 구현, 영역별 직후 보안/UX 검토자(`docs/agents/`) → 금: Opus 회고 → 토: 격차 분석·`BACKLOG.md`. 안티 는 설계서와 코드 diff 리뷰, 콘텐츠 병행.
 
 ## 열린 결정 (기본값으로 진행, 이견 있으면 변경)
 1. 운영 DB = SQLite (Postgres 복귀 안 함).

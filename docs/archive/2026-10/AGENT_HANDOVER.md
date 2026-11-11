@@ -59,7 +59,7 @@
 
 ## 🔁 교차 리뷰 & 주간 보고
 
-Claude ↔ Gemini 는 서로의 결과물을 `docs/reviews/` 에 리뷰로 남기고, 주말에 Opus 가 회고·계획에 반영한 뒤 사용자에게 보고한다.
+Claude ↔ 안티 는 서로의 결과물을 `docs/reviews/` 에 리뷰로 남기고, 주말에 Opus 가 회고·계획에 반영한 뒤 사용자에게 보고한다.
 규칙·템플릿은 [`docs/reviews/README.md`](docs/reviews/README.md) 참고. 핵심: 형식 고정, 하루치 범위만, 지적 3개 이상(또는 확인 항목 나열), 리뷰어가 직접 수정 금지, 사용자 승인 후에만 반영.
 
 ---
@@ -81,7 +81,7 @@ npm test             # Vitest 단위 테스트 (125개 전원 통과 필수)
 
 1. **브랜치 분리 및 독립 관리 (Branch Isolation)**
    - **Claude Code**: 기능/아키텍처 브랜치 (`claude/peaceful-pasteur-abbqgx` 또는 `feat/*`)를 주 무대로 사용 (W43 작업: 서버 마크다운 렌더, `/recent` 피드 등).
-   - **Antigravity (Gemini)**: 콘텐츠/UI 브랜치 (`content/*` 또는 `gemini/*`)를 주 무대로 사용 (콘텐츠 조사, 팩트체크, UI 디테일 개선 등).
+   - **Antigravity (안티)**: 콘텐츠/UI 브랜치 (`content/*` 또는 `gemini/*`)를 주 무대로 사용 (콘텐츠 조사, 팩트체크, UI 디테일 개선 등).
    - **원칙**: 서로의 전용 브랜치에 직접 푸시하지 않고, 최신 커밋을 가져올 때는 상대 브랜치를 `git merge`하여 반영합니다.
 
 2. **작업 선점 및 파일 락 (Task & File Claiming)**
@@ -121,7 +121,7 @@ npm test             # Vitest 단위 테스트 (125개 전원 통과 필수)
   - 위 "콘텐츠 작업 규칙" 섹션 신설.
 - **결과**: 가격 6건 출처 일치, 출처 미확인 문구는 삭제/수정. typecheck 통과, 테스트 69개 통과.
 - **알려진 이슈**: 캠핑 6개 중 3개가 전원 장비(텐트/침낭/조명 누락), 가격은 코스트코 한 곳 기준. 개발 DB 시드의 가짜 투표 때문에 신규 아이템(투표 0)이 하위 노출 — 실서비스 전 시드 정리 필요.
-- **역할 분담 계획**: 콘텐츠 조사·작성은 Gemini 계열 에이전트, 어려운 기능 개발은 Claude Code. 콘텐츠 날은 위 규칙을 따를 것.
+- **역할 분담 계획**: 콘텐츠 조사·작성은 안티 계열 에이전트, 어려운 기능 개발은 Claude Code. 콘텐츠 날은 위 규칙을 따를 것.
 
 ### [2026-10-09] Claude Code ➔ 차기 에이전트 (동기화 확인)
 - **확인 내용**:
@@ -130,7 +130,7 @@ npm test             # Vitest 단위 테스트 (125개 전원 통과 필수)
 - **변경 사항**: 코드 변경 없음. 이 로그만 추가.
 - **다음 작업 제안**: 위 제안 항목 중 하나(마이페이지/Karma 또는 Q&A 글쓰기 폼) 선택 대기.
 
-### [2026-10-09] Gemini (콘텐츠 담당) ➔ Claude Code / 차기 에이전트
+### [2026-10-09] 안티 (콘텐츠 담당) ➔ Claude Code / 차기 에이전트
 - **완료된 작업**:
   - `content/camping-2.json` 작성 (텐트 3종, 침낭 1종, 조명 2종 등 총 6개, 저/중/고 각 2개 균형 편성).
   - 팩트체크: 코오롱몰 공식관, 코스트코 코리아, 다나와 기준 출처 2개 이상 및 실구매가·스펙 확인, 미확인 항목(코베아 팝업 텐트 패키지 무게 등)은 `specSummary`에 명시 또는 `null` 처리.
@@ -141,7 +141,7 @@ npm test             # Vitest 단위 테스트 (125개 전원 통과 필수)
 - **다음 작업 제안**:
   - 브랜치 `content/2026-10-09-camping-2` 내용 교차 리뷰 후 로컬 DB 반영 (`npm run content:import -- content/camping-2.json`).
 
-### [2026-10-15] Antigravity (Gemini CLI) ➔ Claude Code
+### [2026-10-15] Antigravity (안티 CLI) ➔ Claude Code
 - **주요 환경 및 실행 능력 변화 (핵심)**:
   - Antigravity가 이제 CLI 환경 및 완전한 권한(`--dangerously-skip-permissions`, `always-proceed`)으로 동작합니다.
   - 시스템 `osxkeychain` GitHub 인증이 연동되어 **`git push` / `git pull`을 독립적으로 직접 수행**할 수 있게 되었습니다.
