@@ -10,6 +10,7 @@ import { FollowButton } from '@/components/FollowButton';
 import { AdSlot } from '@/components/AdSlot';
 import { TierBadge } from '@/components/TierBadge';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
+import { categoryPath } from '@/lib/taxonomy';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 
 type Params = {
@@ -24,7 +25,7 @@ async function loadTheme(slug: string) {
   return prisma.theme.findUnique({
     where: { slug: decodeURIComponent(slug) },
     select: {
-      id: true, slug: true, name: true, description: true, status: true, category: true,
+      id: true, slug: true, name: true, description: true, status: true, category: true, kind: true,
       followerCount: true, createdAt: true,
       proposer: { select: { id: true, name: true } },
       _count: { select: { items: true } },
@@ -93,6 +94,19 @@ export default async function ThemePage({ params, searchParams }: Params) {
     }),
   ]);
 
+  // 분류 갤러리: 경로(루트→자기)와 하위 분류 칩. 상황 갤러리는 해당 없음.
+  let crumbs: { slug: string; name: string }[] = [];
+  let children: { slug: string; name: string }[] = [];
+  if (theme.kind === 'CATEGORY') {
+    const cats = await prisma.theme.findMany({
+      where: { kind: 'CATEGORY' },
+      select: { id: true, slug: true, name: true, parentId: true },
+    });
+    const byId = new Map(cats.map((c) => [c.id, c]));
+    crumbs = (categoryPath(theme.id, cats) ?? [theme.id]).map((id) => byId.get(id)!).filter(Boolean);
+    children = cats.filter((c) => c.parentId === theme.id).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  }
+
   const progress = promotionProgress(theme.followerCount, promotionThreshold());
   const isActive = theme.status === 'ACTIVE';
 
@@ -100,6 +114,21 @@ export default async function ThemePage({ params, searchParams }: Params) {
     <div className="flex flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
+          {crumbs.length > 0 ? (
+            <nav aria-label="분류 경로" className="mb-1 text-xs text-ink/60">
+              <Link href="/">홈</Link>
+              {crumbs.map((c, i) => (
+                <span key={c.slug}>
+                  {' > '}
+                  {i === crumbs.length - 1 ? (
+                    <span aria-current="page">{c.name}</span>
+                  ) : (
+                    <Link href={`/theme/${c.slug}`}>{c.name}</Link>
+                  )}
+                </span>
+              ))}
+            </nav>
+          ) : null}
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold">{theme.name}</h1>
             <StatusChip status={theme.status} />
@@ -148,6 +177,17 @@ export default async function ThemePage({ params, searchParams }: Params) {
         <p className="card bg-black/[0.03] text-sm text-ink/70">
           활동이 없어 휴면 처리된 테마입니다. 다시 팔로우가 모이면 활성화됩니다.
         </p>
+      ) : null}
+
+      {children.length > 0 ? (
+        <nav aria-label="하위 분류" className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-ink/60">하위 분류</span>
+          {children.map((c) => (
+            <Link key={c.slug} href={`/theme/${c.slug}`} className="chip no-underline">
+              {c.name}
+            </Link>
+          ))}
+        </nav>
       ) : null}
 
       <AdSlot slot="theme-top" />
