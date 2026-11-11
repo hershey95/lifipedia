@@ -29,8 +29,8 @@
 
 ## W47 (11/9~11/15)
 설계서: `docs/design/2026-W47-community-sources.md` (8.1 작업 큐 순서로 집는다). 실패해도 그날 `dev.md` 를 남긴다.
-- [ ] T1 상황·분류 스키마(`Theme.kind`, `SituationCategory`) + 문서 재배치 마이그레이션 스크립트 — 월 (`2026-W47-taxonomy-situation.md` 5절). `db:push`·실제 재배치는 사람이
-- [ ] T2 분류 페이지·경로·상위 요약 + `popularity.ts` — 화
+- [x] T1 (fce36ef) 스키마 `Theme.kind`·`SituationCategory` + `taxonomy.ts` 순수 함수(`planReassignment` 포함). **`db:push` 미적용(사람)**. 실행 래퍼 스크립트는 `scripts/` 수정 금지라 미작성 — 사람이 `planReassignment` 로 2줄 래퍼를 만들거나 `scripts/` 허용 필요
+- [~] T2 (db0c22e) `popularity.ts`(+테스트)·분류 페이지 경로·하위 분류 칩 완료. **남음**: 중분류의 하위 리프 1위 모음("상위 요약"), 문서 3개 미만 리프 합치기, "인기 산정 방식" 공개 페이지, `unstable_cache(60초)` 연결 — T3 와 함께 집는다
 - [ ] T3 상황 페이지(인기순 분류 카드) + `content/taxonomy.json` import — 수 (Gemini 가 시드 초안을 먼저 올림)
 - [ ] V1 조회 지표 `PageView`/`ViewMark` + 집계·정리 — 목 (`2026-W47-taxonomy-situation.md` 7.3). 개인정보 미저장
 - [ ] P1 게시판 `Post`·`PostVote`·글 작성/목록/상세, 상황·분류 게시판 (+ 기존 B 댓글 투표·트리 정렬 흡수) — W48 월 (7.2). `db:push` 는 사람이

@@ -98,8 +98,14 @@ enum ThemeStatus {
   DORMANT // 휴면. 활동 저조로 읽기 전용
 }
 
+enum ThemeKind {
+  SITUATION // 상황 갤러리: 문서를 소유하지 않고 분류를 연결, 자체 게시판
+  CATEGORY // 분류 갤러리: 리프(소분류)가 문서를 갖고 순위를 매긴다
+}
+
 model Theme {
   id          String      @id @default(cuid())
+  kind        ThemeKind   @default(SITUATION)
   // SEO 친화 URL: /theme/여행-인생템
   slug        String      @unique
   name        String
@@ -123,10 +129,28 @@ model Theme {
   items     Item[]
   snapshots RankingSnapshot[]
 
+  // 상황 ↔ 분류 연결 (kind 에 따라 한쪽만 쓴다)
+  linkedCategories SituationCategory[] @relation("SituationSide")
+  linkedSituations SituationCategory[] @relation("CategorySide")
+
+  @@index([kind])
   @@index([status, followerCount])
   @@index([status, lastActivityAt])
   @@index([parentId])
   @@index([category])
+}
+
+model SituationCategory {
+  situationId String
+  categoryId  String
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  situation Theme @relation("SituationSide", fields: [situationId], references: [id], onDelete: Cascade)
+  category  Theme @relation("CategorySide", fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([situationId, categoryId])
+  @@index([categoryId])
 }
 
 model ThemeFollow {
