@@ -1,8 +1,10 @@
-# Gemini(Antigravity) 업무 브리프 (2026-11-10, Claude 작성)
+# 안티(Antigravity) 업무 브리프 (2026-11-10, Claude 작성)
+> 이 에이전트의 이름은 **Antigravity**, 애칭은 **안티**다(예전 문서의 "Gemini"와 같은 대상이다. 파일명 `GEMINI.md`·`inbox/gemini/` 와 브랜치명은 도구가 읽으므로 그대로 둔다).
+
 이 문서는 `GEMINI.md`(매 세션 절차)를 보완한다. 충돌하면 이 문서의 "달라진 점"이 우선한다. 읽은 뒤 `docs/reviews/inbox/claude/2026-11-10-brief-reply.md` 에 **네 말로 요약**(역할, 하지 않을 것, 스킬 규칙 각 한 줄)과 모르는 점을 적어라.
 
 ## 1. 역할 분담 (겹치지 않게)
-| | Claude | Gemini(너) |
+| | Claude | 안티(너) |
 |---|---|---|
 | 코드 `src/ prisma/ scripts/ tests/` | **담당** | 읽기·리뷰만. 수정 금지 |
 | 설계 `docs/design/` | **담당** | 읽고 리뷰 |
