@@ -25,7 +25,16 @@ for t in ts:
 [ -n "$HANDLE" ] || { echo "Gemini 터미널을 찾지 못함(Orca 미실행 또는 agy 세션 없음)"; exit 2; }
 
 START=$(date +%Y-%m-%dT%H:%M:%S)
-SEND_OUT=$(orca terminal send --terminal "$HANDLE" --text "$PROMPT" --enter 2>&1); SEND_RC=$?
+SEND_OUT=$(orca terminal send --terminal "$HANDLE" --text "$PROMPT" --enter --wait-submit 30 2>&1); SEND_RC=$?
+# Orca 가 소유 세션을 확정하지 못해 거부(agent_session_ownership_unknown 등)하면, 안내된 요청 ID 로 같은 지시를 재발행한다(재전송이 아니라 결과 재생). 최대 3회.
+for try in 1 2 3; do
+  [ "$SEND_RC" -ne 0 ] || break
+  RID=$(echo "$SEND_OUT" | grep -oE -- '--retry-request [0-9a-f-]{36}' | head -1 | awk '{print $2}')
+  [ -n "$RID" ] || break
+  echo "orca send 재시도 $try (id=$RID): $(echo "$SEND_OUT" | head -1 | cut -c1-80)"
+  sleep 15
+  SEND_OUT=$(orca terminal send --terminal "$HANDLE" --text "$PROMPT" --enter --retry-request "$RID" --wait-submit 30 2>&1); SEND_RC=$?
+done
 echo "orca send rc=$SEND_RC: $(echo "$SEND_OUT" | head -4 | tr '\n' ' ' | cut -c1-300)"
 # 입력이 수락되면(input_accepted) 전달된 것으로 본다. 종료코드가 0 이 아니어도 수락 문구가 있으면 진행한다.
 if [ "$SEND_RC" -ne 0 ] && ! echo "$SEND_OUT" | grep -q "input_accepted"; then echo "전달 실패($HANDLE)"; exit 3; fi
