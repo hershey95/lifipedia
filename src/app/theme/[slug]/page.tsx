@@ -11,6 +11,8 @@ import { AdSlot } from '@/components/AdSlot';
 import { TierBadge } from '@/components/TierBadge';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
 import { categoryPath } from '@/lib/taxonomy';
+import { POPULARITY_RULES } from '@/lib/popularity';
+import { buildSituationCards, type SituationCard } from '@/lib/situation';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 
 type Params = {
@@ -107,6 +109,49 @@ export default async function ThemePage({ params, searchParams }: Params) {
     children = cats.filter((c) => c.parentId === theme.id).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
   }
 
+  // 상황 갤러리: 연결된 분류를 인기순 카드로 (설계 W47-taxonomy 3절)
+  let cards: SituationCard[] | null = null;
+  if (theme.kind === 'SITUATION') {
+    const links = await prisma.situationCategory.findMany({ where: { situationId: theme.id }, select: { categoryId: true } });
+    cards = [];
+    if (links.length > 0) {
+      const asOf = new Date();
+      const since = new Date(asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000);
+      const cats = await prisma.theme.findMany({
+        where: { kind: 'CATEGORY' },
+        select: { id: true, slug: true, name: true, parentId: true, followerCount: true },
+      });
+      const catIds = cats.map((c) => c.id);
+      const [items, votes, edits, comments] = await Promise.all([
+        prisma.item.findMany({
+          where: { themeId: { in: catIds }, isRemoved: false },
+          select: { id: true, themeId: true, name: true, slug: true, score: true },
+        }),
+        prisma.vote.findMany({
+          where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+          select: { weight: true, createdAt: true, item: { select: { themeId: true } } },
+        }),
+        prisma.editHistory.findMany({
+          where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+          select: { createdAt: true, item: { select: { themeId: true } } },
+        }),
+        prisma.talkComment.findMany({
+          where: { isRemoved: false, createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+          select: { createdAt: true, item: { select: { themeId: true } } },
+        }),
+      ]);
+      cards = buildSituationCards({
+        cats,
+        linkedIds: links.map((l) => l.categoryId),
+        items,
+        votes: votes.map((v) => ({ weight: v.weight, createdAt: v.createdAt, themeId: v.item.themeId })),
+        edits: edits.map((e) => ({ createdAt: e.createdAt, themeId: e.item.themeId })),
+        comments: comments.map((c) => ({ createdAt: c.createdAt, themeId: c.item.themeId })),
+        asOf,
+      });
+    }
+  }
+
   const progress = promotionProgress(theme.followerCount, promotionThreshold());
   const isActive = theme.status === 'ACTIVE';
 
@@ -188,6 +233,36 @@ export default async function ThemePage({ params, searchParams }: Params) {
             </Link>
           ))}
         </nav>
+      ) : null}
+
+      {cards ? (
+        <section aria-labelledby="cards-h" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="cards-h" className="text-xl font-bold">지금 인기 분류</h2>
+            <span className="text-xs text-fg-subtle">최근 {POPULARITY_RULES.WINDOW_DAYS}일 투표·편집·댓글 기준</span>
+          </div>
+          {cards.length === 0 ? (
+            <p className="card text-sm text-fg-muted">아직 연결된 분류가 없습니다.</p>
+          ) : (
+            <ol className="grid gap-3 sm:grid-cols-2">
+              {cards.map((c) => (
+                <li key={c.id} className="card flex flex-col gap-1">
+                  <p className="text-xs text-fg-subtle">{c.pathNames.join(' > ')}</p>
+                  <Link href={`/theme/${c.slug}`} className="font-semibold no-underline">{c.name}</Link>
+                  <p className="text-xs text-fg-muted">
+                    문서 {c.itemCount.toLocaleString('ko-KR')}개 · 인기 {c.score.toFixed(1)}
+                  </p>
+                  {c.topItem ? (
+                    <p className="text-xs text-fg-muted">
+                      1위 후보{' '}
+                      <Link href={`/theme/${c.topItem.themeSlug}/item/${c.topItem.slug}`}>{c.topItem.name}</Link>
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
       ) : null}
 
       <AdSlot slot="theme-top" />
