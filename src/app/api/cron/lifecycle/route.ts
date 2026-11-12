@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { ok, fail, handleError, authorizeCron } from '@/lib/api';
+import { VIEW_RULES } from '@/lib/views';
 import { THEME_LIFECYCLE, promotionThreshold } from '@/lib/theme-lifecycle';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,12 @@ async function run(request: Request) {
       data: { status: 'DORMANT' },
     });
 
-    return ok({ promoted: promoted.count, madeDormant: slept.count, threshold });
+    // 조회 중복 제거 표식은 2일 후 지운다(방문자 기록을 남기지 않기 위해)
+    const marks = await prisma.viewMark.deleteMany({
+      where: { createdAt: { lt: new Date(Date.now() - VIEW_RULES.MARK_RETENTION_DAYS * 86_400_000) } },
+    });
+
+    return ok({ promoted: promoted.count, madeDormant: slept.count, threshold, viewMarksDeleted: marks.count });
   } catch (error) {
     return handleError(error);
   }

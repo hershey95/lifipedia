@@ -31,8 +31,8 @@
 설계서: `docs/design/2026-W47-community-sources.md` (8.1 작업 큐 순서로 집는다). 실패해도 그날 `dev.md` 를 남긴다.
 - [x] T1 (fce36ef) 스키마 `Theme.kind`·`SituationCategory` + `taxonomy.ts` 순수 함수(`planReassignment` 포함). **`db:push` 미적용(사람)**. 실행 래퍼 스크립트는 `scripts/` 수정 금지라 미작성 — 사람이 `planReassignment` 로 2줄 래퍼를 만들거나 `scripts/` 허용 필요
 - [~] T2 (db0c22e) `popularity.ts`(+테스트)·분류 페이지 경로·하위 분류 칩 완료. **남음**: 중분류의 하위 리프 1위 모음("상위 요약"), 문서 3개 미만 리프 합치기, "인기 산정 방식" 공개 페이지, `unstable_cache(60초)` 연결 — T3 와 함께 집는다
-- [ ] T3 상황 페이지(인기순 분류 카드) + `content/taxonomy.json` import — 수 (안티 가 시드 초안을 먼저 올림)
-- [ ] V1 조회 지표 `PageView`/`ViewMark` + 집계·정리 — 목 (`2026-W47-taxonomy-situation.md` 7.3). 개인정보 미저장
+- [x] T3 (f1db17a) 상황 페이지 인기순 분류 카드(`situation.ts` `buildSituationCards`) + 시드 검증 `parseTaxonomySeed`. **남음**: `taxonomy.json` import 실행 래퍼(`scripts/` 금지, 사람) · `content:check` 연결 · 시드 파일 자체(`content/taxonomy.json` 없음)
+- [x] V1 (커밋 해시는 dev.md 참조) 조회 지표 `PageView`/`ViewMark` 스키마(추가만) + `views.ts` + `POST /api/views` + 표식 2일 정리(cron). **남음**: 페이지에서 호출하는 클라이언트 컴포넌트, 인기 점수에 조회 항 연결, `db:push`(사람)
 - [ ] P1 게시판 `Post`·`PostVote`·글 작성/목록/상세, 상황·분류 게시판 (+ 기존 B 댓글 투표·트리 정렬 흡수) — W48 월 (7.2). `db:push` 는 사람이
 - [ ] P2 추천 답변 문서 첨부·집계·도움됨 — W48 화 (7.2)
 - [ ] P3 상황 페이지 베스트 문서·답변 없는 질문 — W48 수 (7.1)
