@@ -153,6 +153,30 @@ model SituationCategory {
   @@index([categoryId])
 }
 
+// 조회 지표 (W47 V1). 일 단위 집계만 저장하고 방문자 기록은 없다. 순위 점수에는 쓰지 않는다(ADR 0001).
+enum ViewTarget {
+  THEME
+  ITEM
+}
+
+model PageView {
+  day        String // 'YYYY-MM-DD' (KST)
+  targetType ViewTarget
+  targetId   String
+  count      Int        @default(0)
+
+  @@id([day, targetType, targetId])
+  @@index([targetType, targetId])
+}
+
+// 하루 1인 1회 중복 제거용 임시 표식. hash(vid+day+target) 만 저장하고 2일 후 지운다.
+model ViewMark {
+  hash      String   @id
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model ThemeFollow {
   themeId   String
   userId    String
