@@ -63,15 +63,17 @@ G(db:push·build) ─┬─> M1 ──> (시드·래퍼 적용, 사람) ──> 
 
 ## 5. 작업 M1 — 분류 마감
 
+- **데이터 모델**: 변경 없음. **API**: 변경 없음. 바뀌는 것은 순수 함수·서버 컴포넌트·공개 설명 페이지다.
+
 ### 5.1 `content:check` 가 시드 파일을 알아보게 한다 (`src/lib/content-check.ts`)
-두 방향이 수용돼 있다. 11-15 답신 #2 는 "`items` 없는 파일은 건너뛴다", PROGRESS T3 잔여는 "`content:check` 에 시드 검증을 연결한다"이다. **둘을 한 분기로 합친다.** `checkContent` 첫머리에서 `categories`·`situations` 배열이 있으면 갤러리 규칙 대신 `parseTaxonomySeed` 를 돌리고, 그 `errors` 를 `Issue` 로 바꿔 돌려준다. 건너뛰기만 하면 시드의 깨진 부모 slug 를 아무도 잡지 못한다. 반대로 검증기를 따로 만들면 스크립트(`scripts/check-content.ts`)를 고쳐야 한다. 이 분기 하나는 둘 다 피한다.
+두 방향이 수용돼 있다. 11-15 답신 #2 는 "`items` 없는 파일은 건너뛴다", PROGRESS T3 잔여는 "`content:check` 에 시드 검증을 연결한다"이다. **둘을 한 분기로 합친다.** `checkContent` 첫머리에서 `categories`·`situations` 배열이 있으면 갤러리 파일(`gallery`·`items` 필드) 규칙 대신 `parseTaxonomySeed` 를 돌리고, 그 `errors` 를 `Issue` 로 바꿔 돌려준다. 건너뛰기만 하면 시드의 깨진 부모 slug 를 아무도 잡지 못한다. 반대로 검증기를 따로 만들면 스크립트(`scripts/check-content.ts`)를 고쳐야 한다. 이 분기 하나는 둘 다 피한다.
 ```ts
 export function checkContent(data: unknown, galleries: string[]): Issue[] {
   const d = data as Json;
   if (d && Array.isArray(d.categories) && Array.isArray(d.situations)) {
     return parseTaxonomySeed(d).errors.map((msg) => ({ level: 'error' as const, msg }));
   }
-  // 기존 갤러리 파일 검사 그대로
+  // 기존 갤러리 파일(gallery·items 필드) 검사 그대로
 }
 ```
 - `situation.ts` → `content-check.ts` import 는 순환이 없다(`situation.ts` 는 `popularity`·`taxonomy` 만 본다).
@@ -114,14 +116,21 @@ export function summarizeChildren(input: {
 - `page.tsx:245` → "아직 배치된 분류 갤러리가 없습니다." 그리고 `/themes?category=` 로 가는 "분류 둘러보기" 링크를 단다(taxonomy 3절 "제안 링크". 배치 제안 흐름은 W49 이후라 지금은 둘러보기로 둔다).
 - `page.tsx:324`·`:411` 의 "항목" → "문서". 이 파일의 다른 금지어("테마" 등)는 K 의 치환 커밋 때 같이 본다. 이번에는 바꾸지 않는다(범위 고정).
 
-### 5.6 수용 기준 (M1)
-- [ ] `content:check` 가 올바른 시드에 오류 0, 깨진 부모에 오류 1을 낸다(테스트). 갤러리 파일 결과는 변하지 않는다.
+### 5.6 위험 (M1)
+- **60초 지연**: 투표·편집 직후 상황 갤러리의 카드 순서가 최대 60초 늦게 바뀐다. 인기는 30일 창 지표라 문제없다. 문서 순위(점수)는 캐시 밖이다.
+- **캐시 키 실수**: `asOf` 를 밖에서 넘기면 요청마다 키가 달라져 캐시가 무력해진다(5.2). 코드 리뷰 항목으로 둔다.
+- **시드 분기의 오판**: `categories`·`situations` 배열을 **둘 다** 가진 JSON 만 시드로 본다. 갤러리 파일(`gallery`·`items` 필드)에는 두 키가 없다. 두 키를 다 가진 갤러리 파일이 생기면 갤러리 파일 규칙 검사를 건너뛰게 된다. 그래서 테스트 3번째 사례("`categories` 만 있으면 기존 검사")로 경계를 고정한다.
+- **데이터 없이 만든 화면**: G 와 시드 적용 전에는 `summarizeChildren` 결과가 늘 빈 배열이다. 육안 확인은 G 뒤로 미룬다(회고 3절 "데이터 없이 만든 화면").
+
+### 5.7 수용 기준 (M1)
+- [ ] `content:check` 가 올바른 시드에 오류 0, 깨진 부모에 오류 1을 낸다(테스트). 갤러리 파일(`gallery`·`items`)의 결과는 변하지 않는다.
 - [ ] 상황 페이지의 카드 계산이 `unstable_cache` 60초 안에 있다. `asOf` 는 함수 안에서 만든다.
 - [ ] `summarizeChildren` 테스트 5건이 통과한다. 중분류 페이지에 상위 요약과 합친 목록이 보인다(G 이후 육안. 못 보면 "육안 미확인").
 - [ ] `how-ranking-works#popularity` 의 숫자가 `POPULARITY_RULES` 에서 온다.
 - [ ] `npx tsc --noEmit`, `npx vitest run` 통과. `npm run build` 결과(G 여부에 따라)를 기록한다.
 
 ## 6. 작업 M2 — 조회 지표 연결
+- **데이터 모델**: 변경 없음(`PageView`·`ViewMark` 는 V1 에 있음. `ViewTarget.POST` 는 P1). **API**: `POST /api/views` 의 요청·응답 형식은 그대로다. `Set-Cookie` 의 `Secure` 속성만 바뀐다.
 
 ### 6.1 비콘 컴포넌트 `src/components/ViewBeacon.tsx`
 ```tsx
@@ -154,7 +163,7 @@ export function ViewBeacon({ targetType, targetId }: { targetType: 'THEME' | 'IT
 - HMAC 서명은 비밀키 환경변수가 필요하다(`.env` 수정은 무인 금지). 이번에도 기본값(서명 없음)으로 둔다. 위조해도 자기 방문의 중복 제거만 우회하고, IP 분당 60 한도에 걸린다(회고 2절 #4).
 
 ### 6.4 라우트 테스트 `tests/views-route.test.ts` — 안티 리뷰 11-15 #4
-`vote-route.test.ts` 와 같은 mock 방식으로 쓴다. 안티 리뷰는 "400/404"라고 했지만 **이 라우트에는 404 가 없다.** 없는 대상은 `202 { counted: false }` 다. 존재 여부를 숨기려는 동작이라 그대로 고정한다.
+`vote-route.test.ts` 와 같은 mock 방식으로 쓴다. 한도기는 모듈 수준 상태라 **사례마다 다른 `x-forwarded-for` 를 쓴다.** 그래야 429 사례가 테스트 순서에 의존하지 않는다. 안티 리뷰는 "400/404"라고 했지만 **이 라우트에는 404 가 없다.** 없는 대상은 `202 { counted: false }` 다. 존재 여부를 숨기려는 동작이라 그대로 고정한다.
 - 잘못된 본문(`targetType: 'USER'`, `targetId` 누락) → 400.
 - 봇 UA → 202 `counted: false`, DB 호출 없음.
 - 없는 대상 → 202 `counted: false`, `viewMark.create` 호출 없음.
@@ -167,7 +176,16 @@ export function ViewBeacon({ targetType, targetId }: { targetType: 'THEME' | 'IT
 - 반환 함수에 `size()` 를 붙여 테스트가 공개 표면으로 확인하게 한다.
 - **테스트**(`tests/views.test.ts`): IP 3개가 1번씩 요청 → 창(60초) 뒤 아무 IP 로 요청 → `size()` 가 1.
 
-### 6.6 수용 기준 (M2)
+### 6.6 위험 (M2)
+- **쿠키를 지우며 조회 부풀리기**: 중복 제거는 `vid` 쿠키 기준이다. 한 IP 가 요청마다 쿠키를 버리면 분당 60회까지 매번 센다. 하루에 한 대상에 약 86,000회다. 가중 0.1 을 곱해도 인기 약 8,600 이라, 어떤 투표 항보다 크다.
+  - 조회 항은 지표가 30일 쌓이는 12월 중순까지 자동으로 0 이다. 그래서 **W48 을 막지는 않는다.**
+  - 그러나 조회 항이 켜지기 전에 상한을 정해야 한다. 상한은 인기 산식의 변경이라 거버넌스다(11-14 답신 #3). 11절 결정 6 으로 올린다.
+  - 후보: 대상별 하루 조회 상한(예: 하루 IP 수 기준), 조회 항을 `log1p(조회)` 로 압축하는 방법.
+- **개발 모드 이중 호출**: React StrictMode 는 개발 중 `useEffect` 를 두 번 부른다. 같은 날 `ViewMark` 중복 제거가 흡수하므로 두 번 세지 않는다. 운영 빌드에는 해당하지 않는다.
+- **http 배포에서 `Secure`**: 6.3 대로 요청 프로토콜로 판정한다. 프록시가 `x-forwarded-proto` 를 넘기지 않는 https 배포라면 `Secure` 가 빠진다. 그래도 동작은 하고 보안만 약간 약하다. G 의 NAS 확인 항목에 넣는다.
+- **봇 필터 우회**: UA 필터는 정직한 봇만 거른다. 나머지는 IP 한도와 위의 상한 결정이 받는다.
+
+### 6.7 수용 기준 (M2)
 - [ ] 분류·문서 페이지를 열면 `/api/views` 가 1회 호출된다(G 이후 `PageView` 행으로 확인, 못 하면 "육안 미확인").
 - [ ] `views-route.test.ts` 6건, `views.test.ts` 정리 1건, `situation.test.ts` 조회 항 3건이 통과한다.
 - [ ] `Secure` 는 https 요청에만 붙는다.
@@ -256,8 +274,9 @@ model PostCommentVote {
 }
 ```
 - 추가 enum 값: `ViewTarget.POST`(`views.ts:10` 주석이 이미 예고한다), `ReportTargetType.POST`·`POST_COMMENT`. enum 값 추가는 SQLite 에서 데이터 변경이 없다.
-- `User`·`Theme` 에 관계 필드만 더한다. `AnswerItem` 과 `helpfulAt` 은 P2 의 것이다. 하지만 `db:push` 를 두 번으로 줄이려고 **P1 커밋에 같이 넣는다**(사람 실행 횟수가 병목이다. 회고 3절).
+- 관계 필드만 더한다: `User`(글·글 투표·게시판 댓글·댓글 투표 4개), `Theme.posts`, `Item.answerItems AnswerItem[]`. `Item` 쪽이 빠지면 `prisma validate` 가 실패한다. `AnswerItem` 과 `helpfulAt` 은 P2 의 것이다. 하지만 `db:push` 를 두 번으로 줄이려고 **P1 커밋에 같이 넣는다**(사람 실행 횟수가 병목이다. 회고 3절).
 - 글의 `conceptAt`(게시판 개념글)은 넣지 않는다. 열린 질문 Q1 이다.
+- **조회 라우트 존재 확인을 함께 고친다.** `views/route.ts:22-25` 는 `THEME` 이면 `theme.count`, 아니면 `item.count` 를 보는 2분기 삼항이다. `POST` 값을 더하기만 하면 글 id 가 `item.count` 로 가서 늘 0이 된다. 그러면 조회가 영원히 `counted:false` 다. P1 에서 `POST` 분기 `post.count({ where: { id, isRemoved: false } })` 를 더하고, 6.4 테스트에 "있는 글 → `counted:true`" 1건을 더한다.
 
 ### 7.2 순수 함수 `src/lib/comments.ts` (W45 4.2 를 모양 일반화)
 W45 4.2 의 시그니처를 그대로 쓴다. 대상 행을 구체 모델이 아니라 **최소 모양**으로 받는다. 그러면 토론 댓글(B)·게시판 댓글·글 자체가 같은 함수를 쓴다.
@@ -284,14 +303,14 @@ export const postBody = z.object({ kind: z.enum(POST_KINDS), title: z.string().t
 
 | 메서드·경로 | 요청 | 응답 | 비고 |
 |---|---|---|---|
-| `POST /api/themes/[slug]/posts` | `postBody` | 201 `{ post: { id } }` | 갤러리 `canContribute(status)` 아니면 403(문서 작성과 같다). 상황 갤러리·분류 갤러리 모두 허용 |
+| `POST /api/themes/[slug]/posts` | `postBody` | 201 `{ post: { id } }` | 대상 상황 갤러리·분류 갤러리가 `canContribute(status)` 가 아니면 403(문서 작성과 같다). 두 종류 모두 허용 |
 | `POST /api/posts/[id]/vote` | `{ type }` | 200 `{ action, myVote, upCount, downCount }` | 본인 글 403, 삭제 글 404. 같은 방향 재투표는 취소, 반대는 전환(`items/[id]/vote` 규칙) |
 | `POST /api/posts/[id]/comments` | `{ bodyText, parentId? }` (+P2 `itemIds`) | 201 `{ comment }` | 부모가 다른 글이면 400(`talk` 라우트와 같다) |
 | `POST /api/post-comments/[id]/vote` | `{ type }` | 200 (위와 같은 모양) | 본인 댓글 403 |
 - **레이트 리밋**(`abuse.ts` 의 `ABUSE_LIMITS` 에 더함, 세기는 `countSince`):
   - `POSTS_PER_DAY: 10`, `NEW_ACCOUNT_POSTS_PER_DAY: 3`(가입 7일 미만, taxonomy 7.2). 판정은 `user.createdAt` 으로 한다.
   - 게시판 댓글은 기존 `COMMENTS_PER_HOUR: 20` 을 `postComment` 테이블로 따로 센다.
-  - 글·댓글 투표는 `COMMENT_VOTES_PER_HOUR: 120`(W45 4.4 의 값, 이번에 처음 정의) 하나를 함께 쓴다.
+  - 글·댓글 투표는 `COMMENT_VOTES_PER_HOUR: 120`(W45 4.4 의 값, 이번에 처음 정의) 하나를 함께 쓴다. 세는 법은 `countSince(prisma.postVote, { userId }, 3_600) + countSince(prisma.postCommentVote, { userId }, 3_600)` 의 합이다. B 가 들어오면 `commentVote` 도 더한다.
 - 투표 가중치는 `voteWeightFor(user)` 를 쓴다. **랭킹·신뢰도에 영향이 없다.** `recomputeItemScore`·`contributionCount` 를 건드리지 않는다는 것을 라우트 테스트로 고정한다.
 - 수정·삭제 API 는 이번에 없다. 작성자 삭제(`isRemoved`)는 신고 처리(W45-4)와 같은 권한 설계 안에서 한다(안티 리뷰 11-15 #3 과 같은 이유).
 - 신고는 기존 `POST /api/reports` 의 `targetType` 목록(`reports/route.ts:10`)에 `POST`·`POST_COMMENT` 를 더한다.
@@ -320,7 +339,7 @@ export const postBody = z.object({ kind: z.enum(POST_KINDS), title: z.string().t
   - `boardHref` 는 기본값을 뺀다.
   - `postBody`: 제목 101자 → 실패, 본문 공백만 → 실패.
 - `tests/post-route.test.ts`(mock):
-  - 작성: 비로그인 401. 신규 계정 4번째 글 429. 비ACTIVE 갤러리 403. 성공 201.
+  - 작성: 비로그인 401. 신규 계정 4번째 글 429. 비ACTIVE 상황 갤러리·분류 갤러리 403. 성공 201.
   - 글 투표: 신규 `created`, 같은 방향 `removed`, 반대 `changed`. 본인 글 403. 쓰기는 `$transaction` 안에서만 일어난다. `recomputeItemScore` 를 부르지 않는다.
   - 댓글: 다른 글의 `parentId` → 400.
 - `tests/feed.test.ts`: `tab=board` 파싱 1건을 더한다.
@@ -386,7 +405,16 @@ export function itemTallyForPost(answers: {
   - 도움됨: 남이 누름 403, 4번째 409.
   - `contributionEvent` 를 호출하지 않는다.
 
-### 8.6 수용 기준 (P2)
+### 8.6 위험 (P2)
+- **자기 제품 끼워 넣기**: 판매자가 모든 추천 요청에 자기 문서를 첨부할 수 있다.
+  - 막는 장치: 첨부는 답변당 3개, 댓글 시간당 20개 한도, 신고(`POST_COMMENT`).
+  - 집계는 그 답변이 받은 **추천**으로만 오른다. 첨부만으로는 표 위로 올라가지 않는다.
+  - 신고 처리 경로가 없다는 한계는 7.7 과 같다.
+- **부계정 추천으로 집계 부풀리기**: 7일 이상 된 계정의 가중 추천이 쌓이면 표 순위가 오른다. 이 표는 그 글 안에서만 보이고 **문서 점수에 들어가지 않는다.** 그래서 순위 조작의 이득이 작다. 따로 탐지하지 않고, 개념글과 같은 관찰 대상으로 둔다.
+- **도움됨 남용**: 질문자가 부계정 답변에 도움됨을 주는 경로가 있다. 기여 적립을 하지 않으므로(8.3) 신뢰도에는 영향이 없다. 화면의 `도움됨` 칩만 영향을 받는다.
+- **검색 상자 부하**: 첨부 검색은 기존 `/api/search` 를 그대로 쓴다. 입력 디바운스(300ms)를 둔다.
+
+### 8.7 수용 기준 (P2)
 - [ ] 추천 요청에 답변 + 문서 2개를 첨부하면 답변에 카드가 보이고 상단 표에 집계된다(육안, G 이후).
 - [ ] 도움됨은 글 작성자만, 글당 3개까지 줄 수 있다. 기여 원장이 변하지 않는다(테스트).
 - [ ] `tsc`·`vitest` 통과, `build` 결과 기록. 직후 보안 검토자(첨부 검증·권한)를 거친다.
@@ -420,6 +448,7 @@ export function itemTallyForPost(answers: {
 | 2 | 신고 처리(W45-4) 검토자 | **보류**. 게시판 스팸은 사람이 DB 로 처리 | ref-security Q7. 게시판을 열면 필요가 커진다(7.7) |
 | 3 | 도움됨을 기여로 적립할지 | **적립 안 함**, `helpfulAt` 만 기록 | 8.3 |
 | 4 | `vid` HMAC 서명(환경변수 신설) | **서명 없음** + `Secure`(https 때) + IP 한도 | 6.3 |
+| 6 | 조회 항의 상한(쿠키를 지우며 부풀리기 대비). **조회 항이 켜지는 12월 중순 전**까지 정해야 한다 | 이번 주는 결정 없이 진행한다(조회 항이 자동으로 0). 12-08 설계일까지 답이 없으면 `log1p(조회)` 압축을 제안안으로 올린다 | 6.6. 인기 산식 변경이라 거버넌스 |
 | — | ~~분류 인기에 조회수를 넣을지~~ | **종결**: ADR 0001 본문이 허용한다 | 6.2 |
 | 운영 | 게이트 G 1~6 (백업·`db:push`·build·`scripts/` 3건·시드 파일·Bash 허용 기록) | 결정이 아니라 사람이 해야 할 실행 | 3절 |
 
