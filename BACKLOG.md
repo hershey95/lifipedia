@@ -1,7 +1,42 @@
 # BACKLOG (Claude 관리, 토요일 격차 분석으로 갱신)
 > 4주 통합 로드맵: `docs/design/ROADMAP.md` (W43~W46), 진행: `docs/design/PROGRESS.md`. 아래는 로드맵 밖 항목과 격차 분석 결과.
 > 우선순위 P0 즉시 / P1 2주 / P2 분기. 규모 S<½일, M 1~2일, L 3일+.
-> 최종 갱신: 2026-10-24 (격차 분석, 코드 미수정. 근거는 파일:줄)
+> 최종 갱신: 2026-11-14 (격차 분석, 코드 미수정. 근거는 파일:줄). 아래 10-24 절은 이력이며, 낡은 항목은 11-14 절 "10-24 항목 상태"에서 정정한다.
+
+## 격차 분석 2026-11-14 (W47 토요일)
+### 10-24 항목 상태 (정정)
+- 해결: 보호 수준(`src/lib/protection.ts`, `protection-service.ts`·`tests/protection.test.ts`), 갤러리 통합 탭(`/theme/[slug]`), 라이트 토큰 정의(globals.css `data-theme`), 알림·댓글 투표 **모델**(schema.prisma:311 `CommentVote`, :331 `Notification`, :304 `conceptAt`).
+- 그대로: 신고→제재 경로 없음(`isRemoved = true` 를 쓰는 코드 grep 0건), 처리방침·약관 라우트 없음, `ink` 브리지 생존(tailwind.config.ts:10~11, 사용 97곳·21파일: `theme/[slug]/page.tsx` 25, `how-ranking-works` 11, `[tier]/page.tsx` 9, `themes/page.tsx` 8).
+- 정정: `*.tsbuildinfo` 는 이제 `.gitignore:7` 에 있음(추적 해제 여부만 재확인). 테스트 파일 21개로 늘었으나 라우트 테스트는 여전히 `me`·`vote` 뿐.
+
+### P0 — 막힌 것
+- **[P0·사용자·S] `db:push` 미적용 19일째(11-13 회고 18일 기준).** A-4a·T1·V1 스키마(`SituationCategory`, `PageView`, `ViewMark`, `CommentVote`, `Notification`, `Theme.kind`)가 운영 DB 에 없다. `npm run build` prerender 게이트가 막혀 있고(PROGRESS.md:19, :32~35), 이후 모든 작업(P1·C·S)의 선행 조건. 근거 PROGRESS.md:35 "db:push(사람)". 월요일 첫 일.
+- **[P0·사용자·S] `taxonomy.json` 시드 import 불가.** `content/taxonomy.json` 은 `content:check` 에서 오류(최상위에 gallery·items 필요, facts.txt 11-14)이고, `parseTaxonomySeed`(src/lib/taxonomy.ts)에 맞는 실행 래퍼가 `scripts/` 금지라 없다. 분류 카드(`situation.ts`)는 데이터 없이 빈 화면. 결정: `content-check` 가 taxonomy 파일을 구분하게 할지(`src/lib/content-check.ts`, 코드라 가능), 래퍼를 사람이 만들지.
+
+### 기능 격차 (설계 대비 코드)
+- **[P1·M] 조회 지표가 아직 끊겨 있다.** `/api/views`(src/app/api/views/route.ts:13)는 있으나 호출하는 클라이언트 컴포넌트가 없다(`src/components` 에서 `/api/views` grep 0건). 인기 점수에도 조회 항 연결 없음(`popularity.ts` 사용처는 `theme/[slug]/page.tsx:14`뿐). 주의: ADR 0001 은 조회수를 **순위 점수에 넣지 않는다** — 분류 카드의 "인기" 점수에 쓸 때 ADR 범위(문서 순위 vs 분류 정렬)를 먼저 명문화할 것. 규모 M.
+- **[P1·M] T2 잔여**: 중분류 "상위 요약", 3개 미만 리프 합치기, "인기 산정 방식" 공개 페이지(`how-ranking-works/page.tsx` 에 분류 인기 설명 없음), `unstable_cache(60초)`(`src/app` 에서 `unstable_cache` grep 0건 → 분류 카드가 요청마다 집계). 근거 PROGRESS.md:33.
+- **[P1·L] 알림·댓글 투표·개념글 구현 0.** 모델만 있고(schema.prisma:311·331) 라우트·UI 없음(`src` 에서 `commentVote`·`notification` grep 0건). 게시판 P1 이 흡수(PROGRESS.md:36·39·40). 알림 3종·헤더 배지·90일 정리 포함.
+- **[P1·L] `Item.sources` 필드·각주 렌더 없음.** `EDITABLE_FIELDS` 에 `sources` 없음(wiki.ts:8~17), Item 컬럼 없음. 현재 `sources` 는 콘텐츠 JSON 검증에만 존재(content-check.ts:85~105). 콘텐츠 `facts` 전환의 선행.
+- **[P2·M] 게시판 `Post`·`PostVote`·추천 답변(P1~P3) 스키마도 없음** — W48 월~수 (PROGRESS.md:36~38).
+
+### 보안·운영
+- **[P0·M] 신고 처리 경로 없음 (10-24 이후 변화 없음).** `Report` 는 쌓이기만(schema.prisma:420), 처리 UI·`Sanction` 없음. 결정 대기(ref-security Q7). 최소안: 목록+`isRemoved` 토글+기록.
+- **[P1·S] `vid` 쿠키에 `Secure` 없음·서명 없음**(src/app/api/views/route.ts:45). HttpOnly·SameSite 는 있음. HMAC 서명은 환경변수 신설 필요(사용자 결정, 11-13 보고 4). 위조 시 한도 우회 가능하나 점수 영향은 해시 단위 중복 제거 수준.
+- **[P1·S] cron 인증이 `CRON_SECRET` 단일**(src/lib/api.ts:25). 미설정 시 동작 확인 필요: ROADMAP W43-1 은 "필수화"라 했음 — 라우트 테스트 없음(`tests/` 에 cron·views 라우트 테스트 없음, `views.test.ts` 는 순수 함수 수준 추정). 확인 후 테스트 추가.
+- **[P1·M] 라우트 테스트 공백 확대**: edit·revert·items·reports·views·cron 라우트(되돌리기, 보호 403, 409, 한도) 무테스트. `tests/` 에 `me-route`·`vote-route` 뿐.
+- 이월 유지: 처리방침·약관 페이지 없음(P0·S 최소안), SQLite 백업 자동화 부재(P1·M, `scripts/` 금지 → 사용자), CSP `'unsafe-inline'`(P1·낮음).
+
+### 프론트·디자인
+- **[P1·L] `ink` 치환(97곳) 지연**: 브리지로 보이기는 하나 W47 K·D 0건. 라이트 토글·가드 2번·`useOptimistic`(src 에 사용 0건)은 W48. 디자인 가드 테스트(`tests/design-tokens.test.ts`)는 있음 → 치환 단위를 파일 그룹으로 쪼개 소규모 커밋 권장(예: `theme/[slug]/page.tsx` 25곳 먼저).
+- **[P1·S] 접근성 자동 점검 없음**(10-24 항목 유지). 라이트 토글 도입 시 대비 가드와 함께.
+- **[P2·M] Playwright 시각 회귀 없음**(W46-4 → W48, 의존성 설치 허용·시드 DB 선행).
+
+### 무인 운영·프로세스 부채
+- **[P1·S] Bash 거부 재발**: 11-09·11-10 월·화 구현 0건(11-13 회고). 원인 기록 없음 → 허용 목록 변경 이력을 남길 것(사용자).
+- **[P1·S] 안티의 `content/*.json` 쓰기 차단** — 대화형 Claude 가 옮기는 현 방식 유지/해제 결정 필요(11-13 보고 3).
+- **[P1·S] 크레모아 인용 대조 불일치**: 11-14 facts 의 `인용[1] NOT_FOUND`(camping-2.json 크레모아 판매가·재입고 인용 2건)는 JS 렌더 의심 — 이미 안티가 재고 정정함. 다음 점검에서 실측 재확인.
+- 낡은 가격(다나와 3건)·가격 재확인 주기: 이월.
 
 ## 격차 분석 2026-10-24 — 로드맵 안의 미완 (참고, 중복 등재 아님)
 - W44 잔여 5개(4a·1·2·3·4b/c)가 모두 미착수 — PROGRESS.md:14~19. 코드 근거: `ink` 브리지가 아직 살아 있고(tailwind.config.ts:9) `text/bg/border-ink` 류 78곳·22개 파일이 남음(`src/app/**`, `src/components/**`). 라이트 테마 변수 없음(globals.css:8~10 다크 값만).
