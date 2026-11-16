@@ -33,14 +33,30 @@
 - [~] T2 (db0c22e) `popularity.ts`(+테스트)·분류 페이지 경로·하위 분류 칩 완료. **남음**: 중분류의 하위 리프 1위 모음("상위 요약"), 문서 3개 미만 리프 합치기, "인기 산정 방식" 공개 페이지, `unstable_cache(60초)` 연결 — T3 와 함께 집는다
 - [x] T3 (f1db17a) 상황 페이지 인기순 분류 카드(`situation.ts` `buildSituationCards`) + 시드 검증 `parseTaxonomySeed`. **남음**: `taxonomy.json` import 실행 래퍼(`scripts/` 금지, 사람) · `content:check` 연결 · 시드 파일 자체(`content/taxonomy.json` 없음)
 - [x] V1 (커밋 해시는 dev.md 참조) 조회 지표 `PageView`/`ViewMark` 스키마(추가만) + `views.ts` + `POST /api/views` + 표식 2일 정리(cron). **남음**: 페이지에서 호출하는 클라이언트 컴포넌트, 인기 점수에 조회 항 연결, `db:push`(사람)
-- [ ] P1 게시판 `Post`·`PostVote`·글 작성/목록/상세, 상황·분류 게시판 (+ 기존 B 댓글 투표·트리 정렬 흡수) — W48 월 (7.2). `db:push` 는 사람이
-- [ ] P2 추천 답변 문서 첨부·집계·도움됨 — W48 화 (7.2)
-- [ ] P3 상황 페이지 베스트 문서·답변 없는 질문 — W48 수 (7.1)
-- [~] B (W45-2) 댓글 투표 — P1 에 흡수
-- [ ] C (W45-1) 알림 3종·헤더 배지·`/notifications`·90일 정리 — 화 (W45 설계서 5절, W47 4절)
-- [ ] S (W46-1) `Item.sources` + 각주 렌더 + 편집 폼, `tags` 제외 — 수 (W47 5절). `db:push` 는 사람이
-- [ ] K (W44-4b 중 `ink`) `ink` 치환 + 가드 1번, 이어서 D (W45-5) `ink` 정의 삭제 — 목 (W47 6절)
-- [ ] 회고 `reviews/retro/2026-W47-retro.md` — 금
+- [~] P1·P2·P3 게시판 — **W48 로** (아래 W48 섹션)
+- [~] B (W45-2) 댓글 투표 — P1 에 흡수, W48 남는 날 ②
+- [~] C (W45-1) 알림 3종 — W48 남는 날 ③
+- [~] S (W46-1) 출처 구조 — W48 남는 날 ⑤
+- [~] K·D `ink` 치환·삭제 — W48 남는 날 ⑥
+- [x] 회고 `reviews/retro/2026-W47-retro.md` (4f470ef)
+- T2·T3·V1 의 "남음"은 아래 W48 의 M1·M2 로 옮겼다.
 
-## W48 (11/16~11/22, 예정)
-ROADMAP "W47~W48 재배치" 절. 해당 주 설계일에 옮겨 적는다: 4b 팔레트 치환·가드 2번·4c 토글, W45-3 `useOptimistic`, W46-2·3·4(사용자 결정 3·4·5 뒤), W45-4(결정 2 뒤).
+## W48 (11/16~11/22)
+설계서: `docs/design/2026-W48-board-taxonomy.md` (2절 표 순서로 집는다. 절 번호는 이 설계서 기준). G 가 안 되면 W48 의 `[x]` 전부에 "build 미확인"을 적는다.
+- [~] G **사람만**: `dev.db` 백업 → `npm run db:push` → `npm run build` 확인 → `scripts/` 3건(collect-facts `items` 건너뛰기, 시드 import 래퍼, 재배치 래퍼) → `content/taxonomy.json` 가져오기 → Bash 허용 상태 한 줄 기록 (3절). 무인 세션은 집지 않는다
+- [ ] M1 분류 마감 — 월: `content:check` 시드 분기, 상황 카드 `unstable_cache(60)`, `summarizeChildren`(상위 요약·3개 미만 합치기), `how-ranking-works#popularity`, 문구 "배치"·"문서" (5절)
+- [ ] M2 조회 지표 연결 — 월(넘치면 화 오전): `ViewBeacon`, 인기의 조회 항, `vid` `Secure`(https 때), IP 한도기 정리, `views-route.test.ts` (6절)
+- [ ] P1 게시판 — 화~수: `Post`·`PostVote`·`PostComment`·`PostCommentVote`·`AnswerItem` 스키마(추가만) + `comments.ts`·`board.ts` + 라우트 4개 + 게시판·글쓰기·글 상세. 끝나면 **`db:push` 2차(사람)** (7절)
+- [ ] P2 답변 문서 첨부·집계·도움됨(기여 적립 없음) — 목 (8절)
+- [ ] 회고 `reviews/retro/2026-W48-retro.md` — 금 (금요일 회고 세션만 집는다. 구현 세션은 건너뛰고 남는 날 ①부터)
+- [ ] 남는 날 ① P3 베스트 문서·답변 없는 질문 (9절 1)
+- [ ] 남는 날 ② B 토론 댓글 투표·개념글 (9절 2, W45 4.3~4.6)
+- [ ] 남는 날 ③ C 알림 3종 (9절 3, W45 5절)
+- [ ] 남는 날 ④ `useOptimistic` 세 투표 버튼 (9절 4)
+- [ ] 남는 날 ⑤ S 출처 구조 (W47 5절)
+- [ ] 남는 날 ⑥ K `ink` 치환 + 가드 1번 → D 삭제 (W47 6절)
+- [~] 4b 팔레트·가드 2번·4c 토글 — 육안 확인(사람)과 K 선행 (2절 막힌 것)
+- [~] W46-2 `facts`·`content:import` — `scripts/` 허용과 S 선행
+- [~] W46-3 처리방침·약관·계정 삭제 — 운영자 사실 4가지
+- [~] W46-4 Playwright — 의존성 설치 허용 + 시드 DB
+- [~] W45-4 신고 처리·제재 — 검토자 결정
