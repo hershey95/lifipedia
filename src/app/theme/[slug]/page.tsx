@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
@@ -12,7 +13,7 @@ import { TierBadge } from '@/components/TierBadge';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
 import { categoryPath } from '@/lib/taxonomy';
 import { POPULARITY_RULES } from '@/lib/popularity';
-import { buildSituationCards, type SituationCard } from '@/lib/situation';
+import { buildSituationCards, summarizeChildren, type SituationCard } from '@/lib/situation';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 
 type Params = {
@@ -34,6 +35,49 @@ async function loadTheme(slug: string) {
     },
   });
 }
+
+/** 상황 갤러리의 인기 분류 카드. 60초 캐시(투표·편집 직후 최대 60초 지연, 인기는 30일 창 지표라 무방). asOf 는 안에서 만든다: 밖에서 넘기면 키가 매번 달라진다. */
+const loadSituationCards = unstable_cache(
+  async (situationId: string): Promise<SituationCard[]> => {
+    const links = await prisma.situationCategory.findMany({ where: { situationId }, select: { categoryId: true } });
+    const asOf = new Date();
+    const since = new Date(asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000);
+    const cats = await prisma.theme.findMany({
+      where: { kind: 'CATEGORY' },
+      select: { id: true, slug: true, name: true, parentId: true, followerCount: true },
+    });
+    const catIds = cats.map((c) => c.id);
+    const [items, votes, edits, comments] = await Promise.all([
+      prisma.item.findMany({
+        where: { themeId: { in: catIds }, isRemoved: false },
+        select: { id: true, themeId: true, name: true, slug: true, score: true },
+      }),
+      prisma.vote.findMany({
+        where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+        select: { weight: true, createdAt: true, item: { select: { themeId: true } } },
+      }),
+      prisma.editHistory.findMany({
+        where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+        select: { createdAt: true, item: { select: { themeId: true } } },
+      }),
+      prisma.talkComment.findMany({
+        where: { isRemoved: false, createdAt: { gte: since }, item: { themeId: { in: catIds } } },
+        select: { createdAt: true, item: { select: { themeId: true } } },
+      }),
+    ]);
+    return buildSituationCards({
+      cats,
+      linkedIds: links.map((l) => l.categoryId),
+      items,
+      votes: votes.map((v) => ({ weight: v.weight, createdAt: v.createdAt, themeId: v.item.themeId })),
+      edits: edits.map((e) => ({ createdAt: e.createdAt, themeId: e.item.themeId })),
+      comments: comments.map((c) => ({ createdAt: c.createdAt, themeId: c.item.themeId })),
+      asOf,
+    });
+  },
+  ['situation-cards'],
+  { revalidate: 60 },
+);
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
@@ -99,6 +143,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
   // 분류 갤러리: 경로(루트→자기)와 하위 분류 칩. 상황 갤러리는 해당 없음.
   let crumbs: { slug: string; name: string }[] = [];
   let children: { slug: string; name: string }[] = [];
+  let childSummary: ReturnType<typeof summarizeChildren> | null = null;
   if (theme.kind === 'CATEGORY') {
     const cats = await prisma.theme.findMany({
       where: { kind: 'CATEGORY' },
@@ -107,49 +152,20 @@ export default async function ThemePage({ params, searchParams }: Params) {
     const byId = new Map(cats.map((c) => [c.id, c]));
     crumbs = (categoryPath(theme.id, cats) ?? [theme.id]).map((id) => byId.get(id)!).filter(Boolean);
     children = cats.filter((c) => c.parentId === theme.id).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    if (children.length > 0) {
+      const items = await prisma.item.findMany({
+        where: { themeId: { in: cats.map((c) => c.id) }, isRemoved: false },
+        select: { id: true, themeId: true, name: true, slug: true, score: true },
+      });
+      childSummary = summarizeChildren({ parentId: theme.id, cats, items });
+    }
   }
 
   // 상황 갤러리: 연결된 분류를 인기순 카드로 (설계 W47-taxonomy 3절)
   let cards: SituationCard[] | null = null;
   if (theme.kind === 'SITUATION') {
     const links = await prisma.situationCategory.findMany({ where: { situationId: theme.id }, select: { categoryId: true } });
-    cards = [];
-    if (links.length > 0) {
-      const asOf = new Date();
-      const since = new Date(asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000);
-      const cats = await prisma.theme.findMany({
-        where: { kind: 'CATEGORY' },
-        select: { id: true, slug: true, name: true, parentId: true, followerCount: true },
-      });
-      const catIds = cats.map((c) => c.id);
-      const [items, votes, edits, comments] = await Promise.all([
-        prisma.item.findMany({
-          where: { themeId: { in: catIds }, isRemoved: false },
-          select: { id: true, themeId: true, name: true, slug: true, score: true },
-        }),
-        prisma.vote.findMany({
-          where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-          select: { weight: true, createdAt: true, item: { select: { themeId: true } } },
-        }),
-        prisma.editHistory.findMany({
-          where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-          select: { createdAt: true, item: { select: { themeId: true } } },
-        }),
-        prisma.talkComment.findMany({
-          where: { isRemoved: false, createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-          select: { createdAt: true, item: { select: { themeId: true } } },
-        }),
-      ]);
-      cards = buildSituationCards({
-        cats,
-        linkedIds: links.map((l) => l.categoryId),
-        items,
-        votes: votes.map((v) => ({ weight: v.weight, createdAt: v.createdAt, themeId: v.item.themeId })),
-        edits: edits.map((e) => ({ createdAt: e.createdAt, themeId: e.item.themeId })),
-        comments: comments.map((c) => ({ createdAt: c.createdAt, themeId: c.item.themeId })),
-        asOf,
-      });
-    }
+    cards = links.length > 0 ? await loadSituationCards(theme.id) : [];
   }
 
   const progress = promotionProgress(theme.followerCount, promotionThreshold());
@@ -235,14 +251,52 @@ export default async function ThemePage({ params, searchParams }: Params) {
         </nav>
       ) : null}
 
+      {childSummary && (childSummary.ranked.length > 0 || childSummary.merged.length > 0) ? (
+        <section aria-labelledby="child-top-h" className="flex flex-col gap-3">
+          <h2 id="child-top-h" className="text-xl font-bold">하위 분류 1위</h2>
+          {childSummary.ranked.length > 0 ? (
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {childSummary.ranked.map((r) => (
+                <li key={r.slug} className="card flex flex-col gap-1">
+                  <Link href={`/theme/${r.slug}`} className="font-semibold no-underline">{r.name}</Link>
+                  <p className="text-xs text-fg-muted">문서 {r.itemCount.toLocaleString('ko-KR')}개</p>
+                  {r.top ? (
+                    <p className="text-xs text-fg-muted">
+                      1위 후보 <Link href={`/theme/${r.slug}/item/${r.top.slug}`}>{r.top.name}</Link>
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {childSummary.merged.length > 0 ? (
+            <div>
+              <h3 className="mb-1 text-sm font-bold">문서 3개 미만 분류의 문서</h3>
+              <ul className="flex flex-col gap-1 text-sm">
+                {childSummary.merged.map((m) => (
+                  <li key={`${m.themeSlug}/${m.slug}`}>
+                    <Link href={`/theme/${m.themeSlug}/item/${m.slug}`}>{m.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       {cards ? (
         <section aria-labelledby="cards-h" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="cards-h" className="text-xl font-bold">지금 인기 분류</h2>
-            <span className="text-xs text-fg-subtle">최근 {POPULARITY_RULES.WINDOW_DAYS}일 투표·편집·댓글 기준</span>
+            <span className="text-xs text-fg-subtle">
+              최근 {POPULARITY_RULES.WINDOW_DAYS}일 투표·편집·댓글 기준 ·{' '}
+              <Link href="/how-ranking-works#popularity">산정 방식</Link>
+            </span>
           </div>
           {cards.length === 0 ? (
-            <p className="card text-sm text-fg-muted">아직 연결된 분류가 없습니다.</p>
+            <p className="card text-sm text-fg-muted">
+              아직 배치된 분류 갤러리가 없습니다. <Link href="/themes?category=">분류 둘러보기</Link>
+            </p>
           ) : (
             <ol className="grid gap-3 sm:grid-cols-2">
               {cards.map((c) => (
@@ -321,7 +375,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
           <p className="text-xs text-ink/50">인기 = 마지막 투표 시점의 점수입니다. 순위 탭과 순서가 다를 수 있습니다.</p>
           {listItems.length === 0 ? (
             <p className="card text-sm text-ink/60">
-              아직 문서가 없습니다. <Link href={`/theme/${theme.slug}/item/new`}>첫 항목을 작성해 보세요.</Link>
+              아직 문서가 없습니다. <Link href={`/theme/${theme.slug}/item/new`}>첫 문서를 작성해 보세요.</Link>
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -408,8 +462,8 @@ export default async function ThemePage({ params, searchParams }: Params) {
 
                 {ranked.length === 0 ? (
                   <p className="card text-sm text-ink/60">
-                    아직 등록된 항목이 없습니다.{' '}
-                    <Link href={`/theme/${theme.slug}/item/new`}>첫 항목을 작성해 보세요.</Link>
+                    아직 등록된 문서가 없습니다.{' '}
+                    <Link href={`/theme/${theme.slug}/item/new`}>첫 문서를 작성해 보세요.</Link>
                   </p>
                 ) : (
                   <ol className="flex flex-col gap-2">

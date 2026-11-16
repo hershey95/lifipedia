@@ -127,4 +127,23 @@ describe('checkContent', () => {
     expect(w('써머레스트 네오에어 : 다나와 가격비교 (193,200+무료배송)')).toHaveLength(0);
     expect(w('써머레스트 네오에어 : 다나와 가격비교 (293,200+무료배송)').length).toBeGreaterThan(0);
   });
+
+  describe('분류 시드 분기', () => {
+    const seed = (over: Record<string, unknown> = {}) => ({
+      categories: [{ slug: 'camp', name: '캠핑', parent: null }, { slug: 'tent', name: '텐트', parent: 'camp' }],
+      situations: [{ slug: 'trip', name: '여행', categories: ['tent'] }],
+      ...over,
+    });
+    it('올바른 시드는 오류가 없다', () => {
+      expect(checkContent(seed(), GAL)).toEqual([]);
+    });
+    it('없는 부모는 오류 1건이고 slug 가 문장에 있다', () => {
+      const r = checkContent(seed({ categories: [{ slug: 'tent', name: '텐트', parent: 'nope' }], situations: [] }), GAL);
+      expect(r).toHaveLength(1);
+      expect(r[0].msg).toContain('nope');
+    });
+    it('categories 만 있으면 갤러리 파일 검사를 탄다', () => {
+      expect(checkContent({ categories: [] }, GAL)[0].msg).toContain('gallery 와 items');
+    });
+  });
 });

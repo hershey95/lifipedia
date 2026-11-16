@@ -18,6 +18,51 @@ export type SituationCard = {
   topItem: { name: string; slug: string; themeSlug: string } | null;
 };
 
+/** 자기 + 모든 하위 분류 id (리프가 문서를 가진다) */
+function subtree(cats: { id: string; parentId: string | null }[], rootId: string): Set<string> {
+  const ids = new Set([rootId]);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const c of cats) {
+      if (c.parentId && ids.has(c.parentId) && !ids.has(c.id)) {
+        ids.add(c.id);
+        grew = true;
+      }
+    }
+  }
+  return ids;
+}
+
+export const CATEGORY_SUMMARY_RULES = { MIN_ITEMS_TO_RANK: 3 } as const;
+export type ChildSummary = { slug: string; name: string; itemCount: number; top: { name: string; slug: string } | null };
+
+const byScore = <T extends { id: string; score: number }>(a: T, b: T) => b.score - a.score || a.id.localeCompare(b.id);
+
+/** 중·대분류 페이지용. 직속 하위 분류마다 하위 전체 문서를 모아, 3개 이상이면 1위(score)를 보이고 아니면 merged 로 보낸다. */
+export function summarizeChildren(input: {
+  parentId: string;
+  cats: { id: string; slug: string; name: string; parentId: string | null }[];
+  items: { id: string; themeId: string; name: string; slug: string; score: number }[];
+}): { ranked: ChildSummary[]; merged: { name: string; slug: string; themeSlug: string }[] } {
+  const ranked: (ChildSummary & { id: string; score: number })[] = [];
+  const merged: { id: string; score: number; name: string; slug: string; themeSlug: string }[] = [];
+  for (const child of input.cats.filter((c) => c.parentId === input.parentId)) {
+    const ids = subtree(input.cats, child.id);
+    const mine = input.items.filter((i) => ids.has(i.themeId));
+    if (mine.length === 0) continue;
+    if (mine.length >= CATEGORY_SUMMARY_RULES.MIN_ITEMS_TO_RANK) {
+      const top = [...mine].sort(byScore)[0];
+      ranked.push({ id: top.id, score: top.score, slug: child.slug, name: child.name, itemCount: mine.length, top: { name: top.name, slug: top.slug } });
+    } else {
+      for (const i of mine) merged.push({ id: i.id, score: i.score, name: i.name, slug: i.slug, themeSlug: input.cats.find((c) => c.id === i.themeId)?.slug ?? child.slug });
+    }
+  }
+  return {
+    ranked: ranked.sort(byScore).map((r) => ({ slug: r.slug, name: r.name, itemCount: r.itemCount, top: r.top })),
+    merged: merged.sort(byScore).map((m) => ({ name: m.name, slug: m.slug, themeSlug: m.themeSlug })),
+  };
+}
+
 export function buildSituationCards(input: {
   cats: Cat[];
   linkedIds: string[];
@@ -32,27 +77,12 @@ export function buildSituationCards(input: {
   const since = asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000;
   const inWindow = (d: Date) => d.getTime() >= since && d.getTime() <= asOf.getTime();
 
-  // 카드 하나가 덮는 분류 = 자기 + 모든 하위(리프가 문서를 가진다)
-  const subtree = (rootId: string) => {
-    const ids = new Set([rootId]);
-    for (let grew = true; grew; ) {
-      grew = false;
-      for (const c of cats) {
-        if (c.parentId && ids.has(c.parentId) && !ids.has(c.id)) {
-          ids.add(c.id);
-          grew = true;
-        }
-      }
-    }
-    return ids;
-  };
-
   const rows = input.linkedIds.flatMap((id) => {
     const cat = byId.get(id);
     if (!cat) return [];
-    const ids = subtree(id);
+    const ids = subtree(cats, id);
     const mine = items.filter((i) => ids.has(i.themeId));
-    const top = [...mine].sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))[0];
+    const top = [...mine].sort(byScore)[0];
     const score = popularity(
       {
         votes: votes.filter((v) => ids.has(v.themeId)),

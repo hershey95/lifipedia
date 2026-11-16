@@ -2,6 +2,7 @@
  * content/*.json 결정적 검사. 토큰 없이 잡을 수 있는 오류(출처 부족, 목록 페이지 URL,
  * 제품 간 URL 공유, 광고 문구, 잘못된 교차링크)만 본다. 가격·스펙의 사실 여부는 못 본다.
  */
+import { parseTaxonomySeed } from './situation';
 import { slugify } from './slug';
 import { TIERS } from './tier';
 
@@ -52,6 +53,10 @@ export function checkContent(data: unknown, galleries: string[]): Issue[] {
   const add = (level: Issue['level'], msg: string, item?: string) => issues.push({ level, msg, item });
   const d = data as Json;
 
+  // 분류 시드(content/taxonomy.json)는 categories·situations 를 둘 다 가질 때만 시드로 본다
+  if (d && Array.isArray(d.categories) && Array.isArray(d.situations)) {
+    return parseTaxonomySeed(d).errors.map((msg) => ({ level: 'error' as const, msg }));
+  }
   if (!d || typeof d !== 'object' || !Array.isArray(d.items)) {
     return [{ level: 'error', msg: '최상위에 gallery 와 items 배열이 필요합니다' }];
   }
