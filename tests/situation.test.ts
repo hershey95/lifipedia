@@ -48,6 +48,21 @@ describe('buildSituationCards', () => {
   });
 });
 
+describe('buildSituationCards 조회 항', () => {
+  const run = (viewsTrackedDays: number, views: { themeId: string; count: number }[]) =>
+    buildSituationCards({ cats, linkedIds: ['tent'], items: [], votes: [], edits: [], comments: [], views, viewsTrackedDays, asOf: NOW });
+
+  it('조회 지표가 30일 미만이면 조회가 커도 점수가 변하지 않는다', () => {
+    expect(run(29, [{ themeId: 'bp', count: 1000 }])[0].score).toBe(0);
+  });
+  it('30일이면 하위 분류의 조회 1000 이 +100', () => {
+    expect(run(30, [{ themeId: 'bp', count: 1000 }])[0].score).toBeCloseTo(100);
+  });
+  it('배치되지 않은 분류의 조회는 섞이지 않는다', () => {
+    expect(run(30, [{ themeId: 'rice', count: 1000 }])[0].score).toBe(0);
+  });
+});
+
 describe('summarizeChildren', () => {
   const sub = (parentId: string, its: ReturnType<typeof item>[]) => summarizeChildren({ parentId, cats, items: its });
 

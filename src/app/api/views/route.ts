@@ -42,7 +42,9 @@ export async function POST(request: Request) {
     }
     const res = ok({ counted }, { status: 202 });
     if (!cookieVid) {
-      res.headers.append('Set-Cookie', `vid=${vid}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax`);
+      // Secure 는 요청 프로토콜로 정한다: http 로 열린 production 에서 Secure 쿠키는 저장되지 않아 중복 제거가 깨진다
+      const https = (request.headers.get('x-forwarded-proto') ?? new URL(request.url).protocol.replace(':', '')) === 'https';
+      res.headers.append('Set-Cookie', `vid=${vid}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${https ? '; Secure' : ''}`);
     }
     return res;
   } catch (error) {

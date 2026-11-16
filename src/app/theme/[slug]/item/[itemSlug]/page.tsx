@@ -12,6 +12,7 @@ import { TierBadge } from '@/components/TierBadge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { AdSlot } from '@/components/AdSlot';
 import { ReportButton } from '@/components/ReportButton';
+import { ViewBeacon } from '@/components/ViewBeacon';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
 import { extractToc } from '@/lib/markdown';
 
@@ -60,6 +61,7 @@ export default async function ItemPage({ params }: Params) {
 
   return (
     <div className="flex flex-col gap-6">
+      <ViewBeacon targetType="ITEM" targetId={item.id} />
       <nav aria-label="경로" className="text-sm text-ink/60">
         {item.theme.category ? (
           <Link href={`/themes?category=${encodeURIComponent(item.theme.category)}`}>{item.theme.category}</Link>

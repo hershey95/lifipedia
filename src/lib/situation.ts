@@ -70,6 +70,9 @@ export function buildSituationCards(input: {
   votes: { themeId: string; weight: number; createdAt: Date }[];
   edits: { themeId: string; createdAt: Date }[];
   comments: { themeId: string; createdAt: Date }[];
+  /** 창 안의 분류별 조회 합계(THEME 조회 + 소속 문서의 ITEM 조회를 분류 id 로 합친 것)와 조회 지표가 쌓인 일수 */
+  views?: { themeId: string; count: number }[];
+  viewsTrackedDays?: number;
   asOf: Date;
 }): SituationCard[] {
   const { cats, items, votes, edits, comments, asOf } = input;
@@ -88,6 +91,8 @@ export function buildSituationCards(input: {
         votes: votes.filter((v) => ids.has(v.themeId)),
         editCount: edits.filter((e) => ids.has(e.themeId) && inWindow(e.createdAt)).length,
         commentCount: comments.filter((c) => ids.has(c.themeId) && inWindow(c.createdAt)).length,
+        views: (input.views ?? []).filter((v) => ids.has(v.themeId)).reduce((s, v) => s + v.count, 0),
+        viewsTrackedDays: input.viewsTrackedDays,
       },
       asOf,
     );

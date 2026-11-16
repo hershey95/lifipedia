@@ -13,6 +13,8 @@ import { TierBadge } from '@/components/TierBadge';
 import { RANKING_CONSTANTS } from '@/lib/ranking';
 import { categoryPath } from '@/lib/taxonomy';
 import { POPULARITY_RULES } from '@/lib/popularity';
+import { viewDay } from '@/lib/views';
+import { ViewBeacon } from '@/components/ViewBeacon';
 import { buildSituationCards, summarizeChildren, type SituationCard } from '@/lib/situation';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 
@@ -47,7 +49,7 @@ const loadSituationCards = unstable_cache(
       select: { id: true, slug: true, name: true, parentId: true, followerCount: true },
     });
     const catIds = cats.map((c) => c.id);
-    const [items, votes, edits, comments] = await Promise.all([
+    const [items, votes, edits, comments, pageViews, firstView] = await Promise.all([
       prisma.item.findMany({
         where: { themeId: { in: catIds }, isRemoved: false },
         select: { id: true, themeId: true, name: true, slug: true, score: true },
@@ -64,8 +66,18 @@ const loadSituationCards = unstable_cache(
         where: { isRemoved: false, createdAt: { gte: since }, item: { themeId: { in: catIds } } },
         select: { createdAt: true, item: { select: { themeId: true } } },
       }),
+      prisma.pageView.findMany({ where: { day: { gte: viewDay(since) } }, select: { targetType: true, targetId: true, count: true } }),
+      prisma.pageView.findFirst({ orderBy: { day: 'asc' }, select: { day: true } }),
     ]);
+    const itemTheme = new Map(items.map((i) => [i.id, i.themeId]));
+    const views = pageViews.flatMap((v) => {
+      const themeId = v.targetType === 'THEME' ? v.targetId : itemTheme.get(v.targetId);
+      return themeId ? [{ themeId, count: v.count }] : [];
+    });
+    const viewsTrackedDays = firstView ? Math.floor((Date.parse(viewDay(asOf)) - Date.parse(firstView.day)) / 86_400_000) : 0;
     return buildSituationCards({
+      views,
+      viewsTrackedDays,
       cats,
       linkedIds: links.map((l) => l.categoryId),
       items,
@@ -173,6 +185,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
 
   return (
     <div className="flex flex-col gap-8">
+      <ViewBeacon targetType="THEME" targetId={theme.id} />
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           {crumbs.length > 0 ? (
