@@ -1,10 +1,10 @@
 /** 갤러리(/theme/[slug]) 탭·정렬·티어 파라미터 — 순수 함수. 잘못된 값은 기본값으로 돌아간다. */
 import { tierFromSlug, TIER_SLUGS, type Tier } from '@/lib/tier';
 
-export type FeedParams = { tab: 'rank' | 'list' | 'talk'; sort: 'hot' | 'new' | 'top'; tier: Tier | null };
+export type FeedParams = { tab: 'rank' | 'list' | 'talk' | 'board'; sort: 'hot' | 'new' | 'top'; tier: Tier | null };
 export const FEED_DEFAULTS: FeedParams = { tab: 'rank', sort: 'hot', tier: null };
 
-const TABS = ['rank', 'list', 'talk'] as const;
+const TABS = ['rank', 'list', 'talk', 'board'] as const;
 const SORTS = ['hot', 'new', 'top'] as const;
 type Sp = Record<string, string | string[] | undefined>;
 

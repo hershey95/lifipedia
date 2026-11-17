@@ -12,7 +12,7 @@ const REASONS = [
   { value: 'OTHER', label: '기타' },
 ] as const;
 
-type Props = { targetType: 'ITEM' | 'COMMENT' | 'THEME'; targetId: string };
+type Props = { targetType: 'ITEM' | 'COMMENT' | 'THEME' | 'POST' | 'POST_COMMENT'; targetId: string };
 
 export function ReportButton({ targetType, targetId }: Props) {
   const { status } = useSession();

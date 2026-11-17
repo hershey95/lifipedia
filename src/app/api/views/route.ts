@@ -22,7 +22,9 @@ export async function POST(request: Request) {
     const exists =
       targetType === 'THEME'
         ? await prisma.theme.count({ where: { id: targetId } })
-        : await prisma.item.count({ where: { id: targetId, isRemoved: false } });
+        : targetType === 'POST'
+          ? await prisma.post.count({ where: { id: targetId, isRemoved: false } })
+          : await prisma.item.count({ where: { id: targetId, isRemoved: false } });
     let counted = false;
     if (exists) {
       const day = viewDay();

@@ -12,6 +12,10 @@ describe('feed', () => {
     expect(parseFeedParams({ tab: 'x', sort: 'rising', tier: 'gold' })).toEqual({ tab: 'rank', sort: 'hot', tier: null });
     expect(parseFeedParams({ sort: ['top', 'new'] }).sort).toBe('hot');
   });
+  it('board 탭 파싱·링크', () => {
+    expect(parseFeedParams({ tab: 'board' }).tab).toBe('board');
+    expect(feedHref('s', { tab: 'board' })).toBe('/theme/s?tab=board');
+  });
   it('feedHref: 기본값은 URL 에서 빠진다', () => {
     expect(feedHref('s', {})).toBe('/theme/s');
     expect(feedHref('s', { tab: 'list', sort: 'hot' })).toBe('/theme/s?tab=list');

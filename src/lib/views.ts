@@ -7,7 +7,7 @@
 import { createHash } from 'node:crypto';
 
 export const VIEW_RULES = { MARK_RETENTION_DAYS: 2, IP_LIMIT_PER_MINUTE: 60 } as const;
-export const VIEW_TARGETS = ['THEME', 'ITEM'] as const; // POST 는 P1 에서 enum 과 함께 추가
+export const VIEW_TARGETS = ['THEME', 'ITEM', 'POST'] as const;
 export type ViewTargetType = (typeof VIEW_TARGETS)[number];
 
 const BOT = /bot|crawl|spider|slurp|curl|wget|python-requests|httpclient|headless|preview|facebookexternalhit/i;

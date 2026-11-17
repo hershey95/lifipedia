@@ -11,6 +11,11 @@ export const ABUSE_LIMITS = {
   ITEMS_PER_DAY: 10,
   /** 시간당 토론 댓글 상한 */
   COMMENTS_PER_HOUR: 20,
+  /** 하루 게시판 글 상한. 가입 7일 미만 계정은 더 낮다 */
+  POSTS_PER_DAY: 10,
+  NEW_ACCOUNT_POSTS_PER_DAY: 3,
+  /** 게시판 글·댓글 투표 합계 시간당 상한 */
+  COMMENT_VOTES_PER_HOUR: 120,
   /** 하루 신고 상한 */
   REPORTS_PER_DAY: 20,
   /** 시간당 테마 제안 상한 */

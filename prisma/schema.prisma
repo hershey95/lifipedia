@@ -51,6 +51,10 @@ model User {
   reports        Report[]            @relation("Reporter")
   commentVotes   CommentVote[]
   notifications  Notification[]
+  posts          Post[]            @relation("PostAuthor")
+  postVotes      PostVote[]
+  postComments   PostComment[]     @relation("PostCommentAuthor")
+  postCommentVotes PostCommentVote[]
 
   @@index([trustScore])
 }
@@ -127,6 +131,7 @@ model Theme {
 
   followers ThemeFollow[]
   items     Item[]
+  posts     Post[]
   snapshots RankingSnapshot[]
 
   // 상황 ↔ 분류 연결 (kind 에 따라 한쪽만 쓴다)
@@ -157,6 +162,7 @@ model SituationCategory {
 enum ViewTarget {
   THEME
   ITEM
+  POST
 }
 
 model PageView {
@@ -232,6 +238,7 @@ model Item {
   edits     EditHistory[]
   votes     Vote[]
   comments  TalkComment[]
+  answerItems AnswerItem[]
   snapshots RankingSnapshot[]
 
   @@unique([themeId, slug])
@@ -343,6 +350,102 @@ model Notification {
   @@index([userId, readAt, createdAt])
 }
 
+// ---------------------------------------------------------------- 게시판 (W48 P1·P2)
+// 토론 댓글(TalkComment)과 같은 모양의 새 테이블. 규칙은 lib/comments.ts 하나를 공유한다.
+// 랭킹·신뢰도에는 들어가지 않는다.
+
+enum PostKind {
+  QUESTION // 추천 요청
+  REVIEW // 후기
+  TALK // 잡담
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  themeId   String
+  theme     Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?    @relation("PostAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  kind      PostKind
+  title     String
+  body      String // 마크다운. raw HTML 은 렌더하지 않는다
+  isRemoved Boolean  @default(false)
+  upCount   Int      @default(0)
+  downCount Int      @default(0)
+  score     Float    @default(0) // commentTally 의 bestScore. hot 정렬 키
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes    PostVote[]
+  comments PostComment[]
+
+  @@index([themeId, createdAt])
+  @@index([themeId, score])
+  @@index([authorId, createdAt])
+}
+
+model PostVote {
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      VoteType
+  weight    Float // 투표 시점 고정
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([postId, userId])
+  @@index([userId, createdAt])
+}
+
+model PostComment {
+  id        String        @id @default(cuid())
+  postId    String
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?         @relation("PostCommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  parentId  String?
+  parent    PostComment?  @relation("PostCommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   PostComment[] @relation("PostCommentThread")
+  body      String
+  isRemoved Boolean       @default(false)
+  upCount   Int           @default(0)
+  downCount Int           @default(0)
+  bestScore Float         @default(0)
+  helpfulAt DateTime? // P2: 추천 요청 작성자의 도움됨 표시. 기여 적립 없음
+  createdAt DateTime      @default(now())
+
+  votes PostCommentVote[]
+  items AnswerItem[]
+
+  @@index([postId, createdAt])
+}
+
+model PostCommentVote {
+  commentId String
+  comment   PostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      VoteType
+  weight    Float
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@id([commentId, userId])
+  @@index([userId, createdAt])
+}
+
+// P2: 추천 요청의 답변이 첨부한 문서. 문서가 지워지면 첨부도 지워진다.
+model AnswerItem {
+  commentId String
+  comment   PostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  itemId    String
+  item      Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, itemId])
+  @@index([itemId])
+}
+
 // ---------------------------------------------------------------- 투표
 
 enum VoteType {
@@ -409,6 +512,8 @@ enum ReportTargetType {
   COMMENT
   THEME
   USER
+  POST
+  POST_COMMENT
 }
 
 enum ReportStatus {

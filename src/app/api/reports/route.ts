@@ -7,7 +7,7 @@ import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 export const dynamic = 'force-dynamic';
 
 const body = z.object({
-  targetType: z.enum(['ITEM', 'COMMENT', 'THEME']),
+  targetType: z.enum(['ITEM', 'COMMENT', 'THEME', 'POST', 'POST_COMMENT']),
   targetId: z.string().min(1),
   reason: z.enum(['SPAM', 'ADVERTISING', 'VOTE_MANIPULATION', 'ABUSIVE', 'COPYRIGHT', 'OTHER']),
   detail: z.string().trim().max(2_000).optional(),

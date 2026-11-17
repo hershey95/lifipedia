@@ -17,6 +17,8 @@ import { viewDay } from '@/lib/views';
 import { ViewBeacon } from '@/components/ViewBeacon';
 import { buildSituationCards, summarizeChildren, type SituationCard } from '@/lib/situation';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
+import { parseBoardParams } from '@/lib/board';
+import { Board } from '@/components/Board';
 
 type Params = {
   params: Promise<{ slug: string }>;
@@ -107,7 +109,9 @@ export default async function ThemePage({ params, searchParams }: Params) {
   const { slug } = await params;
   const theme = await loadTheme(slug);
   if (!theme) notFound();
-  const { tab, sort, tier: tierFilter } = parseFeedParams(await searchParams);
+  const sp = await searchParams;
+  const { tab, sort, tier: tierFilter } = parseFeedParams(sp);
+  const boardParams = parseBoardParams(sp);
 
   const me = await currentUser();
   const itemWhere = { themeId: theme.id, isRemoved: false };
@@ -332,15 +336,26 @@ export default async function ThemePage({ params, searchParams }: Params) {
         </section>
       ) : null}
 
+      {theme.kind === 'SITUATION' ? (
+        <Board
+          themeId={theme.id}
+          themeSlug={theme.slug}
+          base={`/theme/${encodeURIComponent(theme.slug)}`}
+          params={boardParams}
+          canWrite={isActive}
+        />
+      ) : null}
+
       <AdSlot slot="theme-top" />
 
-      {isActive ? (
+      {isActive && theme.kind === 'CATEGORY' ? (
         <nav aria-label="갤러리 보기" className="flex gap-4 border-b border-white/10 pb-2 text-sm">
           {(
             [
               ['rank', '순위'],
               ['list', '목록'],
               ['talk', '토론'],
+              ['board', '게시판'],
             ] as const
           ).map(([t, label]) => (
             <Link
@@ -453,6 +468,16 @@ export default async function ThemePage({ params, searchParams }: Params) {
             </ul>
           )}
         </section>
+      ) : null}
+
+      {theme.kind === 'CATEGORY' && tab === 'board' ? (
+        <Board
+          themeId={theme.id}
+          themeSlug={theme.slug}
+          base={feedHref(theme.slug, { tab: 'board' })}
+          params={boardParams}
+          canWrite={isActive}
+        />
       ) : null}
 
       {isActive && tab === 'rank' ? (

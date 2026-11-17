@@ -4,6 +4,7 @@ const { db } = vi.hoisted(() => ({
   db: {
     theme: { count: vi.fn() },
     item: { count: vi.fn() },
+    post: { count: vi.fn() },
     viewMark: { create: vi.fn() },
     pageView: { upsert: vi.fn() },
     $transaction: vi.fn(),
@@ -75,6 +76,15 @@ describe('POST /api/views', () => {
   it('센 방문은 counted:true', async () => {
     const res = await call({ targetType: 'ITEM', targetId: 'i1' });
     expect(await res.json()).toEqual({ counted: true });
+  });
+
+  it('게시판 글(POST)은 post 테이블로 존재를 확인한다', async () => {
+    db.post.count.mockResolvedValueOnce(1);
+    expect(await (await call({ targetType: 'POST', targetId: 'p1' })).json()).toEqual({ counted: true });
+    expect(db.post.count).toHaveBeenCalledWith({ where: { id: 'p1', isRemoved: false } });
+    expect(db.item.count).not.toHaveBeenCalled();
+    db.post.count.mockResolvedValueOnce(0);
+    expect(await (await call({ targetType: 'POST', targetId: 'gone' })).json()).toEqual({ counted: false });
   });
 
   it('같은 IP 의 61번째 요청은 429', async () => {
