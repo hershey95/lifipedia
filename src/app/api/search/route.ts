@@ -27,7 +27,7 @@ export async function GET(request: Request) {
         orderBy: { score: 'desc' },
         take,
         select: {
-          slug: true, name: true, tier: true, score: true, imageUrl: true,
+          id: true, slug: true, name: true, tier: true, score: true, imageUrl: true,
           theme: { select: { slug: true, name: true } },
         },
       }),

@@ -4,6 +4,7 @@
  * 설계: docs/design/2026-W48-board-taxonomy.md 7.3
  */
 import { z } from 'zod';
+import { RANKING_CONSTANTS } from '@/lib/ranking';
 
 export const POST_KINDS = ['QUESTION', 'REVIEW', 'TALK'] as const;
 export type PostKindValue = (typeof POST_KINDS)[number];
@@ -33,6 +34,38 @@ export function boardHref(base: string, p: Partial<BoardParams>): string {
   if (p.page && p.page > 1) q.set('page', String(p.page));
   const s = q.toString();
   return s ? `${base}${base.includes('?') ? '&' : '?'}${s}` : base;
+}
+
+export const ANSWER_RULES = { MAX_ITEMS: 3, MAX_HELPFUL_PER_POST: 3 } as const;
+
+/** 답변이 될 수 있는가: 추천 요청 글의 최상위 댓글만 */
+export function isAnswer(post: { kind: PostKindValue }, comment: { parentId: string | null }): boolean {
+  return post.kind === 'QUESTION' && comment.parentId === null;
+}
+
+/**
+ * 추천 요청 한 건 안의 문서별 집계. 답변이 받은 가중 추천(UP) 합을 첨부한 문서마다 더한다. 삭제 답변 제외.
+ * 이 숫자는 그 글 안에서만 보이고 문서 점수에 들어가지 않는다(GLOSSARY). 시간 감쇠 없음.
+ * 정렬: weightedUp desc → answerCount desc → itemId asc
+ */
+export function itemTallyForPost(
+  answers: { isRemoved: boolean; itemIds: string[]; votes: { type: 'UP' | 'DOWN'; weight: number }[]; helpfulAt: Date | null }[],
+): { itemId: string; weightedUp: number; answerCount: number; helpful: boolean }[] {
+  const by = new Map<string, { itemId: string; weightedUp: number; answerCount: number; helpful: boolean }>();
+  for (const a of answers) {
+    if (a.isRemoved) continue;
+    const up = a.votes.reduce((s, v) => (v.type === 'UP' ? s + Math.min(v.weight, RANKING_CONSTANTS.MAX_VOTE_WEIGHT) : s), 0);
+    for (const itemId of new Set(a.itemIds)) {
+      const row = by.get(itemId) ?? { itemId, weightedUp: 0, answerCount: 0, helpful: false };
+      row.weightedUp += up;
+      row.answerCount += 1;
+      row.helpful ||= a.helpfulAt !== null;
+      by.set(itemId, row);
+    }
+  }
+  return [...by.values()].sort(
+    (x, y) => y.weightedUp - x.weightedUp || y.answerCount - x.answerCount || x.itemId.localeCompare(y.itemId),
+  );
 }
 
 export const postBody = z.object({
