@@ -21,7 +21,10 @@ def fetch(url):
     m = re.search(r"costco\.co\.kr/.*?/p/(\d+)", url)
     fetch_url = f"https://www.costco.co.kr/rest/v2/korea/products/{m.group(1)}?fields=FULL" if m else url
     r = subprocess.run(["curl", "-sL", "-m", "25", "-A", UA, "-w", "\n%{http_code}", fetch_url], capture_output=True)
-    raw = r.stdout.decode("utf-8", "ignore")
+    try:  # 한국 쇼핑몰 중 EUC-KR/CP949 페이지가 있다(헬리녹스 공식몰 등): utf-8 로 안 읽히면 cp949 로 읽는다
+        raw = r.stdout.decode("utf-8")
+    except UnicodeDecodeError:
+        raw = r.stdout.decode("cp949", "ignore")
     body, _, code = raw.rpartition("\n")
     code = code if r.returncode == 0 else "FAIL"
     title = re.search(r"<title>(.*?)</title>", body, re.S | re.I)
