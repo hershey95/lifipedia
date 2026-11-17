@@ -44,8 +44,8 @@
 ## W48 (11/16~11/22)
 설계서: `docs/design/2026-W48-board-taxonomy.md` (2절 표 순서로 집는다. 절 번호는 이 설계서 기준). G 가 안 되면 W48 의 `[x]` 전부에 "build 미확인"을 적는다.
 - [~] G **사람만**: `dev.db` 백업 → `npm run db:push` → `npm run build` 확인 → `scripts/` 3건(collect-facts `items` 건너뛰기, 시드 import 래퍼, 재배치 래퍼) → `content/taxonomy.json` 가져오기 → Bash 허용 상태 한 줄 기록 (3절). 무인 세션은 집지 않는다
-- [ ] M1 분류 마감 — 월: `content:check` 시드 분기, 상황 카드 `unstable_cache(60)`, `summarizeChildren`(상위 요약·3개 미만 합치기), `how-ranking-works#popularity`, 문구 "배치"·"문서" (5절)
-- [ ] M2 조회 지표 연결 — 월(넘치면 화 오전): `ViewBeacon`, 인기의 조회 항, `vid` `Secure`(https 때), IP 한도기 정리, `views-route.test.ts` (6절)
+- [x] M1 (ecb9a5b, build 미확인: db:push 전이라 prerender P2021) 분류 마감 — 월: `content:check` 시드 분기, 상황 카드 `unstable_cache(60)`, `summarizeChildren`(상위 요약·3개 미만 합치기), `how-ranking-works#popularity`, 문구 "배치"·"문서" (5절)
+- [x] M2 (0711c25, build 미확인) 조회 지표 연결 — 월(넘치면 화 오전): `ViewBeacon`, 인기의 조회 항, `vid` `Secure`(https 때), IP 한도기 정리, `views-route.test.ts` (6절)
 - [ ] P1 게시판 — 화~수: `Post`·`PostVote`·`PostComment`·`PostCommentVote`·`AnswerItem` 스키마(추가만) + `comments.ts`·`board.ts` + 라우트 4개 + 게시판·글쓰기·글 상세. 끝나면 **`db:push` 2차(사람)** (7절)
 - [ ] P2 답변 문서 첨부·집계·도움됨(기여 적립 없음) — 목 (8절)
 - [ ] 회고 `reviews/retro/2026-W48-retro.md` — 금 (금요일 회고 세션만 집는다. 구현 세션은 건너뛰고 남는 날 ①부터)

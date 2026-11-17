@@ -42,6 +42,13 @@ describe('createIpLimiter', () => {
     expect(lim('2.2.2.2', 2_000)).toBe(true);
     expect(lim('1.1.1.1', 61_000)).toBe(true);
   });
+  it('창이 지나면 오래된 IP 키를 지운다', () => {
+    const lim = createIpLimiter(5, 60_000);
+    ['1.1.1.1', '2.2.2.2', '3.3.3.3'].forEach((ip) => lim(ip, 0));
+    expect(lim.size()).toBe(3);
+    lim('4.4.4.4', 61_000);
+    expect(lim.size()).toBe(1);
+  });
   it('보존 기간 상수가 2일이다', () => {
     expect(VIEW_RULES.MARK_RETENTION_DAYS).toBe(2);
   });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSituationCards, parseTaxonomySeed } from '@/lib/situation';
+import { buildSituationCards, parseTaxonomySeed, summarizeChildren } from '@/lib/situation';
 
 const NOW = new Date('2026-11-12T00:00:00Z');
 const day = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
@@ -45,6 +45,52 @@ describe('buildSituationCards', () => {
 
   it('없는 분류 id 는 건너뛴다', () => {
     expect(buildSituationCards({ cats, linkedIds: ['nope'], items: [], votes: [], edits: [], comments: [], asOf: NOW })).toEqual([]);
+  });
+});
+
+describe('buildSituationCards 조회 항', () => {
+  const run = (viewsTrackedDays: number, views: { themeId: string; count: number }[]) =>
+    buildSituationCards({ cats, linkedIds: ['tent'], items: [], votes: [], edits: [], comments: [], views, viewsTrackedDays, asOf: NOW });
+
+  it('조회 지표가 30일 미만이면 조회가 커도 점수가 변하지 않는다', () => {
+    expect(run(29, [{ themeId: 'bp', count: 1000 }])[0].score).toBe(0);
+  });
+  it('30일이면 하위 분류의 조회 1000 이 +100', () => {
+    expect(run(30, [{ themeId: 'bp', count: 1000 }])[0].score).toBeCloseTo(100);
+  });
+  it('배치되지 않은 분류의 조회는 섞이지 않는다', () => {
+    expect(run(30, [{ themeId: 'rice', count: 1000 }])[0].score).toBe(0);
+  });
+});
+
+describe('summarizeChildren', () => {
+  const sub = (parentId: string, its: ReturnType<typeof item>[]) => summarizeChildren({ parentId, cats, items: its });
+
+  it('손자 소분류의 문서가 중분류 자식 카드에 모인다', () => {
+    const { ranked } = sub('camp', [item('a', 'bp', 1), item('b', 'bp', 5), item('c', 'bp', 2)]);
+    expect(ranked.map((r) => r.slug)).toEqual(['tent']);
+    expect(ranked[0].itemCount).toBe(3);
+    expect(ranked[0].top?.slug).toBe('b');
+  });
+
+  it('문서 3개 미만 자식은 merged 로 가고 ranked 에 없다', () => {
+    const { ranked, merged } = sub('camp', [item('a', 'chair', 1), item('b', 'chair', 2)]);
+    expect(ranked).toEqual([]);
+    expect(merged.map((m) => m.slug)).toEqual(['b', 'a']);
+    expect(merged[0].themeSlug).toBe('chair');
+  });
+
+  it('3개면 ranked, 1위는 최고 score, 동점은 id 순', () => {
+    const { ranked } = sub('camp', [
+      item('a', 'chair', 4), item('b', 'chair', 4), item('c', 'chair', 1),
+      item('x', 'bp', 9), item('y', 'bp', 1), item('z', 'bp', 1),
+    ]);
+    expect(ranked.map((r) => r.slug)).toEqual(['tent', 'chair']);
+    expect(ranked[1].top?.slug).toBe('a');
+  });
+
+  it('자식이 없으면 둘 다 빈 배열', () => {
+    expect(sub('rice', [item('a', 'rice', 1)])).toEqual({ ranked: [], merged: [] });
   });
 });
 

@@ -4,6 +4,7 @@ import { RANKING_CONSTANTS } from '@/lib/ranking';
 import { PROTECTION_RULES } from '@/lib/protection';
 import { ABUSE_LIMITS } from '@/lib/abuse';
 import { BADGE_THRESHOLDS } from '@/lib/trust';
+import { POPULARITY_RULES } from '@/lib/popularity';
 import { THEME_LIFECYCLE, promotionThreshold } from '@/lib/theme-lifecycle';
 
 export const metadata: Metadata = {
@@ -138,6 +139,21 @@ export default function HowRankingWorksPage() {
             <strong>확장 보호</strong>: 같은 기간 되돌리기 {PROTECTION_RULES.EDIT_WAR_EXTENDED_REVERTS}회 이상.
             계정 {PROTECTION_RULES.EXTENDED_MIN_ACCOUNT_DAYS}일·기여 {PROTECTION_RULES.EXTENDED_MIN_CONTRIBUTIONS}건 이상이면 편집할 수 있습니다.
           </li>
+        </ul>
+      </Section>
+
+      <Section title="인기 (상황 갤러리 안의 분류 정렬)" id="popularity">
+        <p className="text-ink/75">
+          인기는 점수와 별개입니다. 문서 순위에는 들어가지 않습니다(ADR 0001). 상황 갤러리의 분류 카드를 정렬하는 데만 씁니다.
+        </p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-ink/75">
+          <li>최근 {POPULARITY_RULES.WINDOW_DAYS}일 안의 활동만 셉니다.</li>
+          <li>가중 투표 합 + 편집 1건당 {POPULARITY_RULES.EDIT_WEIGHT}점 + 댓글 1건당 {POPULARITY_RULES.COMMENT_WEIGHT}점.</li>
+          <li>추천과 비추천 모두 활동으로 셉니다.</li>
+          <li>
+            조회는 1회당 {POPULARITY_RULES.VIEW_WEIGHT}점이며, 조회 지표가 {POPULARITY_RULES.VIEW_MIN_TRACKED_DAYS}일 이상 쌓인 뒤부터 반영합니다.
+          </li>
+          <li>동점은 팔로워 수로 가릅니다. 운영자 가점은 없습니다.</li>
         </ul>
       </Section>
 

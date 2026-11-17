@@ -27,7 +27,13 @@ export function markHash(vid: string, day: string, targetType: ViewTargetType, t
 /** IP 별 분당 한도. ponytail: 프로세스 메모리라 인스턴스가 늘면 인스턴스마다 따로 센다. 그때 DB 카운트로 */
 export function createIpLimiter(limit: number, windowMs: number) {
   const hits = new Map<string, number[]>();
-  return (ip: string, now: number = Date.now()): boolean => {
+  let lastSweep = -Infinity;
+  const allow = (ip: string, now: number = Date.now()): boolean => {
+    // 창마다 한 번, 창 밖 기록만 남은 IP 키를 지운다(메모리가 IP 수에 비례해 자라지 않게)
+    if (now - lastSweep >= windowMs) {
+      lastSweep = now;
+      for (const [k, ts] of hits) if (ts.every((t) => now - t >= windowMs)) hits.delete(k);
+    }
     const recent = (hits.get(ip) ?? []).filter((t) => now - t < windowMs);
     if (recent.length >= limit) {
       hits.set(ip, recent);
@@ -37,4 +43,5 @@ export function createIpLimiter(limit: number, windowMs: number) {
     hits.set(ip, recent);
     return true;
   };
+  return Object.assign(allow, { size: () => hits.size });
 }
