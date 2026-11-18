@@ -12,6 +12,7 @@ Claude 와 안티가 같은 구조를 보도록 한 장으로 정리했다. 모�
 ## 계획과 진행
 - `docs/design/ROADMAP.md` 로드맵 · `docs/design/PROGRESS.md` 작업 큐(첫 `[ ]` 부터) · `BACKLOG.md` 후순위·격차(토요일 갱신)
 - 이번 구조 개편 설계: `docs/design/2026-W47-taxonomy-situation.md`(상황 갤러리×분류 트리×게시판)
+- 위키백과 기능 전수조사·적용 계획: `docs/design/2026-W49-wiki-features.md`(특수 문서 190개 판정, W49 큐). 위키 주제 리서치는 이것을 반복하지 말고 구현 사례를 찾는다
 - 주간 설계서(`docs/design/2026-W44/W45/W47-*.md`): PROGRESS 가 가리키는 항목에서만 해당 절을 읽는다. 전체를 읽지 않는다.
 - `docs/design/ref-*.md`(백엔드·프론트·보안·디자인 시스템 레퍼런스, 각 40~57KB): **통째로 읽지 말고** 필요한 절만 검색해서 읽는다. 디자인 토큰은 `ref-design-system.md`.
 
