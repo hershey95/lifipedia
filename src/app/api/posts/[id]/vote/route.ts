@@ -24,7 +24,8 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
 
     const used =
       (await countSince(prisma.postVote, { userId: user.id }, 3_600)) +
-      (await countSince(prisma.postCommentVote, { userId: user.id }, 3_600));
+      (await countSince(prisma.postCommentVote, { userId: user.id }, 3_600)) +
+      (await countSince(prisma.commentVote, { userId: user.id }, 3_600));
     const rate = checkRate(used, ABUSE_LIMITS.COMMENT_VOTES_PER_HOUR, 3_600);
     if (!rate.allowed) return fail(429, rate.reason!, { retryAfterSeconds: rate.retryAfterSeconds });
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import { BoardVoteButtons } from '@/components/BoardVoteButtons';
 
 export type TalkComment = {
   id: string;
@@ -12,6 +13,14 @@ export type TalkComment = {
   createdAt: string;
   authorId: string | null;
   authorName: string;
+  /** 서버에서 KST 로 만든 날짜 문구 */
+  createdAtLabel: string;
+  upCount: number;
+  downCount: number;
+  myVote: 'UP' | 'DOWN' | null;
+  own: boolean;
+  isConcept: boolean;
+  isRemoved: boolean;
 };
 
 export function TalkThread({ itemId, comments }: { itemId: string; comments: TalkComment[] }) {
@@ -38,9 +47,21 @@ export function TalkThread({ itemId, comments }: { itemId: string; comments: Tal
               ) : (
                 comment.authorName
               )}{' '}
-              · {comment.createdAt.slice(0, 16).replace('T', ' ')}
+              · <time dateTime={comment.createdAt}>{comment.createdAtLabel}</time>
+              {comment.isConcept ? <span className="chip ml-2 bg-accent-soft text-accent-fg">개념글</span> : null}
             </p>
             <p className="mt-1 whitespace-pre-wrap text-sm leading-6">{comment.body}</p>
+            {comment.isRemoved ? null : (
+              <div className="mt-2">
+                <BoardVoteButtons
+                  endpoint={`/api/talk/${comment.id}/vote`}
+                  initialUp={comment.upCount}
+                  initialDown={comment.downCount}
+                  initialMyVote={comment.myVote}
+                  own={comment.own}
+                />
+              </div>
+            )}
 
             {depth < 3 ? (
               <button
