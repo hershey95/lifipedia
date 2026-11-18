@@ -3,7 +3,7 @@
 > **일요일(11/22) 무인 설계 세션에게**: 이 W49 설계서는 이미 있다. 새 W49 문서를 만들지 말고 W48 회고·남은 큐를 보고 6절 큐 순서만 조정한다.
 
 ## 0. 결론
-- 위키백과 특수 문서 190개(15개 묶음)와 편집·읽기·정책 기능을 하나씩 판정했다. 결과는 표의 행 기준으로 **채택 7 / 변형 30 / 이미 있음 13 / 보류 3 / 비채택 22**다. 무관한 묶음 9개는 각각 한 줄로 정리했다(5절).
+- 위키백과 특수 문서 190개(15개 묶음)와 편집·읽기·정책 기능을 하나씩 판정했다. 결과는 표의 행 기준으로 **채택 6 / 변형 31 / 이미 있음 13 / 보류 4 / 비채택 23**다. 무관한 묶음 9개는 각각 한 줄로 정리했다(5절).
 - 우리 철학의 거름망은 세 가지다. (1) 운영자·검토자 권한 기능은 비채택하거나, 규칙으로 계산하는 형태로 바꾼다. (2) 신뢰도는 기여 원장에서만 오른다. 감사 표시도 신뢰도에 넣지 않는다. (3) 조회수는 점수에 넣지 않는다(ADR 0001).
 - W49 에는 **스키마 변경 없이** 할 수 있는 다섯 가지를 넣는다(`db:push`(G)를 기다리지 않음). 순서는 ① 리비전 비교·고정 링크·되돌리기 버튼 ② 위키링크 해석(빨간 링크·동명 문서·역링크) ③ 기여할 거리와 토막 문서 ④ 편집 필터(가격 급변·대량 삭제·차단 도메인)와 계산형 변경 태그 ⑤ 작은 것 묶음이다.
 - 스키마가 필요한 기능은 W50 이후로 미룬다(G 선행): 문서 이동·넘겨주기, 문서 단위 주시, 감사 표시, 편집 요청, 출처 구조(S).
@@ -26,7 +26,7 @@
 | 위키링크·빨간 링크·역링크 | ◐ | ◐ **`[[ ]]` 가 검색 링크로만 바뀜** | `markdown.ts:35` |
 | 편집 충돌 | ◐ | ◐ 409 응답만 있고 필드별 해결 화면은 없음 | `api/items/[id]/edit/route.ts:70` |
 | 출처·각주 | ◐ | ◐ 그대로(W48 ⑤ S) | BACKLOG 11-14 |
-| 인포박스 | ◐ | ● | A-3 (8b21b9e) |
+| 인포박스 | ◐ | ● | `item/[itemSlug]/page.tsx:157` `<aside aria-label="문서 정보">` |
 | 문서 이동·병합 | ○ | ○ | 후순위 유지 |
 | 편집 요청 | ○ | ○ | 보호 수준이 생겼으니 W50 후보로 승격(7절) |
 
@@ -75,7 +75,7 @@
 | Blocked users · Autoblocks | 있음(최소) | `suspendedUntil`. 처리 흐름은 W45-4(검토자 결정 대기) |
 | User groups / rights · Grants · Global groups | 비채택 | 권한은 신뢰도·보호 수준으로 계산한다. 사람에게 주는 권한 그룹은 만들지 않는다 |
 | Email user | 비채택 | 개인정보, 괴롭힘 경로 |
-| Bot passwords · OAuth consumer · Global accounts/rename/vanish · Reset tokens · Password policies · Change credentials/email | 비채택 | 외부 OAuth 로그인만 쓴다. 계정 삭제는 W46-3 에서 다룬다 |
+| Bot passwords · OAuth consumer · List OAuth applications · Global accounts/rename/vanish · Global account manager · Global group management · Membership in global groups · Global preferences · Search for global contributions · List of globally blocked IPs · Users · Reset tokens · Reset password · Remove credentials · Password policies · Change credentials/email | 비채택 | 외부 OAuth 로그인만 쓴다. 전역(여러 위키) 계정 체계가 없다. 계정 삭제는 W46-3 에서 다룬다 |
 
 ### 3.4 Recent changes and logs (9)
 | 기능 | 판정 | 우리 버전 | 큐 |
@@ -102,6 +102,7 @@
 | Cite This Page | 변형 | 문서 인용 문구 복사(리비전 고정 링크 포함) | W50+ (낮음) |
 | Page assessments | 변형 | 위키프로젝트 평가자 대신 **토막 문서** 계산 | ③ |
 | Export pages · Book · URL shortener · Mass delete · Change content model | 비채택 | 쓸모가 낮거나 관리자 도구다 |
+| Random redirect · Random root page · Redirect by file/user/page/revision/log ID | 비채택 | 넘겨주기·하위 문서가 없다. 리비전 ID 링크는 ①의 `?rev=` 가 대신한다 |
 
 ### 3.6 Data and tools (19) · High use pages (7)
 | 기능 | 판정 | 이유 / 우리 버전 |
@@ -111,7 +112,7 @@
 | Edit filter configuration | 변형 | 규칙을 코드 상수로 공개한다(`how-ranking-works` 처럼). 관리자 화면은 없다 (④) |
 | Most linked-to pages · Pages with the most revisions | 변형 | 역링크 수는 문서 정보에만 쓰고 **점수·인기에는 넣지 않는다**(점수는 투표만, ADR 0001 정신) |
 | API sandbox · REST sandbox | 보류 | 공개 읽기 API 는 P2 후보 |
-| Book sources · Expand templates · Template sandbox · Gadgets · System messages · Namespace · Interwiki · Wiki sets · IP Range · hieroglyph · Version · Gadget usage · API feature usage · Most transcluded · Most interwikis · Most categories · Most linked files/categories | 비채택 | 틀·가젯·다국어·사용자 스크립트 체계가 없다. 사용자 스크립트는 보안상 들이지 않는다 |
+| Book sources · Wikimedia wikis · Expand templates · Template sandbox · Gadgets · System messages · Namespace · Interwiki · Wiki sets · IP Range · hieroglyph · Version · Gadget usage · API feature usage · Most transcluded · Most interwikis · Most categories · Most linked files/categories | 비채택 | 틀·가젯·다국어·사용자 스크립트 체계가 없다. 사용자 스크립트는 보안상 들이지 않는다 |
 
 ### 3.7 나머지 묶음
 | 묶음 | 판정 | 이유 |
@@ -121,6 +122,7 @@
 | Pending changes (3) | 비채택 | 검토자가 승인할 때까지 편집을 숨기는 기능은 사람 권한이다. 규칙 계산형 보호 수준이 대신한다 |
 | Events (10) | 비채택 | 편집 행사 운영은 범위 밖 |
 | Media reports and uploads (8) | 비채택 | 이미지는 URL 만 받는다(저작권·NAS 저장 부담) |
+| Other — Contribute | 변형 | 위키백과의 기여 입구 페이지에 해당한다. 우리 `/contribute`(기여할 거리, ③)가 이 역할을 한다 |
 | Other (SecurePoll·ORES·Community Configuration·Automatic translation·Math·Discussion tools data·Find comment·lint transclusions·Global rename) | 비채택 | ORES(기계학습 훼손 점수)는 "AI 가 판정하지 않는다" 원칙과 맞지 않아 규칙형 태그(④)로 대신한다. 투표·선거 도구는 운영자 체계라 쓰지 않는다 |
 
 ## 4. 특수 문서 밖의 기능 (일반 지식 기준)
@@ -136,20 +138,20 @@
 | 알찬 글·좋은 글·대문 큐레이션·오늘의 알찬 글 | 비채택 | 운영자 선정이다. 개념글(자동)과 인기 문서가 대신한다 |
 | 삭제 토론(AfD) | 비채택 | 문서 삭제는 규칙 위반 제재(`isRemoved`)만 한다 |
 | 핵심 정책: 검증 가능성·독자 연구 금지·중립성 | 있음 | `docs/CONTENT_RESEARCH_GUIDELINE.md`(출처·확인일·원문 인용) |
-| 저작권 표시(CC BY-SA 고지) | 채택 | 문서 하단 라이선스 고지. W46-3(약관)과 함께, 운영자 결정 필요 |
+| 저작권 표시(콘텐츠 라이선스 고지) | 보류 | **사용자 결정**: 어떤 라이선스를 쓸지(CC BY-SA 등)는 법적 결정이다. 정해지면 문서 하단에 고지하고 W46-3(약관)에 묶는다 |
 | 다크 모드 · 모바일 화면 | 있음 | 다크 기본, 라이트 토큰 |
 | 단축키(accesskey) | 비채택(지금) | 쓸 사람이 생기면 |
 | 위키데이터(구조화 사양) | 변형 | `specSummary` 를 구조화된 사양 필드로 바꾸면 문서 비교가 쉬워진다. W50 이후 스키마 |
 
 ## 5. 집계
 3·4절 표의 **행 단위**로 셌다. 한 행에 여러 특수 문서를 묶은 곳이 있어서 합계가 190개와 맞지 않는다.
-- **채택 7**: 리비전 비교, 고정 링크, 역링크, 무작위 문서, Edit Recovery, 알림, 저작권 고지. 2절의 되돌리기 버튼은 별도다.
-- **변형 30**: 토막 문서, Wanted·Dead-end·Orphaned·Fewest revisions·Dormant, 보호 중인 문서 목록, 동명 문서와 그 링크, 색인, 도메인 검색, 추적 분류, 주제 구독, 기여 목록, 새 문서 필터, 변경 태그, 필터 경고, 문서 정보, 문서 비교, 문서 인용, 토막 평가, 통계, 편집 안내, 필터 규칙 공개, 역링크 수, 차단 도메인, 새내기 과제, 충돌 해결, 링크 미리보기, 구조화 사양
-- **있음 13**, **보류 3**(넘겨주기 2, 공개 API), **비채택 22**
+- **채택 6**: 리비전 비교, 고정 링크, 역링크, 무작위 문서, Edit Recovery, 알림. 2절의 되돌리기 버튼은 별도다.
+- **변형 31**: Contribute, 토막 문서, Wanted·Dead-end·Orphaned·Fewest revisions·Dormant, 보호 중인 문서 목록, 동명 문서와 그 링크, 색인, 도메인 검색, 추적 분류, 주제 구독, 기여 목록, 새 문서 필터, 변경 태그, 필터 경고, 문서 정보, 문서 비교, 문서 인용, 토막 평가, 통계, 편집 안내, 필터 규칙 공개, 역링크 수, 차단 도메인, 새내기 과제, 충돌 해결, 링크 미리보기, 구조화 사양
+- **있음 13**, **보류 4**(넘겨주기 2, 공개 API, 라이선스 고지는 사용자 결정), **비채택 23**
 - 무관한 묶음 9개: 위키데이터, 다국어, 틀·가젯, 파일, 전역 계정, OAuth 앱, 행사, 선거, 수식
 
 ## 6. W49 작업 큐 (스키마 변경 없음)
-**순서**: W1~W4 → W48 에서 넘어온 C·`useOptimistic`·S·K → W5. 이유: 11/18 사용자 지시가 가장 최근이고, W1~W4 는 G(`db:push`)와 관계없이 build 까지 확인할 수 있다. C·S 는 스키마 반영 전이라 어차피 "build 미확인"이 붙는다. 월~목 하루 2개, 최대 8칸이다. W5 는 남는 칸에서 집는다.
+**순서**: W1~W4 → W48 에서 넘어온 C·`useOptimistic`·S·K → W5. 이유는 11/18 사용자 지시가 가장 최근이라서다. W1~W4 는 새 스키마를 만들지 않으므로 G 가 할 일을 늘리지 않는다. C 도 이미 있는 `Notification` 모델을 쓰고, 새 컬럼이 생기는 것은 S 하나뿐이다. **단, `npm run build` 는 지금 기존 페이지 prerender 단계에서 `P2021`(테이블 없음, `db:push` 미적용)로 실패한다**(11-18 dev.md:14). 그래서 W1~W4 도 G 가 끝나기 전에는 "build 미확인"으로 적는다. P2021 은 사람이 `db:push` 해야만 풀리므로 원인을 찾느라 시간을 쓰지 않는다. 월~목 하루 2개, 최대 8칸이다. W5 는 남는 칸에서 집는다.
 
 ### W1 리비전 비교·고정 링크·되돌리기 버튼 (S~M)
 - **데이터**: 없음. `EditHistory.snapshot` 두 개와 `buildDiff`(`wiki.ts:37`)를 쓴다.
@@ -211,5 +213,5 @@
 - 보안: 위키링크 제목, `?rev`, `?from/to` 는 모두 검증한다(정수 범위, 80자, 인코딩). 리비전 스냅샷은 지금처럼 raw HTML 없이 렌더한다.
 
 ## 9. 연결
-- 11/25(수) 리서치는 위키 주제다. 이 전수조사를 반복하지 말고 W1·W2·W4 의 **오픈소스 구현 사례**(리비전 diff 화면, 역링크 색인, 편집 필터 규칙 형식)를 찾게 한다. 리서치 스크립트 프롬프트는 바꾸지 않고, 그 세션이 `docs/README.md` 를 통해 이 문서를 읽는다.
+- 11/25(수) 리서치는 위키 주제다. 이 전수조사를 반복하지 말고 W1·W2·W4 의 **오픈소스 구현 사례**(리비전 diff 화면, 역링크 색인, 편집 필터 규칙 형식)를 찾게 한다. 리서치 세션은 프롬프트에 따라 `ROADMAP.md` 를 먼저 읽는다. 그 W49 절이 이 문서를 가리키고 이 지시도 담고 있다.
 - 안티: 콘텐츠에 `[[문서명]]` 링크를 쓸 때 W2 이후 빨간 링크로 보인다. 정확한 문서명만 쓰게 한다(`gemini-brief.md` 반영은 W2 가 끝난 뒤).
