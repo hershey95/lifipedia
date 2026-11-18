@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSituationCards, parseTaxonomySeed, summarizeChildren } from '@/lib/situation';
+import { buildBestItems, buildSituationCards, parseTaxonomySeed, summarizeChildren } from '@/lib/situation';
 
 const NOW = new Date('2026-11-12T00:00:00Z');
 const day = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
@@ -128,5 +128,30 @@ describe('parseTaxonomySeed', () => {
 
   it('형식이 틀리면 오류를 돌려주고 던지지 않는다', () => {
     expect(parseTaxonomySeed(null).errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildBestItems', () => {
+  const base = { cats, linkedIds: ['tent', 'chair'], votes: [], edits: [], comments: [], asOf: NOW };
+
+  it('배치된 분류의 하위 문서만 30일 인기순 상위 N개를 돌려준다', () => {
+    const best = buildBestItems({
+      ...base,
+      items: [item('a', 'bp'), item('b', 'chair'), item('c', 'rice'), item('d', 'bp')],
+      votes: [
+        { itemId: 'a', weight: 1, createdAt: day(1) },
+        { itemId: 'b', weight: 3, createdAt: day(2) },
+        { itemId: 'c', weight: 99, createdAt: day(1) }, // 배치되지 않은 분류
+        { itemId: 'd', weight: 50, createdAt: day(40) }, // 창 밖
+      ],
+      limit: 2,
+    });
+    expect(best.map((b) => b.id)).toEqual(['b', 'a']);
+    expect(best[0].themeSlug).toBe('chair');
+  });
+
+  it('두 배치 분류에 걸쳐도 문서는 한 번만 나오고, 동점은 id 순이다', () => {
+    const best = buildBestItems({ ...base, linkedIds: ['camp', 'tent'], items: [item('y', 'bp'), item('x', 'bp')] });
+    expect(best.map((b) => b.id)).toEqual(['x', 'y']);
   });
 });

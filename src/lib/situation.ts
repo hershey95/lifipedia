@@ -112,6 +112,50 @@ export function buildSituationCards(input: {
   return sortByPopularity(rows);
 }
 
+export type BestItem = { id: string; name: string; slug: string; themeSlug: string; score: number };
+
+/** 상황 페이지 베스트 문서: 배치된 분류의 하위 문서를 문서 단위 인기(분류 인기와 같은 식)로 정렬해 상위 limit 개. */
+export function buildBestItems(input: {
+  cats: Pick<Cat, 'id' | 'slug' | 'parentId'>[];
+  linkedIds: string[];
+  items: { id: string; themeId: string; name: string; slug: string }[];
+  votes: { itemId: string; weight: number; createdAt: Date }[];
+  edits: { itemId: string; createdAt: Date }[];
+  comments: { itemId: string; createdAt: Date }[];
+  views?: { itemId: string; count: number }[];
+  viewsTrackedDays?: number;
+  asOf: Date;
+  limit?: number;
+}): BestItem[] {
+  const { cats, asOf } = input;
+  const slugOf = new Map(cats.map((c) => [c.id, c.slug]));
+  const placed = new Set(input.linkedIds.flatMap((id) => [...subtree(cats, id)]));
+  const since = asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000;
+  const inWindow = (d: Date) => d.getTime() >= since && d.getTime() <= asOf.getTime();
+  const mine = <T extends { itemId: string }>(rows: T[], id: string) => rows.filter((r) => r.itemId === id);
+  return input.items
+    .filter((i) => placed.has(i.themeId))
+    .map((i) => ({
+      id: i.id,
+      name: i.name,
+      slug: i.slug,
+      themeSlug: slugOf.get(i.themeId) ?? '',
+      score: popularity(
+        {
+          votes: mine(input.votes, i.id),
+          editCount: mine(input.edits, i.id).filter((e) => inWindow(e.createdAt)).length,
+          commentCount: mine(input.comments, i.id).filter((c) => inWindow(c.createdAt)).length,
+          views: mine(input.views ?? [], i.id).reduce((s, v) => s + v.count, 0),
+          viewsTrackedDays: input.viewsTrackedDays,
+        },
+        asOf,
+      ),
+    }))
+    .sort(byScore)
+    .slice(0, input.limit ?? 5)
+    .map(({ id, name, slug, themeSlug, score }) => ({ id, name, slug, themeSlug, score }));
+}
+
 export type TaxonomySeed = {
   categories: { slug: string; name: string; parent: string | null }[];
   situations: { slug: string; name: string; categories: string[] }[];

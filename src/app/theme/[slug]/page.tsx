@@ -15,7 +15,7 @@ import { categoryPath } from '@/lib/taxonomy';
 import { POPULARITY_RULES } from '@/lib/popularity';
 import { viewDay } from '@/lib/views';
 import { ViewBeacon } from '@/components/ViewBeacon';
-import { buildSituationCards, summarizeChildren, type SituationCard } from '@/lib/situation';
+import { buildBestItems, buildSituationCards, summarizeChildren, type BestItem, type SituationCard } from '@/lib/situation';
 import { FEED_ORDER_BY, feedHref, parseFeedParams } from '@/lib/feed';
 import { parseBoardParams } from '@/lib/board';
 import { Board } from '@/components/Board';
@@ -42,7 +42,7 @@ async function loadTheme(slug: string) {
 
 /** 상황 갤러리의 인기 분류 카드. 60초 캐시(투표·편집 직후 최대 60초 지연, 인기는 30일 창 지표라 무방). asOf 는 안에서 만든다: 밖에서 넘기면 키가 매번 달라진다. */
 const loadSituationCards = unstable_cache(
-  async (situationId: string): Promise<SituationCard[]> => {
+  async (situationId: string): Promise<{ cards: SituationCard[]; best: BestItem[]; unanswered: { id: string; title: string }[] }> => {
     const links = await prisma.situationCategory.findMany({ where: { situationId }, select: { categoryId: true } });
     const asOf = new Date();
     const since = new Date(asOf.getTime() - POPULARITY_RULES.WINDOW_DAYS * 86_400_000);
@@ -58,15 +58,15 @@ const loadSituationCards = unstable_cache(
       }),
       prisma.vote.findMany({
         where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-        select: { weight: true, createdAt: true, item: { select: { themeId: true } } },
+        select: { weight: true, createdAt: true, item: { select: { id: true, themeId: true } } },
       }),
       prisma.editHistory.findMany({
         where: { createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-        select: { createdAt: true, item: { select: { themeId: true } } },
+        select: { createdAt: true, item: { select: { id: true, themeId: true } } },
       }),
       prisma.talkComment.findMany({
         where: { isRemoved: false, createdAt: { gte: since }, item: { themeId: { in: catIds } } },
-        select: { createdAt: true, item: { select: { themeId: true } } },
+        select: { createdAt: true, item: { select: { id: true, themeId: true } } },
       }),
       prisma.pageView.findMany({ where: { day: { gte: viewDay(since) } }, select: { targetType: true, targetId: true, count: true } }),
       prisma.pageView.findFirst({ orderBy: { day: 'asc' }, select: { day: true } }),
@@ -77,17 +77,37 @@ const loadSituationCards = unstable_cache(
       return themeId ? [{ themeId, count: v.count }] : [];
     });
     const viewsTrackedDays = firstView ? Math.floor((Date.parse(viewDay(asOf)) - Date.parse(firstView.day)) / 86_400_000) : 0;
-    return buildSituationCards({
+    const linkedIds = links.map((l) => l.categoryId);
+    const cards = buildSituationCards({
       views,
       viewsTrackedDays,
       cats,
-      linkedIds: links.map((l) => l.categoryId),
+      linkedIds,
       items,
       votes: votes.map((v) => ({ weight: v.weight, createdAt: v.createdAt, themeId: v.item.themeId })),
       edits: edits.map((e) => ({ createdAt: e.createdAt, themeId: e.item.themeId })),
       comments: comments.map((c) => ({ createdAt: c.createdAt, themeId: c.item.themeId })),
       asOf,
     });
+    const best = buildBestItems({
+      cats,
+      linkedIds,
+      items,
+      votes: votes.map((v) => ({ itemId: v.item.id, weight: v.weight, createdAt: v.createdAt })),
+      edits: edits.map((e) => ({ itemId: e.item.id, createdAt: e.createdAt })),
+      comments: comments.map((c) => ({ itemId: c.item.id, createdAt: c.createdAt })),
+      views: pageViews.filter((v) => v.targetType === 'ITEM').map((v) => ({ itemId: v.targetId, count: v.count })),
+      viewsTrackedDays,
+      asOf,
+    });
+    // 답변 없는 질문: 이 상황 갤러리 글 중 삭제 안 된 최상위 댓글이 없는 추천 요청 최신 5개 (ponytail: 작성자 본인 댓글도 답변으로 친다)
+    const unanswered = await prisma.post.findMany({
+      where: { themeId: situationId, kind: 'QUESTION', isRemoved: false, comments: { none: { parentId: null, isRemoved: false } } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 5,
+      select: { id: true, title: true },
+    });
+    return { cards, best, unanswered };
   },
   ['situation-cards'],
   { revalidate: 60 },
@@ -179,9 +199,12 @@ export default async function ThemePage({ params, searchParams }: Params) {
 
   // 상황 갤러리: 연결된 분류를 인기순 카드로 (설계 W47-taxonomy 3절)
   let cards: SituationCard[] | null = null;
+  let best: BestItem[] = [];
+  let unanswered: { id: string; title: string }[] = [];
   if (theme.kind === 'SITUATION') {
     const links = await prisma.situationCategory.findMany({ where: { situationId: theme.id }, select: { categoryId: true } });
-    cards = links.length > 0 ? await loadSituationCards(theme.id) : [];
+    if (links.length > 0) ({ cards, best, unanswered } = await loadSituationCards(theme.id));
+    else cards = [];
   }
 
   const progress = promotionProgress(theme.followerCount, promotionThreshold());
@@ -333,6 +356,32 @@ export default async function ThemePage({ params, searchParams }: Params) {
               ))}
             </ol>
           )}
+        </section>
+      ) : null}
+
+      {best.length > 0 ? (
+        <section aria-labelledby="best-h" className="flex flex-col gap-2">
+          <h2 id="best-h" className="text-xl font-bold">베스트 문서</h2>
+          <ol className="flex flex-col gap-1 text-sm">
+            {best.map((b) => (
+              <li key={b.id}>
+                <Link href={`/theme/${b.themeSlug}/item/${b.slug}`}>{b.name}</Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+
+      {unanswered.length > 0 ? (
+        <section aria-labelledby="unanswered-h" className="flex flex-col gap-2">
+          <h2 id="unanswered-h" className="text-xl font-bold">답변 없는 질문</h2>
+          <ul className="flex flex-col gap-1 text-sm">
+            {unanswered.map((q) => (
+              <li key={q.id}>
+                <Link href={`/theme/${theme.slug}/post/${q.id}`}>{q.title}</Link>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 
