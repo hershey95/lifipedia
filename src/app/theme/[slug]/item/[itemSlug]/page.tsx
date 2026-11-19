@@ -16,6 +16,7 @@ import { ViewBeacon } from '@/components/ViewBeacon';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
 import { extractToc } from '@/lib/markdown';
 import { parseRev } from '@/lib/revision';
+import { httpUrl } from '@/lib/api';
 import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
 import { toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
@@ -73,7 +74,13 @@ export default async function ItemPage({ params, searchParams }: Params) {
       select: { snapshot: true },
     });
     if (!past) notFound();
-    item = { ...current, ...toSnapshot(past.snapshot as unknown as ItemSnapshot) } as typeof current;
+    const snap = toSnapshot(past.snapshot as unknown as ItemSnapshot);
+    // 옛 스냅샷은 느슨한 검증 시절의 URL(javascript: 등)을 담을 수 있다 → 현재 규칙으로 다시 거른다.
+    const safeImage = typeof snap.imageUrl === 'string' && httpUrl.safeParse(snap.imageUrl).success ? snap.imageUrl : null;
+    const safeLinks = (Array.isArray(snap.purchaseLinks) ? (snap.purchaseLinks as { label: string; url: string }[]) : []).filter(
+      (l) => typeof l?.url === 'string' && httpUrl.safeParse(l.url).success,
+    );
+    item = { ...current, ...snap, imageUrl: safeImage, purchaseLinks: safeLinks } as typeof current;
     pastRevision = revNo;
   }
   const readOnly = pastRevision !== null;
