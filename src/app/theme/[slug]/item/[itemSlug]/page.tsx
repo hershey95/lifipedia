@@ -15,8 +15,13 @@ import { ReportButton } from '@/components/ReportButton';
 import { ViewBeacon } from '@/components/ViewBeacon';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
 import { extractToc } from '@/lib/markdown';
+import { parseRev } from '@/lib/revision';
+import { toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
-type Params = { params: Promise<{ slug: string; itemSlug: string }> };
+type Params = {
+  params: Promise<{ slug: string; itemSlug: string }>;
+  searchParams: Promise<{ rev?: string | string[] }>;
+};
 
 async function loadItem(themeSlug: string, itemSlug: string) {
   return prisma.item.findFirst({
@@ -34,10 +39,13 @@ async function loadItem(themeSlug: string, itemSlug: string) {
   });
 }
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Params): Promise<Metadata> {
   const { slug, itemSlug } = await params;
+  const { rev } = await searchParams;
   const item = await loadItem(slug, itemSlug);
   if (!item) return { title: '문서를 찾을 수 없음' };
+  // 고정 링크(?rev=)는 검색엔진에 중복으로 잡히지 않게 한다.
+  if (rev !== undefined) return { title: `${item.name} — 지난 리비전`, robots: { index: false } };
 
   return {
     title: `${item.name} — ${item.theme.name}`,
@@ -47,21 +55,47 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function ItemPage({ params }: Params) {
+export default async function ItemPage({ params, searchParams }: Params) {
   const { slug, itemSlug } = await params;
-  const item = await loadItem(slug, itemSlug);
-  if (!item) notFound();
+  const { rev } = await searchParams;
+  const current = await loadItem(slug, itemSlug);
+  if (!current) notFound();
+
+  // 지난 리비전: 스냅샷 필드로 덮어써 읽기 전용으로 보여 준다. 스냅샷에 없는 필드는 null(빈 값).
+  const revNo = parseRev(rev, current.revision);
+  if (rev !== undefined && revNo === null) notFound();
+  let pastRevision: number | null = null;
+  let item = current;
+  if (revNo !== null && revNo !== current.revision) {
+    const past = await prisma.editHistory.findUnique({
+      where: { itemId_revision: { itemId: current.id, revision: revNo } },
+      select: { snapshot: true },
+    });
+    if (!past) notFound();
+    item = { ...current, ...toSnapshot(past.snapshot as unknown as ItemSnapshot) } as typeof current;
+    pastRevision = revNo;
+  }
+  const readOnly = pastRevision !== null;
 
   const me = await currentUser();
   const myVote = me ? item.votes.find((vote) => vote.userId === me.id) : undefined;
   const breakdown = computeScore(item.votes as ScoredVote[]);
   const toc = extractToc(item.description);
   const links = (item.purchaseLinks as { label: string; url: string }[] | null) ?? [];
-  const protection = await loadProtection(item);
+  const protection = await loadProtection(current);
 
   return (
     <div className="flex flex-col gap-6">
-      <ViewBeacon targetType="ITEM" targetId={item.id} />
+      {readOnly ? (
+        <p role="status" className="rounded-xl border border-white/10 bg-warn-bg p-3 text-sm text-warn-fg">
+          지난 리비전(r{pastRevision})입니다. 읽기 전용입니다.{' '}
+          <Link href={`/theme/${item.theme.slug}/item/${item.slug}`}>현재 문서 보기</Link>
+          {' · '}
+          <Link href={`/theme/${item.theme.slug}/item/${item.slug}/history`}>편집 이력</Link>
+        </p>
+      ) : (
+        <ViewBeacon targetType="ITEM" targetId={item.id} />
+      )}
       <nav aria-label="경로" className="text-sm text-ink/60">
         {item.theme.category ? (
           <Link href={`/themes?category=${encodeURIComponent(item.theme.category)}`}>{item.theme.category}</Link>
@@ -100,6 +134,7 @@ export default async function ItemPage({ params }: Params) {
           </p>
         </div>
 
+        {readOnly ? null : (
         <div className="flex flex-col items-end gap-2">
           <VoteButtons
             itemId={item.id}
@@ -118,6 +153,7 @@ export default async function ItemPage({ params }: Params) {
             <ReportButton targetType="ITEM" targetId={item.id} />
           </div>
         </div>
+        )}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
