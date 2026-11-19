@@ -16,6 +16,7 @@ import { ViewBeacon } from '@/components/ViewBeacon';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
 import { extractToc } from '@/lib/markdown';
 import { parseRev } from '@/lib/revision';
+import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
 import { toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
 type Params = {
@@ -83,6 +84,10 @@ export default async function ItemPage({ params, searchParams }: Params) {
   const toc = extractToc(item.description);
   const links = (item.purchaseLinks as { label: string; url: string }[] | null) ?? [];
   const protection = await loadProtection(current);
+  const [resolve, backlinks] = await Promise.all([
+    buildWikiResolver([item.description, item.recommendReason, item.specSummary]),
+    readOnly ? Promise.resolve([]) : findBacklinks(current),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -172,18 +177,32 @@ export default async function ItemPage({ params, searchParams }: Params) {
           ) : null}
 
           <Section title="설명">
-            <WikiMarkdown source={item.description} />
+            <WikiMarkdown source={item.description} resolve={resolve} />
           </Section>
 
           {item.recommendReason ? (
             <Section title="추천 이유">
-              <WikiMarkdown source={item.recommendReason} ids={false} />
+              <WikiMarkdown source={item.recommendReason} ids={false} resolve={resolve} />
             </Section>
           ) : null}
 
           {item.specSummary ? (
             <Section title="스펙 요약">
-              <WikiMarkdown source={item.specSummary} ids={false} />
+              <WikiMarkdown source={item.specSummary} ids={false} resolve={resolve} />
+            </Section>
+          ) : null}
+
+          {backlinks.length > 0 ? (
+            <Section title="이 문서를 가리키는 문서">
+              <ul className="flex flex-col gap-1 text-sm">
+                {backlinks.map((b) => (
+                  <li key={`${b.theme.slug}/${b.slug}`}>
+                    <Link href={`/theme/${b.theme.slug}/item/${b.slug}`}>{b.name}</Link>
+                    <span className="ml-2 text-xs text-ink/50">{b.theme.name}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-ink/50">역링크 수는 점수·인기에 반영되지 않습니다.</p>
             </Section>
           ) : null}
 

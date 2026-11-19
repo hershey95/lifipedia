@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
-import { extractToc } from '@/lib/markdown';
+import { extractToc, extractWikiLinks } from '@/lib/markdown';
 
 const html = (s: string) => renderToStaticMarkup(WikiMarkdown({ source: s }));
 
@@ -24,5 +24,27 @@ describe('WikiMarkdown', () => {
   });
   it('[[위키링크]] 는 내부 검색 링크', () => {
     expect(html('[[랜턴]]')).toContain('href="/search?q=%EB%9E%9C%ED%84%B4"');
+  });
+  it('해석기가 있으면 문서·동명 문서·없음으로 갈린다', () => {
+    const resolve = (t: string) =>
+      t === 'A' ? { kind: 'one' as const, href: '/theme/x/item/a' }
+      : t === 'B' ? { kind: 'many' as const, href: '/search?q=B&same=1' }
+      : { kind: 'none' as const };
+    const out = renderToStaticMarkup(WikiMarkdown({ source: '[[A]] [[B]] [[C]]', resolve }));
+    expect(out).toContain('href="/theme/x/item/a"');
+    expect(out).toContain('href="/search?q=B&amp;same=1"');
+    expect(out).toContain('missing=1');
+    expect(out).toContain('title="문서 없음"');
+    expect(out).toContain('wiki-red');
+  });
+});
+
+describe('extractWikiLinks', () => {
+  it('코드 블록 제외·중복 제거·공백 정리', () => {
+    const md = '[[ A ]] [[A]] `[[B]]`\n```\n[[C]]\n```\n[[D]]';
+    expect(extractWikiLinks(md)).toEqual(['A', 'D']);
+  });
+  it('80자 넘는 제목은 링크가 아니다', () => {
+    expect(extractWikiLinks(`[[${'가'.repeat(81)}]]`)).toEqual([]);
   });
 });

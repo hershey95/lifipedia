@@ -124,6 +124,9 @@
   .wiki-md a {
     @apply underline underline-offset-4 decoration-1;
   }
+  .wiki-md a.wiki-red {
+    @apply text-red-400 decoration-dotted;
+  }
   .wiki-md ul {
     @apply list-disc pl-5;
   }

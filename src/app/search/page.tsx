@@ -7,8 +7,12 @@ import type { Tier } from '@/lib/tier';
 export const metadata: Metadata = { title: '검색', robots: { index: false } };
 export const dynamic = 'force-dynamic';
 
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams;
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; missing?: string; same?: string }>;
+}) {
+  const { q, missing, same } = await searchParams;
   const query = q?.trim() ?? '';
 
   if (!query) {
@@ -27,13 +31,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       where: {
         isRemoved: false,
         theme: { status: 'ACTIVE' },
-        OR: [{ name: contains }, { description: contains }],
+        // same=1: 동명 문서 목록 — 이름이 정확히 같은 문서만
+        ...(same === '1' ? { name: query } : { OR: [{ name: contains }, { description: contains }] }),
       },
       orderBy: { score: 'desc' },
       take: 30,
       select: {
         slug: true, name: true, tier: true, score: true,
-        theme: { select: { slug: true, name: true } },
+        theme: { select: { slug: true, name: true, category: true } },
       },
     }),
   ]);
@@ -43,6 +48,18 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       <h1 className="text-2xl font-extrabold">
         &lsquo;{query}&rsquo; 검색 결과
       </h1>
+
+      {missing === '1' && items.every((i) => i.name !== query) ? (
+        <p role="status" className="card text-sm">
+          &lsquo;{query}&rsquo; 문서는 아직 없습니다. 알맞은 <Link href="/themes">분류의 테마</Link>를 골라 문서를
+          만들어 주세요.
+        </p>
+      ) : null}
+      {same === '1' ? (
+        <p role="status" className="card text-sm">
+          이름이 같은 문서가 여러 분류에 있습니다. 분류를 보고 고르세요.
+        </p>
+      ) : null}
 
       <section>
         <h2 className="mb-2 text-lg font-bold">테마 {themes.length}</h2>
@@ -79,6 +96,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   <p className="mt-1 flex items-center gap-2 text-xs text-ink/50">
                     <TierBadge tier={item.tier as Tier} />
                     <Link href={`/theme/${item.theme.slug}`} className="text-inherit no-underline">
+                      {item.theme.category ? `${item.theme.category} / ` : ''}
                       {item.theme.name}
                     </Link>
                   </p>
