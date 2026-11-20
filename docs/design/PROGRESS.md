@@ -48,7 +48,7 @@
 - [x] M2 (0711c25, build 미확인) 조회 지표 연결 — 월(넘치면 화 오전): `ViewBeacon`, 인기의 조회 항, `vid` `Secure`(https 때), IP 한도기 정리, `views-route.test.ts` (6절)
 - [x] P1 (fe7304a, build 미확인: db:push 전이라 prerender P2021. **`db:push` 2차(사람) 필요**) 게시판 — 화~수: `Post`·`PostVote`·`PostComment`·`PostCommentVote`·`AnswerItem` 스키마(추가만) + `comments.ts`·`board.ts` + 라우트 4개 + 게시판·글쓰기·글 상세. 끝나면 **`db:push` 2차(사람)** (7절)
 - [x] P2 (2c550a3, build 미확인, P1 과 같은 `db:push` 2차에 포함) 답변 문서 첨부·집계·도움됨(기여 적립 없음) — 목 (8절)
-- [ ] 회고 `reviews/retro/2026-W48-retro.md` — 금 (금요일 회고 세션만 집는다. 구현 세션은 건너뛰고 남는 날 ①부터)
+- [x] 회고 `reviews/retro/2026-W48-retro.md` (11-20) — 금 (금요일 회고 세션만 집는다. 구현 세션은 건너뛰고 남는 날 ①부터)
 - [x] 남는 날 ① P3 베스트 문서·답변 없는 질문 (de637ab, build 미확인: db:push 전이라 prerender P2021) (9절 1)
 - [x] 남는 날 ② B 토론 댓글 투표·개념글 (4acb566, build 미확인) (9절 2, W45 4.3~4.6). **남음**: 4.5 갤러리 토론 탭 `best=1` 개념글 필터(`feed.ts`), 개념글 알림(C)
 - [~] 남는 날 ③~⑥ (C·`useOptimistic`·S·K) — **W49 큐로 옮김**(아래 W49 섹션, W1~W4 다음). 첫 `[ ]` 규칙은 그대로 따르므로, 11/19(목) 구현 세션은 W49 W1 부터 집는다
