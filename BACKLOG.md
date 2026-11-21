@@ -1,7 +1,42 @@
 # BACKLOG (Claude 관리, 토요일 격차 분석으로 갱신)
 > 4주 통합 로드맵: `docs/design/ROADMAP.md` (W43~W46), 진행: `docs/design/PROGRESS.md`. 아래는 로드맵 밖 항목과 격차 분석 결과.
 > 우선순위 P0 즉시 / P1 2주 / P2 분기. 규모 S<½일, M 1~2일, L 3일+.
-> 최종 갱신: 2026-11-14 (격차 분석, 코드 미수정. 근거는 파일:줄). 아래 10-24 절은 이력이며, 낡은 항목은 11-14 절 "10-24 항목 상태"에서 정정한다.
+> 최종 갱신: 2026-11-21 (격차 분석, 코드 미수정. 근거는 파일:줄). 11-21 절이 최신이다. 11-14·10-24 절은 이력이며 낡은 항목은 11-21 절 "이전 항목 상태"에서 정정한다.
+> 이번 점검은 무인 세션에서 Bash 가 거부되어 Read/Grep/Glob 만 썼다. `tsc`·`vitest`·`build` 는 돌리지 않았다(수치는 파일 검색 기준).
+
+## 격차 분석 2026-11-21 (W49 토요일)
+### 이전 항목 상태 (정정, 11-14 대비)
+- 해결: 조회 비콘 연결(`src/components/ViewBeacon.tsx`, 호출처 `theme/[slug]/page.tsx:215`·`item/[itemSlug]/page.tsx:109`·`post/[postId]/page.tsx:110`), 인기 점수의 조회 항(`popularity.ts:3~4`, ADR 0001 범위를 정렬 신호로 한정한다고 주석에 명시), 분류 카드 `unstable_cache`(`theme/[slug]/page.tsx:44`), `vid` 쿠키 `Secure`(https 때, `api/views/route.ts:47~49`), 댓글 투표·개념글 라우트(`api/talk/[commentId]/vote/route.ts`), 게시판 라우트·스키마(`api/themes/[slug]/posts`, `api/posts/[id]/*`, `api/post-comments/[id]/*`).
+- 해결(확인됨): cron 인증은 `CRON_SECRET` 미설정이면 **거부**(`src/lib/api.ts:25~26`, fail-closed). 11-14 의 "미설정 시 동작 확인" 항목은 닫는다. 남은 건 라우트 테스트뿐.
+- 라우트 테스트: `me`·`vote` 에 `comment-vote-route`·`post-route`·`views-route` 가 더해져 파일 27개. 그래도 edit·revert·items·reports·cron·follow 라우트는 무테스트(`tests/` 에 해당 파일 없음).
+- 그대로: `ink` 브리지(`tailwind.config.ts:10~11`) 105곳·21파일(`theme/[slug]/page.tsx` 25, `how-ranking-works` 13, `[tier]/page.tsx` 9, `themes/page.tsx` 8, `item/[itemSlug]/page.tsx` 8). 11-14 의 97곳보다 늘었다 — 새 화면(게시판·토론)이 치환 없이 `ink` 를 계속 쓰는 신호.
+
+### P0
+- **[P0·사용자·S] G `db:push` → `build` 26일째 미실행.** 이제 스키마가 W48 P1 의 5모델까지 쌓였다(`Notification` schema.prisma:338 외). 모든 W48·W49 `[x]` 가 "build 미확인(P2021)"이고, 런타임 검증이 한 번도 없다. 다음 코드 작업보다 먼저. 근거 PROGRESS.md:46·63.
+- **[P0·M] 신고 처리·제재 경로 여전히 없음.** `Report` 는 쌓이기만 하고 `isRemoved` 를 true 로 쓰는 코드는 `src` 전체 grep 0건(읽기·select 만). 게시판·토론이 늘어 신고 대상이 넘쳤다(글·댓글·답변). 회고 #5 의 기본값("관리자 숨김 라우트 1개", S~M)을 W49 에 올릴 것. 근거 `api/reports/route.ts`, PROGRESS.md:59.
+- **[P0·S] 처리방침·약관 페이지 없음.** `src/app` 에 라우트 0(OAuth 로 개인정보 수집 중, `src/lib/auth.ts`). 운영자 사실 4가지(책임자 연락처·서버 위치·OAuth·백업 주기)가 있어야 쓸 수 있다 — 사용자 입력 대기. 최소안 S.
+
+### 기능 격차
+- **[P1·M] W49 W3 `/contribute`·토막 문서, W4 편집 필터·변경 태그 미착수.** `src/app` 에 `contribute` 라우트 없음, 편집 필터 코드 없음(`items/[id]/edit/route.ts` 만 검사). 큐 순서대로 다음. 근거 PROGRESS.md:65~66.
+- **[P1·L] 알림 3종 구현 0.** `Notification` 모델만 있고(schema.prisma:338) `prisma.notification` 사용처 0건(`src` grep). 개념글 알림도 여기 포함. 헤더 배지·90일 정리 포함. PROGRESS.md:67.
+- **[P1·M] 갤러리 토론 탭 `best=1` 개념글 필터 없음.** `src/lib/feed.ts` 에 best/개념글 처리 0건. B 의 남은 부분(PROGRESS.md:53 "남음 4.5").
+- **[P1·L] `Item.sources` 컬럼·각주 렌더 없음.** schema.prisma 에 `sources`·`tags` 컬럼 0건, `EDITABLE_FIELDS` 도 그대로. `sources` 는 콘텐츠 JSON 검증에만(`content-check.ts:90~110`). 콘텐츠 `facts` 전환의 선행(스키마라 G 후).
+- **[P1·M] `useOptimistic` 0건**(`src` grep). 투표·팔로우 버튼이 서버 왕복을 기다림. 순수 함수 `applyVote` 부터(S) 하면 쪼개기 쉽다.
+- **[P1·M·사용자] `taxonomy.json` 시드 import 래퍼**(`scripts/` 금지). 11-14 항목 유지. 대안: 래퍼를 `src/lib` 안 순수 함수 + 사람이 쓰는 2줄 스크립트.
+
+### 보안·운영
+- **[P1·M] 쓰기 라우트 테스트 공백**: edit·revert·items·reports·cron·follow·search 무테스트. 되돌리기·보호 403·409·한도가 회귀 보호 없이 변경 중(W49 W1 의 되돌리기 버튼 포함). 라우트당 1~2 케이스로 시작.
+- **[P1·S] 투표 한도 쿼리 중복**: 세 투표 라우트가 서로의 모델까지 합산해 매 요청 `count` 3회(`talk/[commentId]/vote/route.ts:23~25`, `post-comments/[id]/vote/route.ts:24~25`, `posts/[id]/vote/route.ts:27~28`). 동작은 맞지만 한 곳으로 모으지 않으면 모델 추가 때 한 라우트만 빠뜨릴 위험. 공용 함수화(S).
+- 이월 유지: SQLite 백업 자동화 부재(P1·M, `scripts/` 금지 → 사용자), CSP `'unsafe-inline'`(next.config.mjs, P1·낮음), `vid` 서명 없음(P1·S, 환경변수 신설은 사용자 결정), 접근성 자동 점검 없음(P1·S), Playwright 시각 회귀 없음(P2·M).
+
+### 프론트·디자인
+- **[P1·L] `ink` 치환 105곳**(위). 파일 그룹별 소규모 커밋 권장. 새 화면부터 `fg-*` 토큰만 쓰도록 `tests/design-tokens.test.ts` 가드 1번을 신규 파일에 먼저 적용하면 증가를 막는다(S).
+
+### 프로세스
+- **[P1·S] 무인 세션 Bash 거부 재발**: 이번 점검도 막혔다. CLAUDE.md 는 단순 명령을 허용한다고 하나 `ls`·`grep` 복합 한 줄이 거부됨(복합 명령 규칙). 단순 명령 한 개씩은 시도하지 않았다 — 다음 세션은 단순 명령으로 확인해 볼 것.
+
+### 권고 큐 (다음 구현 세션)
+1. G(사람) → 2. W3 → 3. W4 → 4. 신고 숨김 라우트(P0, 결정 없으면 기본값) → 5. 라우트 테스트 묶음 → 6. C 알림 → 7. `best=1` 필터.
 
 ## 격차 분석 2026-11-14 (W47 토요일)
 ### 10-24 항목 상태 (정정)
