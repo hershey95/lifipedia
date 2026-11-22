@@ -13,6 +13,7 @@
 - 새 기능·버그 수정은 **테스트 먼저**(`tdd` 스킬): 합의된 경계(public 인터페이스)에서만 테스트하고, 구현 세부에 결합하지 않는다.
 - "완료"는 `npx tsc --noEmit`, `npx vitest run`, `npm run build` 를 **직접 돌린 결과**로만 말한다. 돌리지 못했으면 못 했다고 쓴다.
 - 막히면 증상 가리기를 멈추고 원인부터 재현한다(`diagnosing-bugs`).
+- 큰 설계서(새 기능·스키마)는 끝낸 뒤 `/egm:egm-review <설계서>` 로 기억 없는 검토자에게 맡긴다(일요일은 자동, `scripts/egm-review.sh`). 지적은 수용/거절+이유로 기록한다.
 - 화면은 `docs/agents/design-team.md`(Hallmark 감사, 우리 토큰 우선)와 `docs/agents/ux-reviewer.md`, 권한·보안은 `docs/agents/security-reviewer.md` 관점으로 한 번 검토한다.
 
 ## 하지 않는다

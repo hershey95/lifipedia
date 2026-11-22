@@ -31,6 +31,10 @@ case $DOW in
   6) TASK="격차 분석일. 현재 코드와 ROADMAP/ref-*.md 의 목표를 대조해 빠진 것·부채를 찾아 BACKLOG.md 를 갱신한다(우선순위·규모 포함, 근거 파일:줄). 코드는 수정하지 않는다." ;;
   7) TASK="설계일. 다음 주(W$((WEEK+1)))의 설계서 docs/design/2026-W$((WEEK+1))-<주제>.md 를 쓴다: 작업별 데이터 모델·API·화면·테스트·위험, 순서와 의존성. ROADMAP.md 해당 주 표가 기준이며, 바꾸면 이유를 적는다. PROGRESS.md 에 다음 주 섹션을 옮겨 적는다. 코드는 수정하지 않는다."; MODEL=opus ;;
 esac
+if [ "$DOW" = 1 ]; then # 월요일: 일요일에 EGM 이 남긴 검토 보고서를 먼저 처리한다(수용/거절 기록 후 설계서 반영)
+  EGMR=$(ls -t docs/reviews/egm/*/consolidated_review_report.md 2>/dev/null | head -1)
+  [ -n "$EGMR" ] && TASK="먼저 $EGMR 를 읽는다(기억 없는 검토자들의 설계 검토). 같은 폴더에 response.md 가 없으면: 🔴·🟡 항목마다 수용/부분 수용/거절과 이유를 표로 그 폴더의 response.md 에 적고, 수용한 것만 해당 설계서에 반영해 커밋한다(운영자 큐레이션 금지·ADR 위반 제안은 거절). 이것도 1개 작업으로 치지 않고, 끝낸 뒤 아래 구현을 한다. $TASK"
+fi
 log "start W$WEEK dow=$DOW model=$MODEL base=${START:0:7}"
 [ "${DRY:-0}" = 1 ] && { echo "W$WEEK dow=$DOW model=$MODEL: $TASK"; exit 0; }
 
@@ -43,6 +47,10 @@ perl -e 'alarm shift; exec @ARGV' 10800 claude -p "$COMMON $TASK" \
   --disallowedTools "Bash(git push:*)" "Bash(git reset:*)" "Bash(git checkout:*)" "Bash(rm:*)" "Edit(scripts/**)" "Write(scripts/**)" "Edit(prisma/*.db)" "Edit(.env*)" >> "$LOG" 2>&1
 log "claude exit=$?"
 rm -f "/tmp/lifipedia-dev-$DATE.db"; unset DATABASE_URL
+if [ "$DOW" = 7 ]; then # 일요일: 방금 쓴(고친) 다음 주 설계서를 기억 없는 검토자들(EGM Goldfish)에게 맡긴다. 실패해도 나머지 흐름은 계속한다
+  EGMDOC=$(ls -t docs/design/2026-W$((WEEK+1))-*.md 2>/dev/null | head -1)
+  [ -n "$EGMDOC" ] && { "$WORK/scripts/egm-review.sh" "$EGMDOC" >> "$LOG" 2>&1 && log "EGM 검토 완료 $EGMDOC" || log "EGM 검토 실패/불완전 $EGMDOC"; }
+fi
 
 git add -A docs >> "$LOG" 2>&1; git diff --cached --quiet || git commit -q -m "docs: $DATE 무인 개발 보고 (자동)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>" >> "$LOG" 2>&1
 if [ -n "$(git status --porcelain)" ]; then # 커밋되지 않은 코드 변경 = 미완. 보존하고 되돌린다

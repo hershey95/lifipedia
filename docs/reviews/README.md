@@ -17,6 +17,7 @@
 | 매일 09:00 | `daily-dispatch.sh` | 안티에게 지시 → 끝날 때까지 대기 → 사실 수집 → Claude 무인 점검(Sonnet) → 보고서·피드백 push. 절차는 `RELAY.md` |
 | 매일 11:00 | `weekly-dev.sh` | 요일별 Claude 무인 세션: 월~목 구현, 금 회고, 토 격차 분석(`BACKLOG.md`), 일 다음 주 설계(Opus). 규칙은 `CLAUDE.md` |
 | 수 15:00 | `research-weekly.sh` | 오픈소스 리서치(위키→커뮤니티→가격비교 순환), 결과 `docs/research/` |
+| 일 11:00 뒤 | `egm-review.sh` | 다음 주 설계서를 EGM Goldfish(기억 없는 검토자)가 검토, 결과 `docs/reviews/egm/`. 월요일 구현 세션이 수용/거절+이유를 `response.md` 에 남기고 설계서에 반영 |
 | 금 | 안티 | 디자인 감사(`docs/agents/design-team.md`), 결과 `docs/reviews/design/` |
 - 결과 보고서: `docs/reviews/daily/<날짜>-daily-report.md`, `<날짜>-dev.md`, 회고 `retro/`.
 - 운영 원칙은 **선조치 후보고**: 승인을 기다리지 않고 판단·조치하며 방향 변경·반복 실패·위험·사용자 결정만 보고한다.
