@@ -65,8 +65,8 @@
 - [~] G-대화형 **대화형 Claude 만**(`scripts/` 수정): ① `collect-facts.py` `KeyError: 'items'`(`taxonomy.json` 건너뛰기) ② 시드 import·재배치 래퍼 ③ `taxonomy.json` 키 변환 ④ 무인 Bash 허용 상태 한 줄 기록. 무인 세션은 집지 않는다
 - [x] W1 (65922ab, build 미확인: P2021) 리비전 비교 `history?from=&to=` · 고정 링크 `?rev=N` · 되돌리기 버튼 (6절 W1)
 - [x] W2 (b82d38d, build 미확인: P2021) 위키링크 해석: 빨간 링크·동명 문서·역링크 (6절 W2)
-- [ ] R-1 W1·W2 수용 수정: `?rev=` 폴백·리졸버 `ACTIVE`·`missing=1`·역링크 세 필드·삭제 문서 history 404·되돌리기 버튼 보호 수준·`min-w-0`·`테마` 문구 (10.4, 11-20 답신) — 월
-- [ ] R-2 B 수용 + 분류 갤러리 토론 탭 `best=1`: 고아 `parentId`·`conceptAt` 원자화·`feed.ts` `best` (10.4, 11-19 답신, W45 4.5) — 월
+- [x] (b1819bd, build 미확인: P2021) R-1 W1·W2 수용 수정: `?rev=` 폴백·리졸버 `ACTIVE`·`missing=1`·역링크 세 필드·삭제 문서 history 404·되돌리기 버튼 보호 수준·`min-w-0`·`테마` 문구 (10.4, 11-20 답신) — 월
+- [x] (18c2b6f, build 미확인: P2021) R-2 B 수용 + 분류 갤러리 토론 탭 `best=1`: 고아 `parentId`·`conceptAt` 원자화·`feed.ts` `best` (10.4, 11-19 답신, W45 4.5) — 월
 - [ ] W3 기여할 거리 `/contribute` + 토막 문서 (6절 W3) — 월~화
 - [ ] C 알림 3종 (W45 5절, 10.5) — 화~수, **W49 마감**
 - [ ] W4 편집 필터(가격 급변·대량 삭제·차단 도메인) + 계산형 변경 태그 + `?rev=` 다른 URL 필드 점검(회고 4절 #6) (6절 W4) — 목, 11/25 리서치 결과를 반영한다(10.1 #7)
