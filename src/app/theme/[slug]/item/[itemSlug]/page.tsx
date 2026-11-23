@@ -18,7 +18,7 @@ import { extractToc } from '@/lib/markdown';
 import { parseRev } from '@/lib/revision';
 import { httpUrl } from '@/lib/api';
 import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
-import { toSnapshot, type ItemSnapshot } from '@/lib/wiki';
+import { pastItemView, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
 type Params = {
   params: Promise<{ slug: string; itemSlug: string }>;
@@ -80,7 +80,8 @@ export default async function ItemPage({ params, searchParams }: Params) {
     const safeLinks = (Array.isArray(snap.purchaseLinks) ? (snap.purchaseLinks as { label: string; url: string }[]) : []).filter(
       (l) => typeof l?.url === 'string' && httpUrl.safeParse(l.url).success,
     );
-    item = { ...current, ...snap, imageUrl: safeImage, purchaseLinks: safeLinks } as typeof current;
+    // 스냅샷에 없는 필드는 지어내지 않는다: 본문은 빈 값, name·tier 는 현재 값.
+    item = { ...current, ...pastItemView(snap, current), imageUrl: safeImage, purchaseLinks: safeLinks } as typeof current;
     pastRevision = revNo;
   }
   const readOnly = pastRevision !== null;
@@ -112,7 +113,7 @@ export default async function ItemPage({ params, searchParams }: Params) {
         {item.theme.category ? (
           <Link href={`/themes?category=${encodeURIComponent(item.theme.category)}`}>{item.theme.category}</Link>
         ) : (
-          <Link href="/themes">테마</Link>
+          <Link href="/themes">분류 갤러리</Link>
         )}{' '}
         / <Link href={`/theme/${item.theme.slug}`}>{item.theme.name}</Link> /{' '}
         <Link href={`/theme/${item.theme.slug}/${TIER_SLUGS[item.tier]}`}>{TIER_LABELS[item.tier]}</Link>

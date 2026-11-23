@@ -7,6 +7,8 @@ import { buildDiff, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 import { parseRevRange } from '@/lib/revision';
 import { CONTRIBUTION_RULES, REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
 import { RevertButton } from '@/components/RevertButton';
+import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
+import { loadProtection } from '@/lib/protection-service';
 
 type Params = {
   params: Promise<{ slug: string; itemSlug: string }>;
@@ -20,9 +22,9 @@ export default async function HistoryPage({ params, searchParams }: Params) {
   const sp = await searchParams;
 
   const item = await prisma.item.findFirst({
-    where: { slug: decodeURIComponent(itemSlug), theme: { slug: decodeURIComponent(slug) } },
+    where: { slug: decodeURIComponent(itemSlug), isRemoved: false, theme: { slug: decodeURIComponent(slug) } },
     select: {
-      id: true, name: true, slug: true, revision: true,
+      id: true, name: true, slug: true, revision: true, themeId: true, tier: true,
       theme: { select: { slug: true, name: true } },
       edits: {
         orderBy: { revision: 'desc' },
@@ -67,6 +69,10 @@ export default async function HistoryPage({ params, searchParams }: Params) {
   else if (isSuspended(me)) revertNote = '제재 중인 계정은 되돌릴 수 없습니다.';
   else if (me.contributionCount < CONTRIBUTION_RULES.MIN_CONTRIBUTIONS_TO_REVERT) {
     revertNote = `되돌리기는 기여 ${CONTRIBUTION_RULES.MIN_CONTRIBUTIONS_TO_REVERT}건 이상부터 할 수 있습니다.`;
+  } else {
+    // 보호 수준은 화면 표시용 사전 판단일 뿐이다. 최종 판정은 revert 라우트(서버)가 한다.
+    const p = await loadProtection(item);
+    if (!canEditAt(p.level, userLevel(me))) revertNote = protectionMessage(p.level);
   }
 
   return (
@@ -100,7 +106,7 @@ export default async function HistoryPage({ params, searchParams }: Params) {
         </p>
       ) : null}
 
-      <form method="get" className="flex flex-col gap-4">
+      <form method="get" className="flex min-w-0 flex-col gap-4">
         <div>
           <button type="submit" className="btn-primary">선택한 두 리비전 비교</button>
           <span className="ml-2 text-xs text-ink/50">왼쪽(from)과 오른쪽(to)에서 하나씩 고릅니다.</span>
@@ -112,7 +118,7 @@ export default async function HistoryPage({ params, searchParams }: Params) {
               edit.revision < item.revision &&
               item.revision - edit.revision <= REVERT_LOOKBACK_REVISIONS;
             return (
-              <li key={edit.id} className="card">
+              <li key={edit.id} className="card min-w-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="font-semibold">
                     r{edit.revision}

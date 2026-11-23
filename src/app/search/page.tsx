@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
+import { itemNameExists } from '@/lib/wikilinks';
 import { TierBadge } from '@/components/TierBadge';
 import type { Tier } from '@/lib/tier';
 
@@ -49,9 +50,9 @@ export default async function SearchPage({
         &lsquo;{query}&rsquo; 검색 결과
       </h1>
 
-      {missing === '1' && items.every((i) => i.name !== query) ? (
+      {missing === '1' && !(await itemNameExists(query)) ? (
         <p role="status" className="card text-sm">
-          &lsquo;{query}&rsquo; 문서는 아직 없습니다. 알맞은 <Link href="/themes">분류의 테마</Link>를 골라 문서를
+          &lsquo;{query}&rsquo; 문서는 아직 없습니다. 알맞은 <Link href="/themes">분류 갤러리</Link>를 골라 문서를
           만들어 주세요.
         </p>
       ) : null}

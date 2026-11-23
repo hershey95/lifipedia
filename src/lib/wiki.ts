@@ -25,6 +25,29 @@ export function toSnapshot(item: Record<string, unknown>): ItemSnapshot {
   return out;
 }
 
+const TIERS = ['BUDGET', 'MID', 'PREMIUM'];
+const text = (v: unknown) => (typeof v === 'string' ? v : '');
+
+/**
+ * 지난 리비전을 현재 문서 위에 덮어 보여 줄 때의 필드. 스냅샷에 없는 값은 지어내지 않는다:
+ * 본문 필드는 빈 값, name·tier 는 현재 값. (imageUrl·purchaseLinks 는 호출하는 쪽이 URL 검증과 함께 처리한다.)
+ */
+export function pastItemView(
+  snap: Partial<Record<EditableField, unknown>>,
+  current: { name: string; tier: string },
+) {
+  const name = typeof snap.name === 'string' && snap.name.trim() ? snap.name : current.name;
+  const tier = typeof snap.tier === 'string' && TIERS.includes(snap.tier) ? snap.tier : current.tier;
+  return {
+    name,
+    tier,
+    priceKrw: typeof snap.priceKrw === 'number' ? snap.priceKrw : null,
+    description: text(snap.description),
+    specSummary: text(snap.specSummary),
+    recommendReason: text(snap.recommendReason),
+  };
+}
+
 function render(snapshot: ItemSnapshot): string {
   return EDITABLE_FIELDS.map((field) => {
     const value = snapshot[field];
