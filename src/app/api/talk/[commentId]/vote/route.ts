@@ -61,11 +61,16 @@ export async function POST(request: Request, ctx: { params: Promise<{ commentId:
       });
       const input = votes.map((v) => ({ ...v, voterCreatedAt: v.user.createdAt }));
       const tally = commentTally(input);
-      const becameConcept = comment.conceptAt === null && isConcept(comment, input);
-      await tx.talkComment.update({
-        where: { id: commentId },
-        data: { ...tally, ...(becameConcept && { conceptAt: new Date() }) },
-      });
+      // 개념글 등재는 조건부 updateMany 로 한 번만 성립한다: 동시에 두 표가 조건을 넘겨도 count === 1 인 쪽만 참.
+      let becameConcept = false;
+      if (comment.conceptAt === null && isConcept(comment, input)) {
+        const claim = await tx.talkComment.updateMany({
+          where: { id: commentId, conceptAt: null },
+          data: { conceptAt: new Date() },
+        });
+        becameConcept = claim.count === 1;
+      }
+      await tx.talkComment.update({ where: { id: commentId }, data: tally });
       return { action, ...tally, becameConcept };
     });
 

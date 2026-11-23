@@ -130,7 +130,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
   const theme = await loadTheme(slug);
   if (!theme) notFound();
   const sp = await searchParams;
-  const { tab, sort, tier: tierFilter } = parseFeedParams(sp);
+  const { tab, sort, tier: tierFilter, best: bestOnly } = parseFeedParams(sp);
   const boardParams = parseBoardParams(sp);
 
   const me = await currentUser();
@@ -158,7 +158,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
       : Promise.resolve([]),
     tab === 'talk'
       ? prisma.talkComment.findMany({
-          where: { isRemoved: false, item: itemWhere },
+          where: { isRemoved: false, item: itemWhere, ...(bestOnly && { conceptAt: { not: null } }) },
           orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
           take: 20,
           select: {
@@ -498,9 +498,14 @@ export default async function ThemePage({ params, searchParams }: Params) {
 
       {isActive && tab === 'talk' ? (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-bold">최근 토론</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-xl font-bold">{bestOnly ? '개념글 토론' : '최근 토론'}</h2>
+            <Link href={feedHref(theme.slug, { tab: 'talk', best: !bestOnly })} className="text-sm">
+              {bestOnly ? '현재: 개념글만 보는 중 · 전체 보기' : '현재: 전체 보는 중 · 개념글만 보기'}
+            </Link>
+          </div>
           {talkRows.length === 0 ? (
-            <p className="card text-sm text-ink/60">아직 토론이 없습니다.</p>
+            <p className="card text-sm text-ink/60">{bestOnly ?'아직 개념글이 없습니다.' : '아직 토론이 없습니다.'}</p>
           ) : (
             <ul className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
               {talkRows.map((c) => (

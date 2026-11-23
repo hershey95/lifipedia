@@ -79,6 +79,12 @@ const SIBLING_ORDER: Record<CommentSort, (a: FlatComment, b: FlatComment) => num
   old: (a, b) => a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id),
 };
 
+/** 부모가 목록에 없는 댓글(고아)의 parentId 를 null 로 바꾼다. 화면이 parentId 로 그룹핑할 때 사라지지 않게 한다. */
+export function rootOrphans<T extends { id: string; parentId: string | null }>(list: T[]): T[] {
+  const ids = new Set(list.map((c) => c.id));
+  return list.map((c) => (c.parentId !== null && !ids.has(c.parentId) ? { ...c, parentId: null } : c));
+}
+
 /**
  * 평면 목록 → 트리. 부모가 목록에 없는 댓글(고아)은 최상위로 올린다.
  * 깊이가 MAX_DEPTH 를 넘으면 MAX_DEPTH 단계에 평탄화한다.

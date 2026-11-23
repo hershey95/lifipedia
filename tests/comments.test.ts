@@ -5,6 +5,7 @@ import {
   CONCEPT_RULES,
   isConcept,
   parseCommentSort,
+  rootOrphans,
   type CommentVoteInput,
 } from '@/lib/comments';
 import { wilsonLowerBound } from '@/lib/ranking';
@@ -128,5 +129,16 @@ describe('buildCommentTree', () => {
       c('c5', 'c4', { isRemoved: true }),
     ];
     expect(ids(buildCommentTree(flat, 'old'))).toEqual(['c2']);
+  });
+});
+
+describe('rootOrphans', () => {
+  it('목록에 없는 parentId 는 null(최상위)로, 있는 것은 그대로', () => {
+    const out = rootOrphans([
+      { id: 'a', parentId: null },
+      { id: 'b', parentId: 'a' },
+      { id: 'c', parentId: 'gone' },
+    ]);
+    expect(out.map((x) => x.parentId)).toEqual([null, 'a', null]);
   });
 });

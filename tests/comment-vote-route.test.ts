@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { tx, db, count, auth, recompute } = vi.hoisted(() => ({
   tx: {
     commentVote: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-    talkComment: { update: vi.fn() },
+    talkComment: { update: vi.fn(), updateMany: vi.fn() },
   },
   db: {
     talkComment: { findUnique: vi.fn() },
@@ -37,6 +37,7 @@ beforeEach(() => {
   });
   tx.commentVote.findUnique.mockResolvedValue(null);
   tx.commentVote.findMany.mockResolvedValue([voter('u1')]);
+  tx.talkComment.updateMany.mockResolvedValue({ count: 1 });
 });
 
 describe('POST /api/talk/[commentId]/vote', () => {
@@ -94,7 +95,20 @@ describe('POST /api/talk/[commentId]/vote', () => {
     tx.commentVote.findMany.mockResolvedValue(['a', 'b', 'c', 'd', 'e'].map((u) => ({ ...voter(u), weight: 2 })));
     const body = await (await call()).json();
     expect(body.becameConcept).toBe(true);
-    expect(tx.talkComment.update.mock.calls[0][0].data.conceptAt).toBeInstanceOf(Date);
+    const claim = tx.talkComment.updateMany.mock.calls[0][0];
+    expect(claim.where).toEqual({ id: 'c1', conceptAt: null });
+    expect(claim.data.conceptAt).toBeInstanceOf(Date);
+  });
+
+  it('동시에 먼저 등재된 경우(updateMany count 0) becameConcept 는 거짓 — 알림 중복 방지', async () => {
+    tx.commentVote.findMany.mockResolvedValue(['a', 'b', 'c', 'd', 'e'].map((u) => ({ ...voter(u), weight: 2 })));
+    tx.talkComment.updateMany.mockResolvedValue({ count: 0 });
+    expect((await (await call()).json()).becameConcept).toBe(false);
+  });
+
+  it('조건 미달이면 updateMany 를 부르지 않는다', async () => {
+    await call();
+    expect(tx.talkComment.updateMany).not.toHaveBeenCalled();
   });
 
   it('conceptAt 이 이미 있으면 다시 쓰지 않는다', async () => {
@@ -105,6 +119,7 @@ describe('POST /api/talk/[commentId]/vote', () => {
     tx.commentVote.findMany.mockResolvedValue(['a', 'b', 'c', 'd', 'e'].map((u) => ({ ...voter(u), weight: 2 })));
     const body = await (await call()).json();
     expect(body.becameConcept).toBe(false);
+    expect(tx.talkComment.updateMany).not.toHaveBeenCalled();
     expect(tx.talkComment.update.mock.calls[0][0].data).not.toHaveProperty('conceptAt');
   });
 });

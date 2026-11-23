@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
-import { COMMENT_RULES, buildCommentTree, parseCommentSort } from '@/lib/comments';
+import { COMMENT_RULES, buildCommentTree, parseCommentSort, rootOrphans } from '@/lib/comments';
 import { TalkThread } from '@/components/TalkThread';
 
 type Params = {
@@ -74,7 +74,7 @@ export default async function TalkPage({ params, searchParams }: Params) {
 
       <TalkThread
         itemId={item.id}
-        comments={ordered.map((comment) => ({
+        comments={rootOrphans(ordered).map((comment) => ({
           id: comment.id,
           parentId: comment.parentId,
           body: comment.isRemoved ? '(규칙 위반으로 삭제된 댓글입니다)' : comment.body,
