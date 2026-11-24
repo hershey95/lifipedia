@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
 import { ok, fail, handleError, countSince } from '@/lib/api';
 import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
+import { notificationsFor } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,17 +29,26 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     const item = await prisma.item.findUnique({ where: { id: itemId }, select: { id: true, isRemoved: true } });
     if (!item || item.isRemoved) return fail(404, '항목을 찾을 수 없습니다.');
 
+    let parentAuthorId: string | null = null;
     if (payload.parentId) {
       const parent = await prisma.talkComment.findUnique({
         where: { id: payload.parentId },
-        select: { itemId: true },
+        select: { itemId: true, authorId: true },
       });
       if (!parent || parent.itemId !== itemId) return fail(400, '답글 대상을 찾을 수 없습니다.');
+      parentAuthorId = parent.authorId;
     }
 
-    const comment = await prisma.talkComment.create({
-      data: { itemId, authorId: user.id, parentId: payload.parentId, body: payload.bodyText },
-      select: { id: true, body: true, createdAt: true, parentId: true },
+    const comment = await prisma.$transaction(async (tx) => {
+      const created = await tx.talkComment.create({
+        data: { itemId, authorId: user.id, parentId: payload.parentId, body: payload.bodyText },
+        select: { id: true, body: true, createdAt: true, parentId: true },
+      });
+      if (payload.parentId) {
+        const rows = notificationsFor({ kind: 'TALK_REPLY', actorId: user.id, recipientId: parentAuthorId, itemId, refId: created.id });
+        if (rows.length) await tx.notification.createMany({ data: rows });
+      }
+      return created;
     });
 
     return ok({ comment }, { status: 201 });

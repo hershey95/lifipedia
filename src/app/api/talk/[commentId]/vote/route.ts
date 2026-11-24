@@ -6,6 +6,7 @@ import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { voteWeightFor } from '@/lib/trust';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { commentTally, isConcept } from '@/lib/comments';
+import { notificationsFor } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ commentId:
     const comment = await prisma.talkComment.findUnique({
       where: { id: commentId },
       select: {
-        id: true, parentId: true, authorId: true, createdAt: true, isRemoved: true, conceptAt: true,
+        id: true, itemId: true, parentId: true, authorId: true, createdAt: true, isRemoved: true, conceptAt: true,
         item: { select: { isRemoved: true, theme: { select: { status: true } } } },
       },
     });
@@ -69,6 +70,11 @@ export async function POST(request: Request, ctx: { params: Promise<{ commentId:
           data: { conceptAt: new Date() },
         });
         becameConcept = claim.count === 1;
+        // claim 이 성립한 쪽만 알린다(conceptAt 원자화 덕에 중복 알림이 없다).
+        if (becameConcept) {
+          const rows = notificationsFor({ kind: 'CONCEPT_REACHED', recipientId: comment.authorId, itemId: comment.itemId, refId: commentId });
+          if (rows.length) await tx.notification.createMany({ data: rows });
+        }
       }
       await tx.talkComment.update({ where: { id: commentId }, data: tally });
       return { action, ...tally, becameConcept };

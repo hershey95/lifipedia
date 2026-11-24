@@ -6,6 +6,7 @@ import { ABUSE_LIMITS, checkRate } from '@/lib/abuse';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { recordEdit, voidRevertedContributions } from '@/lib/contribution';
 import { CONTRIBUTION_RULES, REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
+import { notificationsFor } from '@/lib/notify';
 import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
 import { loadProtection } from '@/lib/protection-service';
 import { buildDiff,changedFields, diffDelta, snapshotHash, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
@@ -105,6 +106,16 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
         deltaChars: diffDelta(diff),
       });
       await voidRevertedContributions(tx, { itemId, toRevision: payload.toRevision, revertRevision: nextRevision, revertEditId: history.id });
+      // 되돌려진 구간(toRevision < r < nextRevision)의 편집자에게 알린다. 되돌린 본인·탈퇴자는 notificationsFor 가 거른다.
+      const reverted = await tx.editHistory.findMany({
+        where: { itemId, revision: { gt: payload.toRevision, lt: nextRevision } },
+        select: { editorId: true },
+        distinct: ['editorId'],
+      });
+      const rows = notificationsFor({
+        kind: 'EDIT_REVERTED', actorId: user.id, recipientIds: reverted.map((e) => e.editorId), itemId, refId: history.id,
+      });
+      if (rows.length) await tx.notification.createMany({ data: rows });
     });
 
     return ok({ revision: nextRevision, revertOfRevision: payload.toRevision });

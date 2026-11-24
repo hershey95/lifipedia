@@ -4,6 +4,7 @@ const { tx, db, count, auth, recompute } = vi.hoisted(() => ({
   tx: {
     commentVote: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     talkComment: { update: vi.fn(), updateMany: vi.fn() },
+    notification: { createMany: vi.fn() },
   },
   db: {
     talkComment: { findUnique: vi.fn() },
@@ -32,7 +33,7 @@ beforeEach(() => {
   count.mockResolvedValue(0);
   db.$transaction.mockImplementation((fn: (t: typeof tx) => unknown) => fn(tx));
   db.talkComment.findUnique.mockResolvedValue({
-    id: 'c1', parentId: null, authorId: 'u2', createdAt: new Date(), isRemoved: false, conceptAt: null,
+    id: 'c1', itemId: 'i1', parentId: null, authorId: 'u2', createdAt: new Date(), isRemoved: false, conceptAt: null,
     item: { isRemoved: false, theme: { status: 'ACTIVE' } },
   });
   tx.commentVote.findUnique.mockResolvedValue(null);
@@ -98,12 +99,18 @@ describe('POST /api/talk/[commentId]/vote', () => {
     const claim = tx.talkComment.updateMany.mock.calls[0][0];
     expect(claim.where).toEqual({ id: 'c1', conceptAt: null });
     expect(claim.data.conceptAt).toBeInstanceOf(Date);
+    // 같은 트랜잭션 안에서 작성자에게 개념글 알림 1건(행위자 없음)
+    expect(tx.notification.createMany).toHaveBeenCalledTimes(1);
+    expect(tx.notification.createMany.mock.calls[0][0].data).toEqual([
+      { userId: 'u2', kind: 'CONCEPT_REACHED', actorId: null, itemId: 'i1', refId: 'c1' },
+    ]);
   });
 
   it('동시에 먼저 등재된 경우(updateMany count 0) becameConcept 는 거짓 — 알림 중복 방지', async () => {
     tx.commentVote.findMany.mockResolvedValue(['a', 'b', 'c', 'd', 'e'].map((u) => ({ ...voter(u), weight: 2 })));
     tx.talkComment.updateMany.mockResolvedValue({ count: 0 });
     expect((await (await call()).json()).becameConcept).toBe(false);
+    expect(tx.notification.createMany).not.toHaveBeenCalled();
   });
 
   it('조건 미달이면 updateMany 를 부르지 않는다', async () => {
