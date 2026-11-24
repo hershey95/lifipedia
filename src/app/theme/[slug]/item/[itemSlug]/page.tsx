@@ -15,6 +15,7 @@ import { ReportButton } from '@/components/ReportButton';
 import { ViewBeacon } from '@/components/ViewBeacon';
 import { WikiMarkdown } from '@/components/WikiMarkdown';
 import { extractToc } from '@/lib/markdown';
+import { stubReasons } from '@/lib/upkeep';
 import { parseRev } from '@/lib/revision';
 import { httpUrl } from '@/lib/api';
 import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
@@ -85,6 +86,7 @@ export default async function ItemPage({ params, searchParams }: Params) {
     pastRevision = revNo;
   }
   const readOnly = pastRevision !== null;
+  const stub = stubReasons(current);
 
   const me = await currentUser();
   const myVote = me ? item.votes.find((vote) => vote.userId === me.id) : undefined;
@@ -109,6 +111,14 @@ export default async function ItemPage({ params, searchParams }: Params) {
       ) : (
         <ViewBeacon targetType="ITEM" targetId={item.id} />
       )}
+      {!readOnly && stub.length > 0 ? (
+        <p role="note" className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-fg-muted">
+          이 문서는 토막 문서입니다: {stub.join(' · ')}.{' '}
+          <Link href={`/theme/${item.theme.slug}/item/${item.slug}/edit`}>편집하기</Link>
+          {' · '}
+          <Link href="/contribute">기여할 거리</Link>
+        </p>
+      ) : null}
       <nav aria-label="경로" className="text-sm text-ink/60">
         {item.theme.category ? (
           <Link href={`/themes?category=${encodeURIComponent(item.theme.category)}`}>{item.theme.category}</Link>

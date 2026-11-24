@@ -52,6 +52,9 @@ export function Header() {
           <Link href="/recent" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
             최근 변경
           </Link>
+          <Link href="/contribute" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
+            기여할 거리
+          </Link>
           <Link href="/how-ranking-works" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
             ⚡ 랭킹 공식
           </Link>
