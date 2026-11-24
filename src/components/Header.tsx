@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AuthButton } from './AuthButton';
 
-export function Header() {
+export function Header({ unreadCount = 0 }: { unreadCount?: number }) {
   const router = useRouter();
   const [searchVal, setSearchVal] = useState('');
 
@@ -51,6 +51,18 @@ export function Header() {
           </Link>
           <Link href="/recent" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
             최근 변경
+          </Link>
+          <Link
+            href="/notifications"
+            className="btn-ghost text-xs py-1.5 px-3 no-underline"
+            aria-label={unreadCount > 0 ? `알림 ${unreadCount}건 안 읽음` : '알림'}
+          >
+            알림
+            {unreadCount > 0 ? (
+              <span className="ml-1 rounded-full bg-accent px-1.5 text-[10px] font-bold text-white">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            ) : null}
           </Link>
           <Link href="/contribute" className="btn-ghost text-xs py-1.5 px-3 hidden md:inline-flex no-underline">
             기여할 거리

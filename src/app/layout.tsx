@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { Sidebar, SidebarCategoryGroup } from '@/components/Sidebar';
 import { Providers } from '@/components/Providers';
 import { prisma } from '@/lib/db';
+import { currentUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'http://localhost:3000'),
@@ -54,12 +55,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const sidebarGroups = Array.from(groupMap.values());
 
+  // 안 읽은 알림 수(로그인 시에만). 인덱스 [userId, readAt, createdAt] 1회.
+  // ponytail: 느려지면 unstable_cache 30초
+  const me = await currentUser();
+  const unreadCount = me ? await prisma.notification.count({ where: { userId: me.id, readAt: null } }) : 0;
+
   return (
     <html lang="ko">
       <body>
         <Providers>
           {/* 상단 메인 레딧 스타일 글로벌 헤더 */}
-          <Header />
+          <Header unreadCount={unreadCount} />
 
           {/* 메인 레이아웃: 좌측 레딧/디시 5대 허브 사이드바 + 우측 메인 피드 */}
           <div className="wrap py-6">

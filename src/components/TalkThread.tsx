@@ -40,7 +40,7 @@ export function TalkThread({ itemId, comments }: { itemId: string; comments: Tal
     return (
       <ul className={depth === 0 ? 'flex flex-col gap-3' : 'mt-3 flex flex-col gap-3 border-l border-black/10 pl-4'}>
         {list.map((comment) => (
-          <li key={comment.id} className={depth === 0 ? 'card' : ''}>
+          <li key={comment.id} id={`c-${comment.id}`} className={depth === 0 ? 'card' : ''}>
             <p className="text-xs text-ink/50">
               {comment.authorId ? (
                 <Link href={`/u/${comment.authorId}`}>{comment.authorName}</Link>

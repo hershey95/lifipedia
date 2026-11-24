@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { ok, fail, handleError, authorizeCron } from '@/lib/api';
 import { VIEW_RULES } from '@/lib/views';
+import { NOTIFICATION_RULES } from '@/lib/notify';
 import { THEME_LIFECYCLE, promotionThreshold } from '@/lib/theme-lifecycle';
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +34,12 @@ async function run(request: Request) {
       where: { createdAt: { lt: new Date(Date.now() - VIEW_RULES.MARK_RETENTION_DAYS * 86_400_000) } },
     });
 
-    return ok({ promoted: promoted.count, madeDormant: slept.count, threshold, viewMarksDeleted: marks.count });
+    // 읽은 알림은 90일 뒤 지운다. 읽지 않은 알림은 지우지 않는다.
+    const notes = await prisma.notification.deleteMany({
+      where: { readAt: { lt: new Date(Date.now() - NOTIFICATION_RULES.RETENTION_DAYS * 86_400_000) } },
+    });
+
+    return ok({ promoted: promoted.count, madeDormant: slept.count, threshold, viewMarksDeleted: marks.count, notificationsDeleted: notes.count });
   } catch (error) {
     return handleError(error);
   }
