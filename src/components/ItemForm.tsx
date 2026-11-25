@@ -48,9 +48,17 @@ export function ItemForm(props: Props) {
   const [notice, setNotice] = useState<string | null>(null);
   const [tierWarning, setTierWarning] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** 편집 필터(W4): 확인이 필요한 사유와 확인 체크 */
+  const [filterWarning, setFilterWarning] = useState<string[] | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+  /** 저장은 됐지만 안내(hint)를 보여 줘야 해서 아직 이동하지 않은 상태 */
+  const [saved, setSaved] = useState<{ href: string; hint: string[] } | null>(null);
 
   function set<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
     setValues((previous) => ({ ...previous, [key]: value }));
+    // 값이 바뀌면 이전 확인은 무효다.
+    setFilterWarning(null);
+    setConfirmed(false);
   }
 
   async function submit(event: React.FormEvent, confirmTier = false) {
@@ -69,7 +77,7 @@ export function ItemForm(props: Props) {
     const payload =
       props.mode === 'create'
         ? { ...values, themeSlug: props.themeSlug, priceKrw: values.priceKrw ?? undefined, confirmTier }
-        : { ...values, baseRevision: props.baseRevision, summary: summary || undefined };
+        : { ...values, baseRevision: props.baseRevision, summary: summary || undefined, confirmed };
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -82,6 +90,14 @@ export function ItemForm(props: Props) {
     if (!response.ok) {
       if (data.needsTierConfirmation) {
         setTierWarning(data.error);
+        return;
+      }
+      if (data.error === 'confirm') {
+        setFilterWarning([...(data.confirm as string[]), ...((data.hint as string[] | undefined) ?? [])]);
+        return;
+      }
+      if (data.error === 'blocked') {
+        setError((data.block as string[]).join(' '));
         return;
       }
       if (data.conflict) {
@@ -101,7 +117,14 @@ export function ItemForm(props: Props) {
 
     // 슬러그는 생성 시점에 고정되므로 편집 후에도 같은 URL 로 돌아간다.
     const slug = props.mode === 'create' ? data.item.slug : props.itemSlug;
-    router.push(`/theme/${props.themeSlug}/item/${slug}`);
+    const href = `/theme/${props.themeSlug}/item/${slug}`;
+    if (data.hint?.length) {
+      // 바로 이동하면 안내를 볼 수 없다.
+      setFilterWarning(null);
+      setSaved({ href, hint: data.hint });
+      return;
+    }
+    router.push(href);
     router.refresh();
   }
 
@@ -239,9 +262,29 @@ export function ItemForm(props: Props) {
       ) : null}
 
       {notice ? <p className="text-sm text-accent-fg">{notice}</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
 
-      <button type="submit" className="btn-primary self-start" disabled={busy}>
+      {filterWarning ? (
+        <div role="alert" className="rounded-lg border border-mid/40 bg-mid/5 p-3 text-sm">
+          <ul className="list-disc pl-4">
+            {filterWarning.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+          <label className="mt-2 flex items-center gap-2">
+            <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+            확인했습니다. 체크한 뒤 다시 저장해 주세요.
+          </label>
+        </div>
+      ) : null}
+
+      {saved ? (
+        <p role="status" className="text-sm text-warn-fg">
+          저장했습니다. {saved.hint.join(' ')} <a href={saved.href}>문서 보기</a>
+        </p>
+      ) : null}
+
+      <button type="submit" className="btn-primary self-start" disabled={busy || saved !== null || (filterWarning !== null && !confirmed)}>
         {busy ? '저장 중…' : props.mode === 'create' ? '문서 만들기' : '저장'}
       </button>
     </form>

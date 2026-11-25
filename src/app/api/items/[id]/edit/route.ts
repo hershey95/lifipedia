@@ -9,6 +9,7 @@ import { buildDiff, changedFields, diffDelta, resolveEdit, snapshotHash, toSnaps
 import { REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
 import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
 import { loadProtection } from '@/lib/protection-service';
+import { checkEdit } from '@/lib/edit-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,8 @@ const body = z.object({
   /** 편집자가 폼을 열 때 본 리비전. 동시 편집 감지의 기준. */
   baseRevision: z.number().int().min(1),
   summary: z.string().trim().max(200).optional(),
+  /** 편집 필터의 confirm 사유를 확인하고 그대로 저장할 때 true */
+  confirmed: z.boolean().default(false),
   name: z.string().trim().min(1).max(80),
   tier: z.enum(['BUDGET', 'MID', 'PREMIUM']),
   priceKrw: z.number().int().min(0).max(1_000_000_000).nullable().optional(),
@@ -79,6 +82,13 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       return fail(400, '변경된 내용이 없습니다.');
     }
 
+    // 편집 필터(W49 W4). block 만 서버 방어이고 confirm 은 마찰이다. 되돌리기 라우트에는 적용하지 않는다.
+    const filter = checkEdit(current, resolution.merged);
+    if (filter.block.length) return fail(422, 'blocked', { block: filter.block });
+    if (filter.confirm.length && !payload.confirmed) {
+      return fail(422, 'confirm', { confirm: filter.confirm, hint: filter.hint });
+    }
+
     const nextRevision = item.revision + 1;
     const diff = buildDiff(current, resolution.merged, item.revision, nextRevision);
     const contentHash = snapshotHash(resolution.merged);
@@ -131,6 +141,7 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
 
     return ok({
       revision: saved.revision,
+      hint: filter.hint,
       autoMerged: resolution.status === 'stale-but-mergeable',
       alsoChangedByOthers: resolution.status === 'stale-but-mergeable' ? resolution.alsoChangedByOthers : [],
     });

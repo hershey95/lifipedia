@@ -8,6 +8,7 @@ import { validateTierAgainstPeers } from '@/lib/tier';
 import { canContribute } from '@/lib/theme-lifecycle';
 import { toSnapshot, buildDiff, snapshotHash } from '@/lib/wiki';
 import { recordCreate } from '@/lib/contribution';
+import { checkEdit } from '@/lib/edit-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,10 @@ export async function POST(request: Request) {
     if (!rate.allowed) return fail(429, rate.reason!);
 
     const body = createBody.parse(await request.json());
+
+    // 새 문서의 링크는 모두 새로 추가된 링크다. 생성으로 편집 필터를 우회하지 못하게 한다.
+    const { block } = checkEdit({}, body);
+    if (block.length) return fail(422, 'blocked', { block });
 
     const theme = await prisma.theme.findUnique({
       where: { slug: body.themeSlug },
