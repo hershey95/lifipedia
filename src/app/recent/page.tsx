@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
 import { changeKind, decodeCursor, encodeCursor, recentWhere, type ChangeKind } from '@/lib/recent';
+import { changeTags } from '@/lib/edit-filter';
+import type { ItemSnapshot } from '@/lib/wiki';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '최근 변경', description: '위키 문서의 최근 편집·되돌리기 내역' };
@@ -34,13 +36,20 @@ export default async function RecentPage({
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     take: PAGE + 1,
     select: {
-      id: true, revision: true, revertOfRevision: true, summary: true, createdAt: true,
+      id: true, itemId: true, revision: true, revertOfRevision: true, summary: true, createdAt: true, snapshot: true,
       editor: { select: { id: true, name: true } },
       item: { select: { name: true, slug: true, theme: { select: { slug: true } } } },
     },
   });
   const page = rows.slice(0, PAGE);
   const next = rows.length > PAGE ? encodeCursor(page[PAGE - 1].createdAt, page[PAGE - 1].id) : null;
+
+  // 변경 태그는 저장하지 않고 직전 리비전과 비교해 계산한다.
+  const wanted = page.filter((r) => r.revision > 1).map((r) => ({ itemId: r.itemId, revision: r.revision - 1 }));
+  const prevRows = wanted.length
+    ? await prisma.editHistory.findMany({ where: { OR: wanted }, select: { itemId: true, revision: true, snapshot: true } })
+    : [];
+  const prevSnapshot = new Map(prevRows.map((p) => [`${p.itemId}:${p.revision}`, p.snapshot]));
 
   // 기여 원장에서 '적립 여부' 를 붙인다 — 사소한 편집이 미적립으로 공개적으로 보이게.
   const events = await prisma.contributionEvent.findMany({
@@ -83,12 +92,20 @@ export default async function RecentPage({
           {page.map((r) => {
             const kind = changeKind(r.revision, r.revertOfRevision);
             const ev = byEdit.get(r.id);
+            const prev = prevSnapshot.get(`${r.itemId}:${r.revision - 1}`);
+            // '새 문서'·'되돌림'은 위의 종류 라벨이 이미 보여 준다.
+            const tags = prev
+              ? changeTags(prev as unknown as ItemSnapshot, r.snapshot as unknown as ItemSnapshot, null)
+              : [];
             return (
               <li key={r.id} className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 break-words px-4 py-3 text-sm">
                 <time className="w-28 shrink-0 text-xs text-slate-400" dateTime={r.createdAt.toISOString()}>
                   {fmt(r.createdAt)}
                 </time>
                 <span className={`rounded px-1.5 py-0.5 text-xs ${KIND_STYLE[kind]}`}>{KIND_LABEL[kind]}</span>
+                {tags.map((tag) => (
+                  <span key={tag} className="rounded bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-300">{tag}</span>
+                ))}
                 <Link href={`/theme/${r.item.theme.slug}/item/${r.item.slug}`} className="font-semibold">
                   {r.item.name}
                 </Link>

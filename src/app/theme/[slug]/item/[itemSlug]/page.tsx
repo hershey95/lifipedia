@@ -18,6 +18,7 @@ import { extractToc } from '@/lib/markdown';
 import { stubReasons } from '@/lib/upkeep';
 import { parseRev } from '@/lib/revision';
 import { httpUrl } from '@/lib/api';
+import { isBlockedUrl } from '@/lib/edit-filter';
 import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
 import { pastItemView, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
@@ -77,9 +78,10 @@ export default async function ItemPage({ params, searchParams }: Params) {
     if (!past) notFound();
     const snap = toSnapshot(past.snapshot as unknown as ItemSnapshot);
     // 옛 스냅샷은 느슨한 검증 시절의 URL(javascript: 등)을 담을 수 있다 → 현재 규칙으로 다시 거른다.
-    const safeImage = typeof snap.imageUrl === 'string' && httpUrl.safeParse(snap.imageUrl).success ? snap.imageUrl : null;
+    const allowed = (u: unknown): u is string => typeof u === 'string' && httpUrl.safeParse(u).success && !isBlockedUrl(u);
+    const safeImage = allowed(snap.imageUrl) ? snap.imageUrl : null;
     const safeLinks = (Array.isArray(snap.purchaseLinks) ? (snap.purchaseLinks as { label: string; url: string }[]) : []).filter(
-      (l) => typeof l?.url === 'string' && httpUrl.safeParse(l.url).success,
+      (l) => allowed(l?.url),
     );
     // 스냅샷에 없는 필드는 지어내지 않는다: 본문은 빈 값, name·tier 는 현재 값.
     item = { ...current, ...pastItemView(snap, current), imageUrl: safeImage, purchaseLinks: safeLinks } as typeof current;

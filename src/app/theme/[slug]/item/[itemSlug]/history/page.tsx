@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { currentUser, isSuspended } from '@/lib/auth';
 import { buildDiff, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 import { parseRevRange } from '@/lib/revision';
+import { changeTags } from '@/lib/edit-filter';
 import { CONTRIBUTION_RULES, REVERT_LOOKBACK_REVISIONS } from '@/lib/contribution-rules';
 import { RevertButton } from '@/components/RevertButton';
 import { canEditAt, protectionMessage, userLevel } from '@/lib/protection';
@@ -29,7 +30,7 @@ export default async function HistoryPage({ params, searchParams }: Params) {
       edits: {
         orderBy: { revision: 'desc' },
         select: {
-          id: true, revision: true, summary: true, diff: true, createdAt: true,
+          id: true, revision: true, summary: true, diff: true, createdAt: true, snapshot: true, revertOfRevision: true,
           editor: { select: { id: true, name: true, badgeLevel: true } },
         },
       },
@@ -112,7 +113,17 @@ export default async function HistoryPage({ params, searchParams }: Params) {
           <span className="ml-2 text-xs text-ink/50">왼쪽(from)과 오른쪽(to)에서 하나씩 고릅니다.</span>
         </div>
         <ol className="flex flex-col gap-4">
-          {item.edits.map((edit) => {
+          {item.edits.map((edit, i) => {
+            // edits 는 최신순이라 다음 칸이 직전 리비전이다. 직전을 모르면 태그를 지어내지 않는다.
+            const prev = item.edits[i + 1];
+            const tags =
+              edit.revision === 1 || prev
+                ? changeTags(
+                    edit.revision === 1 ? null : (prev.snapshot as unknown as ItemSnapshot),
+                    edit.snapshot as unknown as ItemSnapshot,
+                    edit.revertOfRevision,
+                  )
+                : [];
             const canRevert =
               !revertNote &&
               edit.revision < item.revision &&
@@ -122,6 +133,9 @@ export default async function HistoryPage({ params, searchParams }: Params) {
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="font-semibold">
                     r{edit.revision}
+                    {tags.map((tag) => (
+                      <span key={tag} className="chip ml-2 bg-warn-bg text-warn-fg">{tag}</span>
+                    ))}
                     {edit.summary ? <span className="ml-2 font-normal text-ink/70">{edit.summary}</span> : null}
                   </h2>
                   <p className="text-xs text-ink/50">
