@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { TIERS, TIER_LABELS, type Tier } from '@/lib/tier';
+import { draftKey, readDraft, writeDraft } from '@/lib/draft';
 import { MarkdownEditor } from './MarkdownEditor';
 
 export type ItemFormValues = {
@@ -54,7 +55,38 @@ export function ItemForm(props: Props) {
   /** 저장은 됐지만 안내(hint)를 보여 줘야 해서 아직 이동하지 않은 상태 */
   const [saved, setSaved] = useState<{ href: string; hint: string[] } | null>(null);
 
+  // 임시 저장(W5). localStorage 가 막힌 브라우저에서도 폼은 동작해야 하므로 모두 try/catch.
+  const storageKey = draftKey(
+    props.mode === 'create' ? { mode: 'create', themeSlug: props.themeSlug } : { mode: 'edit', itemId: props.itemId },
+  );
+  const baseRevision = props.mode === 'edit' ? props.baseRevision : 0;
+  const [draft, setDraft] = useState<ReturnType<typeof readDraft>>(null);
+  const dirty = useRef(false);
+
+  useEffect(() => {
+    // 서버 렌더와 어긋나지 않게 마운트 뒤에 읽는다.
+    try {
+      setDraft(readDraft(window.localStorage.getItem(storageKey), baseRevision));
+    } catch {}
+  }, [storageKey, baseRevision]);
+
+  useEffect(() => {
+    // 저장본을 쓸지 정하기 전에는 덮어쓰지 않는다.
+    if (!dirty.current || draft) return;
+    try {
+      window.localStorage.setItem(storageKey, writeDraft(baseRevision, values, summary));
+    } catch {}
+  }, [values, summary, draft, storageKey, baseRevision]);
+
+  function clearDraft() {
+    dirty.current = false;
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {}
+  }
+
   function set<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
+    dirty.current = true;
     setValues((previous) => ({ ...previous, [key]: value }));
     // 값이 바뀌면 이전 확인은 무효다.
     setFilterWarning(null);
@@ -118,6 +150,8 @@ export function ItemForm(props: Props) {
     // 슬러그는 생성 시점에 고정되므로 편집 후에도 같은 URL 로 돌아간다.
     const slug = props.mode === 'create' ? data.item.slug : props.itemSlug;
     const href = `/theme/${props.themeSlug}/item/${slug}`;
+    clearDraft();
+    setDraft(null);
     if (data.hint?.length) {
       // 바로 이동하면 안내를 볼 수 없다.
       setFilterWarning(null);
@@ -130,6 +164,38 @@ export function ItemForm(props: Props) {
 
   return (
     <form onSubmit={(event) => submit(event)} className="card flex flex-col gap-4">
+      {draft ? (
+        <div role="status" className="rounded-lg border border-mid/40 bg-mid/5 p-3 text-sm">
+          <p>이 브라우저에 저장하지 않은 작성 내용이 있습니다. 불러오거나 버리기 전에는 새로 임시 저장하지 않습니다.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                dirty.current = true;
+                setValues(draft.values);
+                setSummary(draft.summary);
+                setFilterWarning(null);
+                setConfirmed(false);
+                setDraft(null);
+              }}
+            >
+              불러오기
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                clearDraft();
+                setDraft(null);
+              }}
+            >
+              버리기
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">제품명</span>
         <input className="field" value={values.name} onChange={(e) => set('name', e.target.value)} required maxLength={80} />
@@ -254,7 +320,10 @@ export function ItemForm(props: Props) {
           <input
             className="field"
             value={summary}
-            onChange={(e) => setSummary(e.target.value)}
+            onChange={(e) => {
+              dirty.current = true;
+              setSummary(e.target.value);
+            }}
             placeholder="무엇을 왜 바꿨는지 한 줄로"
             maxLength={200}
           />
