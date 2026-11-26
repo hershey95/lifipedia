@@ -64,7 +64,7 @@ export default async function RecentPage({
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-slate-100">최근 변경</h1>
-      <nav aria-label="범위" className="flex gap-3 text-sm">
+      <nav aria-label="범위" className="flex flex-wrap gap-3 text-sm">
         <Link
           href={recentHref({ following: false, createdOnly })}
           aria-current={following ? undefined : 'page'}

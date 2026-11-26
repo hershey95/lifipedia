@@ -71,12 +71,12 @@ export function ItemForm(props: Props) {
   }, [storageKey, baseRevision]);
 
   useEffect(() => {
-    // 저장본을 쓸지 정하기 전에는 덮어쓰지 않는다.
-    if (!dirty.current || draft) return;
+    // 저장본을 쓸지 정하기 전에는 덮어쓰지 않는다. 서버 저장이 끝난 뒤(saved)에도 남기지 않는다.
+    if (!dirty.current || draft || saved) return;
     try {
       window.localStorage.setItem(storageKey, writeDraft(baseRevision, values, summary));
     } catch {}
-  }, [values, summary, draft, storageKey, baseRevision]);
+  }, [values, summary, draft, saved, storageKey, baseRevision]);
 
   function clearDraft() {
     dirty.current = false;
@@ -150,8 +150,9 @@ export function ItemForm(props: Props) {
     // 슬러그는 생성 시점에 고정되므로 편집 후에도 같은 URL 로 돌아간다.
     const slug = props.mode === 'create' ? data.item.slug : props.itemSlug;
     const href = `/theme/${props.themeSlug}/item/${slug}`;
-    clearDraft();
-    setDraft(null);
+    // 불러올지 정하지 않은 저장본은 지우지 않는다.
+    if (!draft) clearDraft();
+    dirty.current = false;
     if (data.hint?.length) {
       // 바로 이동하면 안내를 볼 수 없다.
       setFilterWarning(null);
