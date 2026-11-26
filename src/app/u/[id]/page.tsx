@@ -6,6 +6,7 @@ import { badgeFor, trustFromContributions } from '@/lib/trust';
 import { TierBadge } from '@/components/TierBadge';
 import { OwnProfileLink } from '@/components/AuthButton';
 import type { Tier } from '@/lib/tier';
+import { revertedRevisions } from '@/lib/revision';
 
 export const metadata: Metadata = { title: '프로필', robots: { index: false } };
 
@@ -27,6 +28,26 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     },
   });
   if (!user) notFound();
+
+  const edits = await prisma.editHistory.findMany({
+    where: { editorId: user.id, item: { isRemoved: false } },
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    take: 20,
+    select: {
+      id: true, itemId: true, revision: true, revertOfRevision: true, summary: true, createdAt: true,
+      item: { select: { name: true, slug: true, theme: { select: { slug: true } } } },
+    },
+  });
+  // "되돌려짐"은 저장하지 않고 해당 문서들의 되돌리기 이력에서 계산한다.
+  const reverts = edits.length
+    ? await prisma.editHistory.findMany({
+        where: { itemId: { in: [...new Set(edits.map((e) => e.itemId))] }, revertOfRevision: { not: null } },
+        select: { itemId: true, revision: true, revertOfRevision: true },
+      })
+    : [];
+  const reverted = new Map(
+    edits.map((e) => [e.itemId, revertedRevisions(reverts.filter((r) => r.itemId === e.itemId))]),
+  );
 
   const stats = [
     { label: '작성한 문서', value: user._count.createdItems },
@@ -63,6 +84,34 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           </div>
         ))}
       </dl>
+
+      <section>
+        <h2 className="mb-2 text-lg font-bold">최근 기여</h2>
+        {edits.length === 0 ? (
+          <p className="card text-sm text-slate-400">아직 기여가 없습니다.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
+            {edits.map((e) => {
+              const href = `/theme/${e.item.theme.slug}/item/${e.item.slug}`;
+              return (
+                <li key={e.id} className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 break-words px-4 py-3 text-sm">
+                  <time className="text-xs text-slate-400" dateTime={e.createdAt.toISOString()}>
+                    {e.createdAt.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}
+                  </time>
+                  <Link href={href} className="font-semibold">{e.item.name}</Link>
+                  <Link href={`${href}/history`} className="text-xs" aria-label={`${e.item.name} 리비전 ${e.revision} 이력`}>
+                    r{e.revision}
+                  </Link>
+                  {e.revision === 1 ? <span className="text-xs text-slate-400">새 문서</span> : null}
+                  {e.revertOfRevision !== null ? <span className="text-xs text-slate-400">되돌리기</span> : null}
+                  {reverted.get(e.itemId)?.has(e.revision) ? <span className="text-xs text-warn-fg">되돌려짐</span> : null}
+                  {e.summary ? <span className="text-slate-400 [overflow-wrap:anywhere]">— {e.summary}</span> : null}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
       <section>
         <h2 className="mb-2 text-lg font-bold">작성한 문서</h2>

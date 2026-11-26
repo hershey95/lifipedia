@@ -7,6 +7,22 @@ export function parseRev(v: string | string[] | undefined, max: number): number 
   return n >= 1 && n <= max ? n : null;
 }
 
+/**
+ * 한 문서의 이력에서 지금 "되돌려진" 상태인 리비전 번호.
+ * `voidRevertedContributions` 와 같은 규칙: 되돌리기를 되돌리면 그 구간이 무효화했던 편집은 복원된다.
+ */
+export function revertedRevisions(history: { revision: number; revertOfRevision: number | null }[]): Set<number> {
+  const revertedBy = new Map<number, number>();
+  for (const h of [...history].sort((a, b) => a.revision - b.revision)) {
+    const to = h.revertOfRevision;
+    if (to === null) continue;
+    const inRange = (r: number) => r > to && r < h.revision;
+    for (const [rev, by] of revertedBy) if (inRange(by)) revertedBy.delete(rev);
+    for (let r = to + 1; r < h.revision; r++) revertedBy.set(r, h.revision);
+  }
+  return new Set(revertedBy.keys());
+}
+
 /** 두 리비전. 순서가 거꾸면 뒤집고, 같거나 하나라도 잘못되면 null. */
 export function parseRevRange(
   from: string | string[] | undefined,

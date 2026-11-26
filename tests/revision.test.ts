@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { parseRev, parseRevRange } from '@/lib/revision';
+import { parseRev, parseRevRange, revertedRevisions } from '@/lib/revision';
+
+describe('revertedRevisions', () => {
+  const revert = (revision: number, to: number) => ({ revision, revertOfRevision: to });
+  it('되돌리기 대상과 되돌리기 사이의 리비전이 되돌려진 것이다', () => {
+    expect([...revertedRevisions([revert(5, 2)])].sort()).toEqual([3, 4]);
+  });
+  it('되돌리기를 되돌리면 원래 편집은 복원된다 (순서와 무관하게 입력)', () => {
+    // r3 이 r2 를 취소(r1 로), r4 가 r3 을 취소(r2 로)
+    expect([...revertedRevisions([revert(4, 2), revert(3, 1)])]).toEqual([3]);
+  });
+  it('되돌리기가 아닌 행은 무시한다', () => {
+    expect(revertedRevisions([{ revision: 2, revertOfRevision: null }]).size).toBe(0);
+  });
+});
 
 describe('parseRevRange', () => {
   it('정상 범위', () => expect(parseRevRange('3', '7', 10)).toEqual({ from: 3, to: 7 }));
