@@ -28,6 +28,10 @@ export default async function ContributePage({ searchParams }: { searchParams: P
           운영자가 고른 목록이 아니라 규칙으로 계산한 목록입니다(5분마다 갱신). 이 목록과 토막 여부는 점수·인기에
           반영되지 않습니다. 기여 인정 규칙은 <Link href="/how-ranking-works">산정 방식</Link>을 보세요.
         </p>
+        <p className="mt-1 text-sm">
+          {/* 라우트 핸들러라 Link(프리페치) 대신 a 를 쓴다. */}
+          <a href={category ? `/random?category=${encodeURIComponent(category)}` : '/random'}>아무 문서나 열어 보기</a>
+        </p>
         {category ? (
           <p className="mt-1 text-sm">
             분류 갤러리 <b>{category}</b> 만 보는 중 · <Link href="/contribute">전체 보기</Link>
