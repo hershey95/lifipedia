@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { currentUser } from '@/lib/auth';
-import { changeKind, decodeCursor, encodeCursor, recentWhere, type ChangeKind } from '@/lib/recent';
+import {
+  changeKind, decodeCursor, encodeCursor, parseRecentParams, recentHref, recentWhere, type ChangeKind,
+} from '@/lib/recent';
 import { changeTags } from '@/lib/edit-filter';
 import type { ItemSnapshot } from '@/lib/wiki';
 
@@ -22,17 +24,18 @@ const fmt = (d: Date) => d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dat
 export default async function RecentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cursor?: string; scope?: string }>;
+  searchParams: Promise<{ cursor?: string; scope?: string; kind?: string }>;
 }) {
   const sp = await searchParams;
   const cur = decodeCursor(sp.cursor);
-  const following = sp.scope === 'following';
+  const filter = parseRecentParams(sp);
+  const { following, createdOnly } = filter;
   const me = following ? await currentUser() : null;
-  if (following && !me) redirect(`/signin?callbackUrl=${encodeURIComponent('/recent?scope=following')}`);
+  if (following && !me) redirect(`/signin?callbackUrl=${encodeURIComponent(recentHref(filter))}`);
   const followCount = me ? await prisma.themeFollow.count({ where: { userId: me.id } }) : 0;
 
   const rows = await prisma.editHistory.findMany({
-    where: recentWhere(cur, me?.id ?? null),
+    where: recentWhere(cur, me?.id ?? null, createdOnly),
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     take: PAGE + 1,
     select: {
@@ -62,20 +65,30 @@ export default async function RecentPage({
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-slate-100">최근 변경</h1>
       <nav aria-label="범위" className="flex gap-3 text-sm">
-        <Link href="/recent" aria-current={following ? undefined : 'page'} className={following ? '' : 'font-bold'}>
+        <Link
+          href={recentHref({ following: false, createdOnly })}
+          aria-current={following ? undefined : 'page'}
+          className={following ? '' : 'font-bold'}
+        >
           전체
         </Link>
         <Link
-          href="/recent?scope=following"
+          href={recentHref({ following: true, createdOnly })}
           aria-current={following ? 'page' : undefined}
           className={following ? 'font-bold' : ''}
         >
           팔로우한 갤러리
         </Link>
+        {/* 범위와 별개로 켜고 끄는 거름 */}
+        <Link href={recentHref({ following, createdOnly: !createdOnly })} className={`ml-auto ${createdOnly ? 'font-bold' : ''}`}>
+          {createdOnly ? '새 문서만 보는 중 · 해제' : '새 문서만'}
+        </Link>
       </nav>
       {page.length === 0 ? (
         <p className="text-sm text-slate-400">
-          {!following ? (
+          {createdOnly && !(following && followCount === 0) ? (
+            '조건에 맞는 새 문서가 없습니다.'
+          ) : !following ? (
             <>
               아직 변경 내역이 없습니다. <Link href="/">테마 둘러보기</Link>
             </>
@@ -133,7 +146,7 @@ export default async function RecentPage({
         </ul>
       )}
       {next ? (
-        <Link href={`/recent?${following ? 'scope=following&' : ''}cursor=${next}`} className="btn-ghost no-underline self-start">
+        <Link href={recentHref(filter, next)}className="btn-ghost no-underline self-start">
           더 보기
         </Link>
       ) : null}

@@ -12,8 +12,9 @@ export function encodeCursor(createdAt: Date, id: string): string {
 }
 
 /** 커서·주시목록 조건을 `AND` 로 묶는다(같은 키 `OR` 를 두 번 펼치면 뒤 것이 앞 것을 덮어쓴다). */
-export function recentWhere(cur: { createdAt: Date; id: string } | null, followerId: string | null) {
+export function recentWhere(cur: { createdAt: Date; id: string } | null, followerId: string | null, createdOnly = false) {
   const and: object[] = [];
+  if (createdOnly) and.push({ revision: 1 });
   if (cur) and.push({ OR: [{ createdAt: { lt: cur.createdAt } }, { createdAt: cur.createdAt, id: { lt: cur.id } }] });
   // 내 편집은 뺀다. NULL(탈퇴 사용자)은 남긴다
   if (followerId) and.push({ OR: [{ editorId: null }, { editorId: { not: followerId } }] });
@@ -21,6 +22,21 @@ export function recentWhere(cur: { createdAt: Date; id: string } | null, followe
     item: { isRemoved: false, ...(followerId ? { theme: { followers: { some: { userId: followerId } } } } : {}) },
     ...(and.length ? { AND: and } : {}),
   };
+}
+
+export type RecentFilter = { following: boolean; createdOnly: boolean };
+
+export function parseRecentParams(sp: { scope?: string | string[]; kind?: string | string[] }): RecentFilter {
+  return { following: sp.scope === 'following', createdOnly: sp.kind === 'create' };
+}
+
+export function recentHref(f: RecentFilter, cursor?: string): string {
+  const q = new URLSearchParams();
+  if (f.following) q.set('scope', 'following');
+  if (f.createdOnly) q.set('kind', 'create');
+  if (cursor) q.set('cursor', cursor);
+  const s = q.toString();
+  return s ? `/recent?${s}` : '/recent';
 }
 
 /** 잘못된 커서는 null — 호출자는 첫 페이지로 취급한다. */

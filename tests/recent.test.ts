@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changeKind, decodeCursor, encodeCursor, recentWhere } from '@/lib/recent';
+import { changeKind, decodeCursor, encodeCursor, parseRecentParams, recentHref, recentWhere } from '@/lib/recent';
 
 describe('recent', () => {
   it('변경 종류', () => {
@@ -16,6 +16,19 @@ describe('recent', () => {
   });
   it('recentWhere: 기본은 필터 없음', () => {
     expect(recentWhere(null, null)).toEqual({ item: { isRemoved: false } });
+  });
+  it('parseRecentParams: 아는 값만 받는다', () => {
+    expect(parseRecentParams({})).toEqual({ following: false, createdOnly: false });
+    expect(parseRecentParams({ scope: 'following', kind: 'create' })).toEqual({ following: true, createdOnly: true });
+    expect(parseRecentParams({ scope: 'x', kind: ['create', 'create'] })).toEqual({ following: false, createdOnly: false });
+  });
+  it('recentHref: 거름 조건이 다음 쪽 링크에도 남는다', () => {
+    expect(recentHref({ following: false, createdOnly: false })).toBe('/recent');
+    expect(recentHref({ following: true, createdOnly: true }, '1_a')).toBe('/recent?scope=following&kind=create&cursor=1_a');
+  });
+  it('recentWhere: 새 문서만이면 리비전 1 조건이 AND 에 더해진다', () => {
+    expect(recentWhere(null, null, true)).toEqual({ item: { isRemoved: false }, AND: [{ revision: 1 }] });
+    expect((recentWhere({ createdAt: new Date(0), id: 'a' }, 'u1', true) as any).AND).toHaveLength(3);
   });
   it('recentWhere: 커서와 주시목록 OR 가 AND 로 함께 남는다', () => {
     const w = recentWhere({ createdAt: new Date(0), id: 'a' }, 'u1') as any;
