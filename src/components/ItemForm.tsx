@@ -59,16 +59,18 @@ export function ItemForm(props: Props) {
   const storageKey = draftKey(
     props.mode === 'create' ? { mode: 'create', themeSlug: props.themeSlug } : { mode: 'edit', itemId: props.itemId },
   );
-  const baseRevision = props.mode === 'edit' ? props.baseRevision : 0;
+  const pageRevision = props.mode === 'edit' ? props.baseRevision : 0;
+  /** 제출·임시 저장의 기준. 저장본을 불러오면 그 저장본의 기준이 된다. */
+  const [baseRevision, setBaseRevision] = useState(pageRevision);
   const [draft, setDraft] = useState<ReturnType<typeof readDraft>>(null);
   const dirty = useRef(false);
 
   useEffect(() => {
     // 서버 렌더와 어긋나지 않게 마운트 뒤에 읽는다.
     try {
-      setDraft(readDraft(window.localStorage.getItem(storageKey), baseRevision));
+      setDraft(readDraft(window.localStorage.getItem(storageKey)));
     } catch {}
-  }, [storageKey, baseRevision]);
+  }, [storageKey]);
 
   useEffect(() => {
     // 저장본을 쓸지 정하기 전에는 덮어쓰지 않는다. 서버 저장이 끝난 뒤(saved)에도 남기지 않는다.
@@ -109,7 +111,7 @@ export function ItemForm(props: Props) {
     const payload =
       props.mode === 'create'
         ? { ...values, themeSlug: props.themeSlug, priceKrw: values.priceKrw ?? undefined, confirmTier }
-        : { ...values, baseRevision: props.baseRevision, summary: summary || undefined, confirmed };
+        : { ...values, baseRevision, summary: summary || undefined, confirmed };
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -135,7 +137,7 @@ export function ItemForm(props: Props) {
       if (data.conflict) {
         setError(
           `${data.error} 충돌 필드: ${(data.conflictingFields as string[]).join(', ')}. ` +
-            '페이지를 새로고침해 최신 내용을 확인한 뒤 다시 저장해 주세요.',
+            '입력한 내용을 복사해 두고, 페이지를 새로고침해 최신 문서에 다시 반영해 주세요.',
         );
         return;
       }
@@ -167,7 +169,11 @@ export function ItemForm(props: Props) {
     <form onSubmit={(event) => submit(event)} className="card flex flex-col gap-4">
       {draft ? (
         <div role="status" className="rounded-lg border border-mid/40 bg-mid/5 p-3 text-sm">
-          <p>이 브라우저에 저장하지 않은 작성 내용이 있습니다. 불러오거나 버리기 전에는 새로 임시 저장하지 않습니다.</p>
+          <p>
+            이 브라우저에 저장하지 않은 작성 내용이 있습니다
+            {props.mode === 'edit' ? ` (리비전 ${draft.baseRevision} 기준)` : ''}. 불러오거나 버리기 전에는 새로 임시
+            저장하지 않습니다.
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
@@ -176,6 +182,7 @@ export function ItemForm(props: Props) {
                 dirty.current = true;
                 setValues(draft.values);
                 setSummary(draft.summary);
+                setBaseRevision(draft.baseRevision);
                 setFilterWarning(null);
                 setConfirmed(false);
                 setDraft(null);
@@ -195,6 +202,13 @@ export function ItemForm(props: Props) {
             </button>
           </div>
         </div>
+      ) : null}
+
+      {baseRevision !== pageRevision ? (
+        <p role="status" className="text-sm text-warn-fg">
+          리비전 {baseRevision} 기준의 작성 내용입니다(지금은 리비전 {pageRevision}). 저장하면 겹치지 않는 변경은
+          병합하고, 같은 항목이 바뀌었으면 충돌을 알려 드립니다.
+        </p>
       ) : null}
 
       <label className="flex flex-col gap-1">

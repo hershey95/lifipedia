@@ -39,6 +39,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     },
   });
   // "되돌려짐"은 저장하지 않고 해당 문서들의 되돌리기 이력에서 계산한다.
+  // ponytail: 최대 20개 문서의 되돌리기 이력 전부를 읽는다. 문서당 수백 건이 되면 가장 오래된 표시 리비전 이후만 읽는다.
   const reverts = edits.length
     ? await prisma.editHistory.findMany({
         where: { itemId: { in: [...new Set(edits.map((e) => e.itemId))] }, revertOfRevision: { not: null } },
@@ -88,24 +89,24 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
       <section>
         <h2 className="mb-2 text-lg font-bold">최근 기여</h2>
         {edits.length === 0 ? (
-          <p className="card text-sm text-slate-400">아직 기여가 없습니다.</p>
+          <p className="card text-sm text-fg-muted">아직 기여가 없습니다.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-white/10 rounded-xl border border-white/10">
             {edits.map((e) => {
               const href = `/theme/${e.item.theme.slug}/item/${e.item.slug}`;
               return (
                 <li key={e.id} className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 break-words px-4 py-3 text-sm">
-                  <time className="text-xs text-slate-400" dateTime={e.createdAt.toISOString()}>
+                  <time className="text-xs text-fg-muted" dateTime={e.createdAt.toISOString()}>
                     {e.createdAt.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}
                   </time>
                   <Link href={href} className="font-semibold">{e.item.name}</Link>
                   <Link href={`${href}/history`} className="text-xs" aria-label={`${e.item.name} 리비전 ${e.revision} 이력`}>
                     r{e.revision}
                   </Link>
-                  {e.revision === 1 ? <span className="text-xs text-slate-400">새 문서</span> : null}
-                  {e.revertOfRevision !== null ? <span className="text-xs text-slate-400">되돌리기</span> : null}
+                  {e.revision === 1 ? <span className="text-xs text-fg-muted">새 문서</span> : null}
+                  {e.revertOfRevision !== null ? <span className="text-xs text-fg-muted">되돌리기</span> : null}
                   {reverted.get(e.itemId)?.has(e.revision) ? <span className="text-xs text-warn-fg">되돌려짐</span> : null}
-                  {e.summary ? <span className="text-slate-400 [overflow-wrap:anywhere]">— {e.summary}</span> : null}
+                  {e.summary ? <span className="text-fg-muted [overflow-wrap:anywhere]">— {e.summary}</span> : null}
                 </li>
               );
             })}

@@ -29,15 +29,13 @@ export function writeDraft(baseRevision: number, values: Draft['values'], summar
 }
 
 /**
- * 기준 리비전이 지금과 같을 때만 돌려준다. 옛 기준의 저장본을 새 기준으로 제출하면
- * 서버의 충돌 검사를 건너뛰고 남의 편집을 덮어쓰게 된다.
+ * 저장본의 `baseRevision` 은 불러온 뒤 제출에도 그대로 써야 한다. 새 기준으로 바꿔 제출하면
+ * 서버의 3방향 병합·충돌 검사를 건너뛰고 남의 편집을 덮어쓰게 된다.
  */
-// ponytail: 그 사이 문서가 바뀌면 저장본은 안내 없이 무시된다. 필요해지면 "옛 저장본 보기"를 더한다.
-export function readDraft(raw: string | null, baseRevision: number): Pick<Draft, 'values' | 'summary'> | null {
+export function readDraft(raw: string | null): Draft | null {
   try {
     const parsed = schema.safeParse(JSON.parse(raw ?? ''));
-    if (!parsed.success || parsed.data.baseRevision !== baseRevision) return null;
-    return { values: parsed.data.values, summary: parsed.data.summary };
+    return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }

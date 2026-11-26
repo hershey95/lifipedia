@@ -265,8 +265,8 @@ export default async function ItemPage({ params, searchParams }: Params) {
                   <Row label="만든 날" value={item.createdAt.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })} />
                   <Row label="만든 사람" value={item.createdBy?.name ?? '작성자 정보 없음'} />
                   <Row label="리비전" value={`${item.revision}`} />
-                  <Row label="편집자" value={`${info.editorCount}명`} />
-                  <Row label="역링크" value={`${info.backlinkCount}개`} />
+                  <Row label="편집자" value={`${info.editorCount.toLocaleString('ko-KR')}명`} />
+                  <Row label="역링크" value={`${info.backlinkCount.toLocaleString('ko-KR')}개`} />
                 </dl>
                 <p className="mt-2">역링크 수는 점수·인기에 반영되지 않습니다.</p>
               </details>
@@ -316,9 +316,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
-      <dt>{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
+    <div className="flex justify-between gap-2">
+      <dt className="shrink-0">{label}</dt>
+      <dd className="min-w-0 text-right tabular-nums [overflow-wrap:anywhere]">{value}</dd>
     </div>
   );
 }

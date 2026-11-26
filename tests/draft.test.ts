@@ -17,15 +17,12 @@ describe('편집 임시 저장', () => {
     expect(draftKey({ mode: 'create', themeSlug: 'abc' })).toBe('lifipedia:draft:new:abc');
     expect(draftKey({ mode: 'edit', itemId: 'abc' })).toBe('lifipedia:draft:edit:abc');
   });
-  it('같은 기준 리비전이면 값과 편집 요약이 복원된다', () => {
-    expect(readDraft(writeDraft(3, values, '가격 갱신'), 3)).toEqual({ values, summary: '가격 갱신' });
-  });
-  it('기준 리비전이 다르면 복원하지 않는다 (남의 편집을 덮어쓰지 않도록)', () => {
-    expect(readDraft(writeDraft(3, values, ''), 4)).toBeNull();
+  it('값·편집 요약과 함께 작성 당시의 기준 리비전을 돌려준다 (그 기준으로 제출해야 서버가 병합·충돌을 판정한다)', () => {
+    expect(readDraft(writeDraft(3, values, '가격 갱신'))).toEqual({ baseRevision: 3, values, summary: '가격 갱신' });
   });
   it('없거나 깨진 저장본은 null', () => {
     for (const bad of [null, '', '{', '3', 'null', '{"baseRevision":3}', '{"baseRevision":3,"summary":"","values":{"name":1}}']) {
-      expect(readDraft(bad, 3)).toBeNull();
+      expect(readDraft(bad)).toBeNull();
     }
   });
 });
