@@ -20,6 +20,7 @@ import { parseRev } from '@/lib/revision';
 import { httpUrl } from '@/lib/api';
 import { isBlockedUrl } from '@/lib/edit-filter';
 import { buildWikiResolver, findBacklinks } from '@/lib/wikilinks';
+import { loadDocInfo } from '@/lib/doc-info';
 import { pastItemView, toSnapshot, type ItemSnapshot } from '@/lib/wiki';
 
 type Params = {
@@ -96,9 +97,10 @@ export default async function ItemPage({ params, searchParams }: Params) {
   const toc = extractToc(item.description);
   const links = (item.purchaseLinks as { label: string; url: string }[] | null) ?? [];
   const protection = await loadProtection(current);
-  const [resolve, backlinks] = await Promise.all([
+  const [resolve, backlinks, info] = await Promise.all([
     buildWikiResolver([item.description, item.recommendReason, item.specSummary]),
     readOnly ? Promise.resolve([]) : findBacklinks(current),
+    readOnly ? Promise.resolve(null) : loadDocInfo(current),
   ]);
 
   return (
@@ -256,6 +258,19 @@ export default async function ItemPage({ params, searchParams }: Params) {
                 <Row label="참여 보정" value={breakdown.participationFactor.toFixed(3)} />
               </dl>
             </details>
+            {info ? (
+              <details className="text-xs text-fg-muted">
+                <summary className="cursor-pointer font-semibold">문서 정보</summary>
+                <dl className="mt-2 flex flex-col gap-1">
+                  <Row label="만든 날" value={item.createdAt.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })} />
+                  <Row label="만든 사람" value={item.createdBy?.name ?? '작성자 정보 없음'} />
+                  <Row label="리비전" value={`${item.revision}`} />
+                  <Row label="편집자" value={`${info.editorCount}명`} />
+                  <Row label="역링크" value={`${info.backlinkCount}개`} />
+                </dl>
+                <p className="mt-2">역링크 수는 점수·인기에 반영되지 않습니다.</p>
+              </details>
+            ) : null}
             {links.length > 0 ? (
               <div>
                 <h3 className="mb-1 text-xs font-bold">구매 링크</h3>

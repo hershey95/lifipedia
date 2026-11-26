@@ -33,19 +33,23 @@ export async function itemNameExists(name: string): Promise<boolean> {
 
 /** 이 문서를 `[[이름]]` 으로 가리키는 문서. */
 // ponytail: LIKE 전수 탐색, 문서 3천 개 또는 응답 1초를 넘으면 링크 테이블(W50+). `[[ 이름 ]]` 처럼 공백이 낀 링크는 못 찾는다.
-export async function findBacklinks(item: { id: string; name: string }) {
+export function backlinkWhere(item: { id: string; name: string }) {
   const needle = `[[${item.name}]]`;
+  return {
+    id: { not: item.id },
+    isRemoved: false,
+    theme: { status: 'ACTIVE' as const },
+    OR: [
+      { description: { contains: needle } },
+      { specSummary: { contains: needle } },
+      { recommendReason: { contains: needle } },
+    ],
+  };
+}
+
+export async function findBacklinks(item: { id: string; name: string }) {
   return prisma.item.findMany({
-    where: {
-      id: { not: item.id },
-      isRemoved: false,
-      theme: { status: 'ACTIVE' },
-      OR: [
-        { description: { contains: needle } },
-        { specSummary: { contains: needle } },
-        { recommendReason: { contains: needle } },
-      ],
-    },
+    where: backlinkWhere(item),
     select: { name: true, slug: true, theme: { select: { slug: true, name: true } } },
     orderBy: { updatedAt: 'desc' },
     take: 20,
