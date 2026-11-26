@@ -37,7 +37,9 @@ def fetch(url):
 for path in sys.argv[1:]:
     data = json.load(open(path, encoding="utf-8"))
     print(f"# {path}")
-    for it in data["items"]:
+    if "items" not in data:
+        print("- 건너뜀: items 없는 파일(분류 시드 등)")
+    for it in data.get("items", []):
         price = it.get("priceKrw")
         print(f"\n## {it['name']} | {it['tier']} | priceKrw={price}")
         urls = [s["url"] for s in it.get("sources", [])] + [p["url"] for p in it.get("purchaseLinks", [])]

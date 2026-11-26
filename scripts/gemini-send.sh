@@ -21,6 +21,10 @@ except Exception:
     sys.exit(0)
 r = d.get("result", d)
 ts = r.get("terminals", r) if isinstance(r, dict) else r
+if not isinstance(ts, list):
+    # Orca 오류 응답을 "터미널 없음"과 구분할 수 있게 원문을 남긴다
+    print("orca terminal list 응답 이상: " + json.dumps(d, ensure_ascii=False)[:300], file=sys.stderr)
+    sys.exit(0)
 for t in ts:
     if t.get("agentIdentity") == "antigravity" and "/worktrees/Lifipedia/" in (t.get("worktreePath") or "") + "/":
         print(t["handle"]); break
