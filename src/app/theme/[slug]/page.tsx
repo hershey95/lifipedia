@@ -143,7 +143,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
         })
       : Promise.resolve(null),
     tab === 'rank'
-      ? Promise.all(TIERS.map((tier) => rankTier({ themeId: theme.id, tier, limit: 3 })))
+      ? Promise.all(TIERS.map((tier) => rankTier({ themeId: theme.id, tier, limit: 1 })))
       : Promise.resolve([]),
     tab === 'list'
       ? prisma.item.findMany({
@@ -537,7 +537,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
       {isActive && tab === 'rank' ? (
         <section className="flex flex-col gap-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-xl font-bold">가격대별 순위</h2>
+            <h2 className="text-xl font-bold">가격대별 1위</h2>
             <Link href="/how-ranking-works" className="text-sm">순위는 어떻게 정해지나요?</Link>
           </div>
 
@@ -547,7 +547,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
               <div key={tier}>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 font-bold">
-                    <TierBadge tier={tier} /> {TIER_LABELS[tier]} Top 3
+                    <TierBadge tier={tier} /> {TIER_LABELS[tier]} 1위
                   </h3>
                   <Link href={`/theme/${theme.slug}/${TIER_SLUGS[tier]}`} className="text-sm">전체 보기</Link>
                 </div>
@@ -561,7 +561,6 @@ export default async function ThemePage({ params, searchParams }: Params) {
                   <ol className="flex flex-col gap-2">
                     {ranked.map((entry) => (
                       <li key={entry.item.id} className="card flex items-center gap-3">
-                        <span className="w-6 shrink-0 text-center text-lg font-extrabold text-ink/30">{entry.rank}</span>
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/theme/${theme.slug}/item/${entry.item.slug}`}
@@ -584,7 +583,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
 
                 {ranked[0]?.breakdown.isProvisional ? (
                   <p className="mt-1 text-xs text-ink/50">
-                    참여자가 {RANKING_CONSTANTS.MIN_DISTINCT_VOTERS}명 미만이라 Top 1은 아직 &lsquo;미정&rsquo;입니다.
+                    참여자가 {RANKING_CONSTANTS.MIN_DISTINCT_VOTERS}명 미만이라 1위는 아직 &lsquo;미정&rsquo;입니다.
                   </p>
                 ) : null}
               </div>
