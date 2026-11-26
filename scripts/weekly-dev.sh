@@ -39,6 +39,8 @@ log "start W$WEEK dow=$DOW model=$MODEL base=${START:0:7}"
 [ "${DRY:-0}" = 1 ] && { echo "W$WEEK dow=$DOW model=$MODEL: $TASK"; exit 0; }
 
 export DATABASE_URL="file:/tmp/lifipedia-dev-$DATE.db" # 스키마 시험은 임시 DB 에서만
+# 빈 DB 로는 npm run build 의 prerender 가 P2021 로 실패한다. 세션 전에 임시 DB 에 스키마를 올린다(2026-11-27)
+npx prisma db push --skip-generate >> "$LOG" 2>&1 || log "임시 DB 준비 실패(세션의 build 확인이 안 될 수 있음)"
 perl -e 'alarm shift; exec @ARGV' 10800 claude -p "$COMMON $TASK" \
   --model "$MODEL" --permission-mode dontAsk --max-budget-usd 20 \
   --allowedTools "Read" "Grep" "Glob" "Edit" "Write" \
