@@ -1,8 +1,54 @@
 # BACKLOG (Claude 관리, 토요일 격차 분석으로 갱신)
 > 4주 통합 로드맵: `docs/design/ROADMAP.md` (W43~W46), 진행: `docs/design/PROGRESS.md`. 아래는 로드맵 밖 항목과 격차 분석 결과.
 > 우선순위 P0 즉시 / P1 2주 / P2 분기. 규모 S<½일, M 1~2일, L 3일+.
-> 최종 갱신: 2026-11-21 (격차 분석, 코드 미수정. 근거는 파일:줄). 11-21 절이 최신이다. 11-14·10-24 절은 이력이며 낡은 항목은 11-21 절 "이전 항목 상태"에서 정정한다.
-> 이번 점검은 무인 세션에서 Bash 가 거부되어 Read/Grep/Glob 만 썼다. `tsc`·`vitest`·`build` 는 돌리지 않았다(수치는 파일 검색 기준).
+> 최종 갱신: 2026-11-28 (격차 분석, 코드 미수정. 근거는 파일:줄). **11-28 절이 최신이다.** 11-21 이전 절은 이력이며, 낡은 항목은 11-28 절 "이전 항목 상태"에서 정정한다.
+
+## 격차 분석 2026-11-28 (W49 토요일)
+코드를 Read/Grep 과 `git ls-files` 로 대조했다. `tsc`·`vitest`·`build`·화면은 돌리거나 보지 않았다. `ref-*.md` 는 `ref-security.md` 6절과 목차만 보고 대조했다(backend·frontend·design-system 본문은 이번에 읽지 않음).
+W50 큐에 이미 있는 것(A~E, S, K, `PROGRESS.md:81~92`)은 다시 적지 않는다. `safeDecode` 는 `src` grep 0건이라 A 는 아직 미착수다.
+
+### 이전 항목 상태 (11-21 대비 정정)
+- **닫음(오판):** `[P0] G db:push 26일째`. 세션이 빈 `/tmp` DB 로 build 한 측정 오류였다(`reviews/retro/2026-W49-retro.md` 3.1, `PROGRESS.md:64`). 컬럼 단위 비교·화면 육안 확인만 남았다.
+- **해결:** `/contribute`·토막 문서(`src/app/contribute/page.tsx`), 편집 필터·변경 태그(`src/lib/edit-filter.ts:50,71`), 알림 3종(`api/talk/[commentId]/vote/route.ts:76`, `items/[id]/talk/route.ts:49`, `items/[id]/revert/route.ts:118`), 토론 탭 `best=1`(`src/lib/feed.ts:23`, `theme/[slug]/page.tsx:161`), 투표 `useOptimistic`(`VoteButtons.tsx:22`, `BoardVoteButtons.tsx:22`), `*.tsbuildinfo` 추적 해제(`git ls-files` 0건).
+- **대부분 해결:** 라우트 테스트. edit·revert·items·talk·게시판은 있다(`tests/protection.test.ts:77~78`, `edit-filter-route`·`post-route`·`notifications-route`). 남은 것은 reports·themes·follow·search·cron 2종(`tests/` import grep 0건).
+- **정정:** 무인 Bash 거부. 이번 세션은 `ls`·`git ls-files`·`git grep` 단순 명령이 됐다. claude-mem `work_state_read` 는 거부됐다.
+- **정정:** `content/taxonomy.json` 은 이제 있다. 남은 것은 키 형식·import 래퍼(`PROGRESS.md:65` ②③).
+- **그대로:** `ink` 104곳·21파일(grep, K 가 큐에 있음), 투표 한도 쿼리 3중 복사(`talk/[commentId]/vote/route.ts:24~26`, `posts/[id]/vote/route.ts:26~28`, `post-comments/[id]/vote/route.ts:23~25`), `Item.sources` 없음(`src/lib/wiki.ts:8~17`, S), CSP `'unsafe-inline'`(`next.config.mjs:19~20`), 백업 자동화 없음, `scripts/__pycache__/*.pyc` 추적 중.
+
+### P0
+- **[P0·M] 신고를 처리할 수단이 없다.** `isRemoved` 를 true 로 쓰는 코드가 `src` 에 없다(grep: 조건·select 만). `Report` 는 쌓이기만 한다(`api/reports/route.ts:34`). W50 D 는 사유 추가뿐이고 조치는 E(스키마) 뒤다. E 가 밀리면 스팸·권리침해 글은 DB 직접 수정밖에 없다.
+- **[P0·S·사용자] 처리방침·약관 페이지 없음.** `src/app` 에 라우트 0. 운영자 사실 4가지(책임자 연락처·서버 위치·OAuth·백업 주기) 대기. **공개 운영 전 필수.**
+
+### P1 — 새로 찾았거나 큐에 없는 것
+- **[P1·S] `//host` 링크가 내부 링크로 렌더된다(보안).** `href.startsWith('/')` 만 본다(`src/components/WikiMarkdown.tsx:33~39`). 외부 사이트가 `rel="nofollow ugc"`·새 창 표시 없이 열린다. 코드 읽기, 재현 안 함. 같은 분기에서 `#` 앵커·각주는 외부 링크 취급(새 창)된다(`:41`). **S(출처·각주) 착수 전에 필요.** 근거 `docs/research/2026-11-25-wiki.md:28~36`.
+- **[P1·S] 단축 URL 차단이 본문 링크를 안 본다.** `checkEdit` 의 block 은 `purchaseLinks` 만(`src/lib/edit-filter.ts:51~54`). 게시판 글·댓글에는 필터 호출이 없다(`checkEdit` 사용처는 items 라우트 둘뿐). 근거 같은 리서치 2).
+- **[P1·M] `[[위키링크]]` 렌더러가 둘이고 서로 다르게 간다.** `WikiTextRenderer` 는 제목을 slug 로 바꿔 `/theme/<slug>`(분류·상황 갤러리 경로)로 보낸다(`src/components/WikiLink.tsx:27~46`). 문서 화면의 `wikiLinksToMarkdown`(`src/lib/markdown.ts:58`)과 결과가 다르다. 홈(`src/app/page.tsx:207`)과 **편집 미리보기**(`MarkdownEditor.tsx:202`)가 옛 렌더러를 써서, 미리보기에서 맞아 보인 링크가 저장 뒤 달라지고 마크다운 서식도 안 보인다.
+- **[P1·M] 화면 문구가 GLOSSARY 금지어 "테마"를 널리 쓴다.** W50 A 는 `search/page.tsx` 만 다룬다. 예: `themes/page.tsx:7,42,45`, `themes/new/page.tsx:10`, `not-found.tsx:11~12`, `me/page.tsx:188`, `signin/page.tsx:22`, `how-ranking-works/page.tsx:110~113`, `FollowButton.tsx:49`, API 오류 문구(`api/items/route.ts:51~53`). A 의 범위를 넓히는 편이 낫다.
+- **[P1·S] 편집 필터 규칙 공개 화면 없음**(W49 설계 3.6). `how-ranking-works/page.tsx` 에 편집 필터·단축 URL 설명 0건. "공개된 규칙" 원칙과 어긋난다.
+- **[P1·S~M] 기여할 거리 목록 3종 미구현**: 90일 미편집, 답변 없는 추천 요청, 나가는 링크 없음(설계서 W3 `:182~185`, `PROGRESS.md:70`). 화면에는 아직 "다음 주에 추가합니다"라고 적혀 있다(`src/app/contribute/page.tsx:76`). 6종은 사용자 지시라 버리지 않는다.
+- **[P1·S] 쓰기 라우트 Origin 검사 없음**(`ref-security.md:358` P1-5). `src` grep `origin` 헤더 검사 0건. 세션 쿠키의 SameSite 기본값에만 기댄다(실제 설정은 확인 안 함).
+- **[P1·S·사용자] OAuth 토큰이 DB 에 남는다**(`ref-security.md:360`). `PrismaAdapter` 기본 동작(`src/lib/auth.ts:25`) + `Account.access_token`·`refresh_token`·`id_token`(`prisma/schema.prisma:68~73`). 비우는 코드 0건. DB 값은 확인 안 함. 백업 유출 시 함께 나간다.
+- **[P1·S] 남은 라우트 테스트**: reports·follow·themes·cron 2종(위). cron 은 인증 거부 케이스 우선.
+- **[P1·S] 투표 한도 합산 공용 함수화**(위, 모델이 늘 때 한 라우트만 빠질 위험).
+
+### P2
+- **[P2·M] 안 쓰는 컴포넌트 5개, 약 2,000줄**: `FullScreenInteractiveUniverse`(652줄)·`MindMapCanvas`(499)·`MindMapDrawer`(124, 앞의 둘만 import)·`ThemeExplorer`(402)·`GalleryFeed`(344). `src` 의 다른 곳에서 import 0건. 삭제하면 "테마" 문구와 `WikiTextRenderer` 사용처가 크게 준다. **삭제는 `git rm` 이라 사용자 확인 뒤.** 위의 렌더러·문구 작업보다 먼저 하면 일이 준다.
+- **[P2·S] GLOSSARY 에 "토막 문서"·"기여할 거리"가 두 번씩, 정의가 다르다**(`GLOSSARY.md:79~85` vs `107~113`: "본문이 짧거나 출처·가격·이미지가 빠진" / "300자 미만, 출처 절 없음…", 목록 구성도 다름). 코드(`src/lib/upkeep.ts:8` `STUB_MIN_BODY=300`)에 맞춰 하나로.
+- **[P2·S] 스냅샷이 과거 기간도 덮어쓴다**(`src/lib/snapshot.ts:80` upsert, `ref-security.md:373` P2-7). "과거 순위 재현" 원칙에 닿는다. 라우트가 과거 `periodKey` 를 받는지는 확인 안 함.
+- **[P2·S] 검색 API 에 요청 제한·상태 거름 없음**: `api/search/route.ts:13~34`(`countSince` 0, 분류·상황 갤러리 조회에는 `status` 조건 없음). 읽기 제한은 NAS 프록시 단에서 하는 안.
+- **[P2·M] 계정 삭제·데이터 내보내기 없음**(`ref-security.md:371`, `src` grep 0건). 처리방침을 쓰면 삭제 요청 절차가 필요해진다(수동 절차라도 명시).
+- **[P2·S] `loading.tsx` 0개**(`ref-design-system.md` 4.12 스켈레톤, Glob 0건).
+- **[P2·S] `FollowButton` 은 `useOptimistic` 미적용**(W45-3 은 투표·팔로우, `src` 사용처는 투표 버튼 둘뿐).
+- **[P2·M] 보호 중 문서 목록**(W5-6, 일괄 쿼리 설계 선행, `PROGRESS.md:74`).
+- **[P2·S~M] 리서치 아이디어 미등록**: 필드별 단어 diff·검색 이름 일치 우선(`docs/research/2026-11-25-wiki.md:54,62`), 가격 파서·가격 변경 이력(`docs/research/2026-11-18-price.md:36,44`).
+- 이월: 접근성 자동 점검·Playwright(`package.json` 에 없음), `vid` 서명, 11-23 EGM 사용자 결정 1·3·4·5·6(`reviews/egm/2026-W49-wiki-features/response.md:35`, 임시 기본값 진행 중).
+
+### 권고 (11/29 일요일 설계 세션)
+W50 순서는 유지하고 끼워 넣기만 한다.
+1. A 에 "테마" 문구 범위 확대를 합친다.
+2. B 뒤에 `//host`·`#` 링크 수정 + 본문 링크 차단(둘 다 S). S(출처) 앞이어야 한다.
+3. E 의 `db:push` 시점을 먼저 정한다. E 가 W50 에 못 들어가면 신고 조치의 임시 수단을 따로 결정한다.
+4. 안 쓰는 컴포넌트 삭제를 사용자에게 확인한 뒤 K(`ink`) 앞에 둔다.
 
 ## 격차 분석 2026-11-21 (W49 토요일)
 ### 이전 항목 상태 (정정, 11-14 대비)
