@@ -4,8 +4,8 @@
 > 최종 갱신: 2026-11-28 (격차 분석, 코드 미수정. 근거는 파일:줄). **11-28 절이 최신이다.** 11-21 이전 절은 이력이며, 낡은 항목은 11-28 절 "이전 항목 상태"에서 정정한다.
 
 ## 격차 분석 2026-11-28 (W49 토요일)
-코드를 Read/Grep 과 `git ls-files` 로 대조했다. `tsc`·`vitest`·`build`·화면은 돌리거나 보지 않았다. `ref-*.md` 는 `ref-security.md` 6절과 목차만 보고 대조했다(backend·frontend·design-system 본문은 이번에 읽지 않음).
-W50 큐에 이미 있는 것(A~E, S, K, `PROGRESS.md:81~92`)은 다시 적지 않는다. `safeDecode` 는 `src` grep 0건이라 A 는 아직 미착수다.
+코드를 Read/Grep 과 `git ls-files` 로 대조했다. `tsc`·`vitest`·`build`·화면은 돌리거나 보지 않았다. `ref-*.md` 는 로드맵·부채 표만 대조했다(아래 "ref-* 대조". 설계 본문 전체는 읽지 않음).
+W50 큐에 이미 있는 것(A~E, S, K, `PROGRESS.md:81~93`)은 다시 적지 않는다. `safeDecode` 는 `src` grep 0건이라 A 는 아직 미착수다.
 
 ### 이전 항목 상태 (11-21 대비 정정)
 - **닫음(오판):** `[P0] G db:push 26일째`. 세션이 빈 `/tmp` DB 로 build 한 측정 오류였다(`reviews/retro/2026-W49-retro.md` 3.1, `PROGRESS.md:64`). 컬럼 단위 비교·화면 육안 확인만 남았다.
@@ -28,14 +28,14 @@ W50 큐에 이미 있는 것(A~E, S, K, `PROGRESS.md:81~92`)은 다시 적지 �
 - **[P1·S~M] 기여할 거리 목록 3종 미구현**: 90일 미편집, 답변 없는 추천 요청, 나가는 링크 없음(설계서 W3 `:182~185`, `PROGRESS.md:70`). 화면에는 아직 "다음 주에 추가합니다"라고 적혀 있다(`src/app/contribute/page.tsx:76`). 6종은 사용자 지시라 버리지 않는다.
 - **[P1·S] 쓰기 라우트 Origin 검사 없음**(`ref-security.md:358` P1-5). `src` grep `origin` 헤더 검사 0건. 세션 쿠키의 SameSite 기본값에만 기댄다(실제 설정은 확인 안 함).
 - **[P1·S·사용자] OAuth 토큰이 DB 에 남는다**(`ref-security.md:360`). `PrismaAdapter` 기본 동작(`src/lib/auth.ts:25`) + `Account.access_token`·`refresh_token`·`id_token`(`prisma/schema.prisma:68~73`). 비우는 코드 0건. DB 값은 확인 안 함. 백업 유출 시 함께 나간다.
-- **[P1·S] 남은 라우트 테스트**: reports·follow·themes·cron 2종(위). cron 은 인증 거부 케이스 우선.
+- **[P1·S] 남은 라우트 테스트**: reports·follow·themes·search·`cron/snapshot`. `cron/lifecycle` 은 W50 B 에 있다(`PROGRESS.md:82`). cron 은 인증 거부 케이스 우선.
 - **[P1·S] 투표 한도 합산 공용 함수화**(위, 모델이 늘 때 한 라우트만 빠질 위험).
 
 ### P2
 - **[P2·M] 안 쓰는 컴포넌트 5개, 약 2,000줄**: `FullScreenInteractiveUniverse`(652줄)·`MindMapCanvas`(499)·`MindMapDrawer`(124, 앞의 둘만 import)·`ThemeExplorer`(402)·`GalleryFeed`(344). `src` 의 다른 곳에서 import 0건. 삭제하면 "테마" 문구와 `WikiTextRenderer` 사용처가 크게 준다. **삭제는 `git rm` 이라 사용자 확인 뒤.** 위의 렌더러·문구 작업보다 먼저 하면 일이 준다.
 - **[P2·S] GLOSSARY 에 "토막 문서"·"기여할 거리"가 두 번씩, 정의가 다르다**(`GLOSSARY.md:79~85` vs `107~113`: "본문이 짧거나 출처·가격·이미지가 빠진" / "300자 미만, 출처 절 없음…", 목록 구성도 다름). 코드(`src/lib/upkeep.ts:8` `STUB_MIN_BODY=300`)에 맞춰 하나로.
 - **[P2·S] 스냅샷이 과거 기간도 덮어쓴다**(`src/lib/snapshot.ts:80` upsert, `ref-security.md:373` P2-7). "과거 순위 재현" 원칙에 닿는다. 라우트가 과거 `periodKey` 를 받는지는 확인 안 함.
-- **[P2·S] 검색 API 에 요청 제한·상태 거름 없음**: `api/search/route.ts:13~34`(`countSince` 0, 분류·상황 갤러리 조회에는 `status` 조건 없음). 읽기 제한은 NAS 프록시 단에서 하는 안.
+- **[P2·S] 검색 API 에 요청 제한 없음**: `api/search/route.ts:13~34`(`countSince` 0). 읽기 제한은 NAS 프록시 단에서 하는 안.
 - **[P2·M] 계정 삭제·데이터 내보내기 없음**(`ref-security.md:371`, `src` grep 0건). 처리방침을 쓰면 삭제 요청 절차가 필요해진다(수동 절차라도 명시).
 - **[P2·S] `loading.tsx` 0개**(`ref-design-system.md` 4.12 스켈레톤, Glob 0건).
 - **[P2·S] `FollowButton` 은 `useOptimistic` 미적용**(W45-3 은 투표·팔로우, `src` 사용처는 투표 버튼 둘뿐).
@@ -43,7 +43,27 @@ W50 큐에 이미 있는 것(A~E, S, K, `PROGRESS.md:81~92`)은 다시 적지 �
 - **[P2·S~M] 리서치 아이디어 미등록**: 필드별 단어 diff·검색 이름 일치 우선(`docs/research/2026-11-25-wiki.md:54,62`), 가격 파서·가격 변경 이력(`docs/research/2026-11-18-price.md:36,44`).
 - 이월: 접근성 자동 점검·Playwright(`package.json` 에 없음), `vid` 서명, 11-23 EGM 사용자 결정 1·3·4·5·6(`reviews/egm/2026-W49-wiki-features/response.md:35`, 임시 기본값 진행 중).
 
+### ref-* 대조 (로드맵·부채 표)
+**완료·큐에 있음**
+- `ref-backend` §2.1: A~D·F(갤러리 팔로우 방식)·G·H·I 구현. E·L 은 후순위(`ROADMAP.md:53,79`), J 는 S(`PROGRESS.md:91`).
+- `ref-frontend` §5.2: TD-1 은 브리지+K, TD-6·10·16 해결, TD-12 는 투표만(`FollowButton` 은 위 P2), TD-7·8·9·13 은 위 렌더러·안 쓰는 컴포넌트 항목(옛 `GalleryFeed` 는 이제 import 가 없다).
+- `ref-design-system` §6: 라이트 토글·가드 2번은 육안 확인과 K 뒤(`PROGRESS.md:55`). 컴팩트 목록 토글은 확인 안 함.
+- `ref-security` §6: P0-2 필수화(`docker-compose.yml:28~29`, 값 길이 검사는 확인 안 함), HSTS(`next.config.mjs:39`).
+
+**새 격차**
+- **[P1·S] `.dockerignore` 의 `*.db` 는 루트만 막는 것으로 보인다(보안).** 제외 목록은 `*.db` 와 `prisma/dev.db` 뿐(`.dockerignore:13~15`)이라 `prisma/dev.backup-*.db` 같은 백업은 `COPY . .`(`Dockerfile:18`) → `COPY /app/prisma`(`Dockerfile:43`)로 **실행 이미지에 들어갈 수 있다.** `**/*.db` 가 필요하다. `.env.*` 도 `.env.local` 만 제외. Docker 패턴 규칙에 근거한 판단이고 이미지를 빌드해 확인하지 않았다.
+- **[P1·S] 모바일(640px 미만)에 검색 진입점이 없다**(TD-4). `Header.tsx:35` `hidden sm:block`, 대신할 링크 없음(`SearchBox.tsx` 는 import 0건이라 안 쓰는 컴포넌트가 6개다). `/recent`·`/contribute` 링크도 `md` 미만에서 숨김(`Header.tsx:52,67`).
+- **[P1·S] 모바일에서 사이드바가 본문 위에 펼쳐진다**(TD-5, `Sidebar.tsx:37` `w-full`, `layout.tsx:72~74` `flex-col`). 코드 기준, 화면 미확인.
+- **[P1·M] `docker compose` 가 `prisma db push` 로 스키마를 반영한다**(`docker-compose.yml:17`, P0-3). `migrations/` 는 없다(`git ls-files prisma`). `--accept-data-loss` 제거만 됐다. E·S 의 스키마가 배포 때 이 경로로 들어간다.
+- **[P2·M] 접근성(`ref-frontend` §4.3, design §6)**: 본문 바로가기·`id="main"`·`aria-live` 없음(layout·투표 버튼 grep 0건), `focus-visible`·`prefers-reduced-motion` 없음(`globals.css` grep 0건), 위키링크 도우미가 `div` 모달(`MarkdownEditor.tsx:212`), 편집기 `select-none`(`:71`)·`<label htmlFor>` 없음(TD-14). 이모지 `aria-hidden`(TD-15)은 확인 안 함.
+- **[P2·S] 대비 계산 테스트 없음**(design §6 1주 ⑥). `tests/design-tokens.test.ts:37` 은 라이트 반전만 본다. `text-[9~11px]` 34줄(`src`, W50 A 는 헤더 배지만).
+- **[P2·S] 성능 예산 미측정**(`ref-frontend` §4.4): First Load JS 를 이번에 재지 않았고 기록 문서도 찾아보지 않았다. 홈이 요청마다 문서 60개의 투표를 전부 읽는다(`src/app/page.tsx:47~62`), 레이아웃도 요청마다 조회(`layout.tsx:31`, TD-11).
+- **[P2·L] 충돌 해결 화면 없음**(§6 4주). 충돌 필드 이름을 오류 문장으로만 보여 준다(`ItemForm.tsx:137~139`). 각주 팝오버·출처 입력 창은 S 뒤.
+- **[P2·M] 분류 태그(`ref-backend` K)와 토론 말머리(H)** 가 로드맵·큐에 없다(`schema.prisma` grep 0건). W47 에서 `tags` 는 제외했다. 버릴지 넣을지 설계 세션에서 정한다.
+- **[P2·S] `ref-security` 남은 것**: 라이선스 고지·만 14세 확인(`src` grep 0건, P1-6, 처리방침과 함께), `/transparency`(P2-3) 없음. `docs` 는 이미지 빌드 문맥에서 제외되지 않는다(P0-4).
+
 ### 권고 (11/29 일요일 설계 세션)
+0. `.dockerignore` 패턴을 NAS 배포 전에 고친다(S).
 W50 순서는 유지하고 끼워 넣기만 한다.
 1. A 에 "테마" 문구 범위 확대를 합친다.
 2. B 뒤에 `//host`·`#` 링크 수정 + 본문 링크 차단(둘 다 S). S(출처) 앞이어야 한다.
